@@ -281,6 +281,8 @@
     background-position: center center;
     background-repeat: no-repeat;
     background-size: cover;
+    display: flex; /* 使用 flexbox */
+     justify-content: center; /* 水平居中 */
 }
 
 @media (min-width: 992px) {
@@ -553,3 +555,8 @@
 }
 /*** Footer End ***/
 
+/* Header Page 顏色 Start*/
+.custom-color {
+    color: #81c408; /* 設定顏色 */
+}
+/* Header Page 顏色 End*/
