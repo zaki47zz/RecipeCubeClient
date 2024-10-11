@@ -1,7 +1,7 @@
 <script setup>
-    import '@/assets/js/store.js'
-    import '@/assets/css/StoreStyle.css'
-    import '@/assets/css/StoreBootstrap.min.css'
+    // import '@/assets/js/store.js'
+    // import '@/assets/css/StoreStyle.css'
+    // import '@/assets/css/StoreBootstrap.min.css'
 </script>
 
 
@@ -29,5 +29,5 @@
 </template>
 
 <style lang="css" scoped>
-
+    
 </style>

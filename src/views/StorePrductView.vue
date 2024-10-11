@@ -2,7 +2,6 @@
     // import '@/assets/js/store.js'
     // import '@/assets/css/StoreStyle.css'
     // import '@/assets/css/StoreBootstrap.min.css'
-    // import 'font-awesome/css/font-awesome.min.css'
 </script>
 
 <template>
@@ -277,6 +276,9 @@
 </template>
 
 <style lang="css" scoped>
+    @import "@/assets/css/StoreBootstrap.min.css";
+    @import "@/assets/css/StoreStyle.css";
+
    .floating-icon {
   position: fixed;
   top: 50%; /* 垂直居中 */
