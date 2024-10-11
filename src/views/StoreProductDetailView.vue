@@ -37,7 +37,7 @@
                             <div class="col-lg-6">
                                 <div class="border rounded">
                                     <a href="#">
-                                        <img src="@/assets/img/single-item.jpg" class="img-fluid rounded" alt="Image">
+                                        <img src="@/assets/img/Store/single-item.jpg" class="img-fluid rounded" alt="Image">
                                     </a>
                                 </div>
                             </div>
@@ -135,7 +135,7 @@
                                     </div>
                                     <div class="tab-pane" id="nav-mission" role="tabpanel" aria-labelledby="nav-mission-tab">
                                         <div class="d-flex">
-                                            <img src="@/assets/img/avatar.jpg" class="img-fluid rounded-circle p-3" style="width: 100px; height: 100px;" alt="">
+                                            <img src="@/assets/img/Store/avatar.jpg" class="img-fluid rounded-circle p-3" style="width: 100px; height: 100px;" alt="">
                                             <div class="">
                                                 <p class="mb-2" style="font-size: 14px;">April 12, 2024</p>
                                                 <div class="d-flex justify-content-between">
@@ -153,7 +153,7 @@
                                             </div>
                                         </div>
                                         <div class="d-flex">
-                                            <img src="@/assets/img/avatar.jpg" class="img-fluid rounded-circle p-3" style="width: 100px; height: 100px;" alt="">
+                                            <img src="@/assets/img/Store/avatar.jpg" class="img-fluid rounded-circle p-3" style="width: 100px; height: 100px;" alt="">
                                             <div class="">
                                                 <p class="mb-2" style="font-size: 14px;">April 12, 2024</p>
                                                 <div class="d-flex justify-content-between">

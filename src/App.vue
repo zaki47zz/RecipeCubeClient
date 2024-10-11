@@ -31,7 +31,7 @@ body::before {
 <template>
     <Loader></Loader>
     <Navbar></Navbar>
-    <main class="main-content container position-relative max-height-vh-100">
+    <main class="main-content container position-relative">
         <RouterView />
     </main>
     <Footer></Footer>

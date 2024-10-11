@@ -27,7 +27,7 @@ footer {
     width: 100%;
     margin-top: auto;
     padding: 20px 0;
-    color: #364868;
+    color: #364868 !important;
 }
 
 .footer-content {

@@ -3,15 +3,20 @@ import BuyandCookView from '@/views/BuyandCookView.vue';
 import CustomRecipeView from '@/views/CustomRecipeView.vue';
 import InventoryView from '@/views/InventoryView.vue';
 import RecipeView from '@/views/RecipeView.vue';
-import ShopView from '@/views/ShopView.vue';
 import UserView from '@/views/UserView.vue';
 import SignIn from '@/views/SignInView.vue';
 import SignUp from '@/views/SignUpView.vue';
 import AboutView from '@/views/AboutView.vue';
 import QuestionView from '@/views/QuestionView.vue';
 import ContactView from '@/views/ContactView.vue';
+import StoreView from '@/views/StoreView.vue';
+import StorePrductView from '@/views/StorePrductView.vue';
+import ChickoutView from '@/views/ChickoutView.vue';
+import CartView from '@/views/CartView.vue';
+import StoreProductDetailView from '@/views/StoreProductDetailView.vue';
 
 import { createRouter, createWebHistory } from 'vue-router';
+
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,11 +51,6 @@ const router = createRouter({
             name: 'Recipe',
             component: RecipeView,
         },
-        // {
-        //     path: '/shop',
-        //     name: 'Shop',
-        //     component: ShopView,
-        // },
         {
             path: '/user',
             name: 'User',
@@ -84,7 +84,7 @@ const router = createRouter({
         {
             //http://localhost:5175/store
             path: '/store',
-            component: StoreView,
+            component:StoreView,
             redirect:'/storeproduct',
             name: 'store',
             children:[
