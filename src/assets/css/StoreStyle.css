@@ -1,4 +1,61 @@
 
+/* 右側懸浮storeIcon products Start */
+
+.floating-icon {
+    position: fixed;
+    bottom: 110px;
+    right: 30px;
+    background-color: #81c408; /* 背景顏色 */
+    border-radius: 15px; /* 圓角 */
+    width: 45px; /* 控制圖標的寬度 */
+    height: 45px; /* 控制圖標的高度 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加陰影效果 */
+    cursor: pointer;
+    z-index: 1000; /* 保證圖標在最上層 */
+    color: white !important; /* 圖標顏色 */
+    font-size: 25px; /* 控制圖標的大小 */
+
+  }
+  .floating-icon:hover {
+    background-color: #ec8404; /* 懸停時變色 */
+  }
+
+  /* 右側懸浮storeIcon products Start */
+
+/* 右側懸浮storeIcon products Start */
+
+.floating-icon-cart {
+    position: fixed;
+    bottom: 170px;
+    right: 30px;
+    background-color: #81c408; /* 背景顏色 */
+    border-radius: 15px; /* 圓角 */
+    width: 45px; /* 控制圖標的寬度 */
+    height: 45px; /* 控制圖標的高度 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加陰影效果 */
+    cursor: pointer;
+    z-index: 1000; /* 保證圖標在最上層 */
+    color: white !important; /* 圖標顏色 */
+    font-size: 25px; /* 控制圖標的大小 */
+
+  }
+  .floating-icon-cart:hover {
+    background-color: #ec8404; /* 懸停時變色 */
+  }
+
+  /* 右側懸浮storeIcon products Start */
+
+
+
+
+
+
 /*** Spinner Start ***/
 #spinner {
     opacity: 0;
@@ -14,6 +71,7 @@
  }
 
  .back-to-top {
+    color:white;
     position: fixed;
     right: 30px;
     bottom: 30px;
@@ -219,7 +277,7 @@
 
 .page-header {
     position: relative;
-    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(../img/cart-page-header-img.jpg);
+    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(../img/Store/cart-page-header-img.jpg);
     background-position: center center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -452,29 +510,29 @@
 
 
 /*** Single Page Start ***/
-.pagination {
-    display: inline-block;
-}
-  
+/* 分頁的樣式 */
 .pagination a {
     color: var(--bs-dark);
     padding: 10px 16px;
     text-decoration: none;
     transition: 0.5s;
-    border: 1px solid var(--bs-secondary);
+    border: 1px solid orange; /* 改為橘色邊框 */
     margin: 0 4px;
 }
-  
-.pagination a.active {
-    background-color: var(--bs-primary);
-    color: var(--bs-light);
-    border: 1px solid var(--bs-secondary);
-}
-  
-.pagination a:hover:not(.active) {background-color: var(--bs-primary)}
 
+.pagination a.active {
+    background-color: #81c408; /* 改為綠色背景 */
+    color: var(--bs-light);
+    border: 1px solid orange; /* 橘色邊框 */
+}
+
+.pagination a:hover:not(.active) {
+    background-color: #81c408; /* 懸停時改為綠色背景 */
+}
+
+/* 標籤導航的樣式 */
 .nav.nav-tabs .nav-link.active {
-    border-bottom: 2px solid var(--bs-secondary) !important;
+    border-bottom: 2px solid orange !important; /* 改為橘色邊框 */
 }
 /*** Single Page End ***/
 

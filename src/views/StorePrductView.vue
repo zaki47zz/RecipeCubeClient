@@ -1,7 +1,5 @@
 <script setup>
-    // import '@/assets/js/store.js'
-    // import '@/assets/css/StoreStyle.css'
-    // import '@/assets/css/StoreBootstrap.min.css'
+    import '@/assets/js/store.js'
 </script>
 
 <template>
@@ -21,7 +19,7 @@
             <ol class="text-center py-0" >
                 <h4>
                     <RouterLink :to="{ name: 'storeproduct' }" class="floating-icon"><i class="fa-solid fa-shop"></i></RouterLink>
-                    <RouterLink :to="{ name: 'cart' }">購物車</RouterLink> |
+                    <RouterLink :to="{ name: 'cart' }"  class="floating-icon-cart"><i class="fa-solid fa-cart-shopping"></i></RouterLink>
                     <RouterLink :to="{ name: 'chickout' }">結帳</RouterLink> |
                     <RouterLink :to="{ name: 'storeProductDetail' }">商店明細</RouterLink>
                 </h4>
@@ -278,30 +276,4 @@
 <style lang="css" scoped>
     @import "@/assets/css/StoreBootstrap.min.css";
     @import "@/assets/css/StoreStyle.css";
-
-   .floating-icon {
-  position: fixed;
-  top: 50%; /* 垂直居中 */
-  right: 20px;  /* 靠右側 */
-  transform: translateY(-50%); /* 讓圖標垂直居中 */
-  background-color: #81c408; /* 背景顏色 */
-  border-radius: 15px; /* 圓角 */
-  width: 60px; /* 控制圖標的寬度 */
-  height: 60px; /* 控制圖標的高度 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加陰影效果 */
-  cursor: pointer;
-  z-index: 1000; /* 保證圖標在最上層 */
-}
-
-.floating-icon i {
-  font-size: 28px; /* 控制圖標的大小 */
-  color: #ffffff; /* 圖標顏色 */
-}
-
-.floating-icon:hover {
-  background-color: #ec8404; /* 懸停時變色 */
-}
 </style>

@@ -1,8 +1,5 @@
 <script setup>
-    // import '@/assets/js/store.js'
-    // import '@/assets/css/StoreStyle.css'
-    // import '@/assets/css/StoreBootstrap.min.css'
-    // import 'font-awesome/css/font-awesome.min.css'
+    import '@/assets/js/store.js'
 </script>
 
 <template>
@@ -20,8 +17,8 @@
      <!-- RouterLink Start -->
      <ol class="text-center py-0" >
                 <h4>
-                    <RouterLink :to="{ name: 'storeproduct' }">商店首頁</RouterLink> |
-                    <RouterLink :to="{ name: 'cart' }">購物車</RouterLink> |
+                    <RouterLink :to="{ name: 'storeproduct' }" class="floating-icon"><i class="fa-solid fa-shop"></i></RouterLink>
+                    <RouterLink :to="{ name: 'cart' }"  class="floating-icon-cart"><i class="fa-solid fa-cart-shopping"></i></RouterLink>
                     <RouterLink :to="{ name: 'chickout' }">結帳</RouterLink> |
                     <RouterLink :to="{ name: 'storeProductDetail' }">商店明細</RouterLink>
                 </h4>
