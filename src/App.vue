@@ -47,9 +47,9 @@ import Loader from './components/Layout/Loader.vue';
 const route = useRoute();
 
 // 導入圖片
-import inventoryBg from '@/assets/img/Background/Inventory.png';
-import recipeBg from '@/assets/img/Background/Recipe.png';
-import buyandcookBg from '@/assets/img/Background/BuyandCook.png';
+import inventoryBg from '@/assets/img/ForBackground/Inventory.png';
+import recipeBg from '@/assets/img/ForBackground/Recipe.png';
+import buyandcookBg from '@/assets/img/ForBackground/BuyandCook.png';
 
 // 監聽路由變化並修改 body 背景
 watchEffect(() => {
