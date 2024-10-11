@@ -46,11 +46,11 @@ const router = createRouter({
             name: 'Recipe',
             component: RecipeView,
         },
-        {
-            path: '/shop',
-            name: 'Shop',
-            component: ShopView,
-        },
+        // {
+        //     path: '/shop',
+        //     name: 'Shop',
+        //     component: ShopView,
+        // },
         {
             path: '/user',
             name: 'User',
@@ -80,6 +80,39 @@ const router = createRouter({
             path: '/contact',
             name: 'Contact',
             component: ContactView,
+        },
+        {
+            //http://localhost:5175/store
+            path: '/store',
+            component: StoreView,
+            redirect:'/storeproduct',
+            name: 'store',
+            children:[
+                {
+                    //http://localhost:5175/storeproduct
+                    path: '/storeproduct',
+                    component: StorePrductView,
+                    name: 'storeproduct'
+                },
+                {
+                    //http://localhost:5175/chickout
+                    path: '/chickout',
+                    component: ChickoutView,
+                    name: 'chickout'
+                },
+                {
+                    //http://localhost:5175/cart
+                    path: '/cart',
+                    component: CartView,
+                    name: 'cart'
+                },
+                {
+                    //http://localhost:5175/storeProductDetail
+                    path: '/storeProductDetail',
+                    component: StoreProductDetailView,
+                    name: 'storeProductDetail',
+                },
+            ]
         },
     ],
 });

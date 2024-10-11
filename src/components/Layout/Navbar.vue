@@ -96,7 +96,7 @@
                         </RouterLink>
                     </li>
                     <li class="nav-item">
-                        <RouterLink class="nav-link me-2" to="/shop">
+                        <RouterLink class="nav-link me-2" to="/store">
                             <i
                                 class="fa-brands fa-shopify opacity-6 me-1"
                                 aria-hidden="true"
