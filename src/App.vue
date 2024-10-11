@@ -38,49 +38,7 @@ body::before {
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router';
-import { watchEffect } from 'vue';
 import Navbar from './components/Layout/Navbar.vue';
 import Footer from './components/Layout/Footer.vue';
 import Loader from './components/Layout/Loader.vue';
-
-const route = useRoute();
-
-// 導入圖片
-import inventoryBg from '@/assets/img/ForBackground/Inventory.png';
-import recipeBg from '@/assets/img/ForBackground/Recipe.png';
-import buyandcookBg from '@/assets/img/ForBackground/BuyandCook.png';
-
-// 監聽路由變化並修改 body 背景
-watchEffect(() => {
-    let backgroundImage = '';
-
-    // 根據路由變更設定不同的背景圖片
-    switch (route.path) {
-        case '/':
-            backgroundImage = `url(${buyandcookBg})`;
-            break;
-        case '/buyandcook':
-            backgroundImage = `url(${buyandcookBg})`;
-            break;
-        case '/recipe':
-            backgroundImage = `url(${recipeBg})`;
-            break;
-        case '/customrecipe':
-            backgroundImage = `url(${recipeBg})`;
-            break;
-        case '/inventory':
-            backgroundImage = `url(${inventoryBg})`;
-            break;
-        case '/addingredient':
-            backgroundImage = `url(${inventoryBg})`;
-            break;
-        default:
-            backgroundImage = null;
-            break;
-    }
-
-    // 設置背景圖片
-    document.body.style.backgroundImage = backgroundImage;
-});
 </script>

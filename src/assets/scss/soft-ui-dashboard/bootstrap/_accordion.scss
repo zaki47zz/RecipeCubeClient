@@ -13,8 +13,8 @@
   text-align: left; // Reset button style
   background-color: $accordion-button-bg;
   border: 0;
-  @include border-radius(0);
   overflow-anchor: none;
+  @include border-radius(0);
   @include transition($accordion-transition);
 
   &:not(.collapsed) {

@@ -1,6 +1,5 @@
-// Bootstrap functions
-//
-// Utility mixins and functions for evaluating source code across our variables, maps, and mixins.
+@use "sass:color";
+@use "sass:math";
 
 // Ascending
 // Used to evaluate Sass maps like our grid breakpoints.
@@ -34,7 +33,7 @@
 
 // Colors
 @function to-rgb($value) {
-  @return red($value), green($value), blue($value);
+  @return color.channel($value, "red", $space: rgb), color.channel($value, "green", $space: rgb), color.channel($value, "blue", $space: rgb);
 }
 
 @function rgba-css-var($identifier, $target) {
@@ -176,13 +175,13 @@ $_luminance-list: .0008 .001 .0011 .0013 .0015 .0017 .002 .0022 .0025 .0027 .003
 // See https://www.w3.org/TR/WCAG20-TECHS/G17.html#G17-tests
 @function luminance($color) {
   $rgb: (
-    "r": red($color),
-    "g": green($color),
-    "b": blue($color)
+    "r": color.channel($color, "red", $space: rgb),
+    "g": color.channel($color, "green", $space: rgb),
+    "b": color.channel($color, "blue", $space: rgb)
   );
 
   @each $name, $value in $rgb {
-    $value: if(divide($value, 255) < .03928, divide(divide($value, 255), 12.92), nth($_luminance-list, $value + 1));
+    $value: if(divide($value, 255) < .03928, divide(divide($value, 255), 12.92), nth($_luminance-list, round($value) + 1));
     $rgb: map-merge($rgb, ($name: $value));
   }
 
@@ -192,18 +191,20 @@ $_luminance-list: .0008 .001 .0011 .0013 .0015 .0017 .002 .0022 .0025 .0027 .003
 // Return opaque color
 // opaque(#fff, rgba(0, 0, 0, .5)) => #808080
 @function opaque($background, $foreground) {
-  @return mix(rgba($foreground, 1), $background, opacity($foreground) * 100);
+  @return mix(rgba($foreground, 1), $background, opacity($foreground) * 100%);
 }
 
 // scss-docs-start color-functions
 // Tint a color: mix a color with white
 @function tint-color($color, $weight) {
-  @return mix(white, $color, $weight);
+  $percentage: if(unitless($weight), $weight * 1%, $weight);
+  @return mix(white, $color, $percentage);
 }
 
 // Shade a color: mix a color with black
 @function shade-color($color, $weight) {
-  @return mix(black, $color, $weight);
+  $percentage: if(unitless($weight), $weight * 1%, $weight);
+  @return mix(black, $color, $percentage);
 }
 
 // Shade the color if the weight is positive, else tint it

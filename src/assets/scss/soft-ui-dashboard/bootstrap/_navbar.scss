@@ -208,7 +208,9 @@
           border-right: 0;
           border-left: 0;
           @include transition(none);
-          transform: none;
+          & {
+            transform: none; // 包裹在 &{} 中
+          }
         }
         .offcanvas-top,
         .offcanvas-bottom {
