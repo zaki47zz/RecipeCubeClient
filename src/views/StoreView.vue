@@ -1,5 +1,5 @@
 <script setup>
-    import "@/assets/js/store.js"
+    import "@/assets/js/store.js";
 </script>
 
 
