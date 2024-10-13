@@ -1,5 +1,32 @@
 <script setup>
     import '@/assets/js/store.js'
+
+    import {ref,computed} from 'vue';
+
+    const BaseURL = import.meta.env.VITE_API_BASEURL;
+    const BaseUrlWithoutApi = BaseURL.replace("/api","");  // 去掉 "/api" 得到基本的 URL;
+
+    const products=ref([]);
+    
+    //取得商品id 獲取單一商品 
+    // const loadProductById = async(id)=>{
+    //     try{
+    //         const response=await fetch(`${BaseURL}/Products/ProductsNcategory/${id}`);
+    //         if(!response){
+    //             alert('請求商品失敗');
+    //             return;
+    //         }
+    //         const data = await response.json();
+    //         products.value=[data];  // 找到一個商品 將結果放入 products 列表
+    //         console.log(data);
+    //     }
+    //     catch(error){
+    //         console.log('fetch 請求商品失敗',error);
+    //     }
+    // }
+
+    // this.loadProductById(productId); // 根據商品 ID 載入商品詳細信息
+
 </script>
 
 <template>

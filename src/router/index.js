@@ -112,6 +112,12 @@ const router = createRouter({
                     component: StoreProductDetailView,
                     name: 'storeProductDetail',
                 },
+                {
+                    //http://localhost:5175/storeProductDetail/4
+                    path: '/storeProductDetail/:id',
+                    component: StoreProductDetailView,
+                    name: 'storeProductDetailById',
+                },
             ]
         },
     ],
