@@ -19,8 +19,7 @@
                 <h4>
                     <RouterLink :to="{ name: 'storeproduct' }" class="floating-icon"><i class="fa-solid fa-shop"></i></RouterLink>
                     <RouterLink :to="{ name: 'cart' }"  class="floating-icon-cart"><i class="fa-solid fa-cart-shopping"></i></RouterLink>
-                    <RouterLink :to="{ name: 'chickout' }">結帳</RouterLink> |
-                    <RouterLink :to="{ name: 'storeProductDetail' }">商店明細</RouterLink>
+                    <RouterLink :to="{ name: 'chickout' }">結帳</RouterLink>
                 </h4>
             </ol>    
         <!-- RouterLink End -->
