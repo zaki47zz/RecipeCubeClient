@@ -1,58 +1,19 @@
 <script setup>
-import Handle from '@/assets/img/ForComponent/Handle.png';
+import Swiper from 'swiper';
+import Isotope from 'isotope-layout';
 import GreenPepper from '@/assets/img/ForComponent/GreenPepper.jpg';
 import SoftBadge from '@/components/SoftBadge.vue';
 </script>
 
 <template>
     <section class="banner-section">
-        <div class="banner-ad bg-success-subtle block-2">
-            <div class="row banner-content p-5">
-                <div class="content-wrapper col-md-12">
-                    <h3>Trending Products</h3>
+        <div class="banner-ad bg-primary-subtle block-2">
+            <div class="row banner-content pt-5">
+                <div class="content-wrapper text-center col-md-12">
+                    <h1>庫存 Inventory</h1>
                     <header>
                         <div class="container-fluid">
-                            <div class="row py-3">
-                                <div class="col-sm-10 offset-sm-2 offset-md-0 col-lg-12 d-none d-lg-block">
-                                    <div
-                                        class="search-bar row bg-light p-2 my-2 rounded-4 d-flex justify-content-center align-items-center"
-                                    >
-                                        <div class="col-md-2 d-none d-md-block">
-                                            <select class="form-select border-0 bg-transparent">
-                                                <option>所有分類</option>
-                                                <option>XX</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-11 col-md-9">
-                                            <form
-                                                id="search-form"
-                                                class="text-center"
-                                                action="index.html"
-                                                method="post"
-                                            >
-                                                <input
-                                                    type="text"
-                                                    class="form-control border-0 bg-transparent text-center"
-                                                    placeholder="搜尋食材"
-                                                />
-                                            </form>
-                                        </div>
-                                        <div class="col-1" style="transform: translateX(25%)">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                width="24"
-                                                height="24"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    fill="currentColor"
-                                                    d="M21.71 20.29L18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 7-7a7 7 0 0 1-7 7Z"
-                                                />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="row py-3"></div>
                         </div>
                     </header>
                 </div>
@@ -60,103 +21,104 @@ import SoftBadge from '@/components/SoftBadge.vue';
         </div>
     </section>
 
-    <section class="py-5">
-        <div class="container-fluid">
-            <div class="row py-3">
-                <div class="d-flex justify-content-center align-items-center p-0">
-                    <nav class="main-menu blur rounded-3 d-flex navbar navbar-expand-lg justify-content-center">
-                        <div
-                            class="offcanvas offcanvas-end"
-                            tabindex="-1"
-                            id="offcanvasNavbar"
-                            aria-labelledby="offcanvasNavbarLabel"
-                        >
-                            <div class="offcanvas-header justify-content-center">
-                                <button
-                                    type="button"
-                                    class="btn-close"
-                                    data-bs-dismiss="offcanvas"
-                                    aria-label="Close"
-                                ></button>
-                            </div>
-
-                            <div class="offcanvas-body">
-                                <select class="filter-categories border-0 mb-0 me-5">
-                                    <option>Shop by Departments</option>
-                                    <option>Groceries</option>
-                                    <option>Drinks</option>
-                                    <option>Chocolates</option>
-                                </select>
-
-                                <ul class="justify-content-end menu-list list-unstyled d-flex gap-md-3 mb-0">
-                                    <li class="nav-item active">
-                                        <a href="#women" class="nav-link">Women</a>
-                                    </li>
-                                    <li class="nav-item dropdown">
-                                        <a href="#men" class="nav-link">Men</a>
-                                    </li>
-                                    <li class="nav-item"><a href="#kids" class="nav-link">Kids</a></li>
-                                    <li class="nav-item">
-                                        <a href="#accessories" class="nav-link">Accessories</a>
-                                    </li>
-                                    <li class="nav-item dropdown">
-                                        <a
-                                            class="nav-link dropdown-toggle"
-                                            role="button"
-                                            id="pages"
-                                            data-bs-toggle="dropdown"
-                                            aria-expanded="false"
-                                            >Pages</a
-                                        >
-                                        <ul class="dropdown-menu" aria-labelledby="pages">
-                                            <li>
-                                                <a href="index.html" class="dropdown-item">About Us</a>
-                                            </li>
-                                            <li><a href="index.html" class="dropdown-item">Shop</a></li>
-                                            <!-- Add other dropdown items here -->
-                                        </ul>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="#brand" class="nav-link">Brand</a>
-                                    </li>
-                                    <li class="nav-item"><a href="#sale" class="nav-link">Sale</a></li>
-                                    <li class="nav-item"><a href="#blog" class="nav-link">Blog</a></li>
-                                </ul>
-                            </div>
+    <section class="pt-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-3">
+                    <div class="d-flex gap-4 align-items-start">
+                        <div class="icon">
+                            <i class="fa-solid fa-1" style="font-size: 50px"></i>
                         </div>
-                    </nav>
+                        <div class="text-md-start">
+                            <h5>選擇食材</h5>
+                            <p>請在下方食材列表選擇食材</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="d-flex gap-4 align-items-start">
+                        <div class="icon">
+                            <i class="fa-solid fa-2" style="font-size: 50px"></i>
+                        </div>
+                        <div class="text-md-start">
+                            <h5>產生食譜</h5>
+                            <p>按下產生食譜按鈕獲取我們推薦的食譜</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="d-flex gap-4 align-items-start">
+                        <div class="icon">
+                            <i class="fa-solid fa-3" style="font-size: 50px"></i>
+                        </div>
+                        <div class="text-md-start">
+                            <h5>開始料理</h5>
+                            <p>挑選想要的料理食譜開始大顯身手吧</p>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <section class="py-1">
+        <div class="container-fluid">
+            <div class="col-sm-10 offset-sm-2 offset-md-0 col-lg-12 d-none d-lg-block">
+                <div class="row g-3 py-1 px-3 my-3 d-flex bg-primary-subtle rounded-4 shadow justify-content-between">
+                    <!-- 分類欄 -->
+                    <div class="col-md-3">
+                        <p class="fw-bold">分類 CATEGORY</p>
+                    </div>
+                    <div class="col-md-3 mt-2">
+                        <select class="form-select">
+                            <option selected>類別</option>
+                            <option value="XX">XX</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mt-2">
+                        <select class="form-select">
+                            <option selected>公開/私有</option>
+                            <option value="0">公開</option>
+                            <option value="1">私有</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mt-2">
+                        <input type="text" class="form-control w-100 text-center" placeholder="搜尋" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="bootstrap-tabs product-tabs">
-                        <div class="tabs-header d-flex justify-content-between border-bottom my-5">
-                            <h3>Trending Products</h3>
+                    <div class="banner-ad bootstrap-tabs product-tabs p-3">
+                        <div class="tabs-header d-flex justify-content-between">
+                            <h3>食材列表</h3>
+                            <div>
+                                <button class="btn blur shadow me-1">歷史編輯紀錄</button>
+                                <button class="btn blur shadow me-1">全選</button>
+                                <button class="btn blur shadow text-danger me-1">刪除所選食材</button>
+                            </div>
                             <nav>
                                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
                                     <a
                                         href="#"
-                                        class="nav-link text-uppercase fs-6 active"
+                                        class="nav-link fs-6 text-dark active"
                                         id="nav-all-tab"
                                         data-bs-toggle="tab"
                                         data-bs-target="#nav-all"
-                                        >All</a
+                                        >所有食材</a
                                     >
                                     <a
                                         href="#"
-                                        class="nav-link text-uppercase fs-6"
+                                        class="nav-link fs-6 text-dark"
                                         id="nav-fruits-tab"
                                         data-bs-toggle="tab"
                                         data-bs-target="#nav-fruits"
-                                        >Fruits & Veges</a
-                                    >
-                                    <a
-                                        href="#"
-                                        class="nav-link text-uppercase fs-6"
-                                        id="nav-juices-tab"
-                                        data-bs-toggle="tab"
-                                        data-bs-target="#nav-juices"
-                                        >Juices</a
+                                        >即期或過期食材</a
                                     >
                                 </div>
                             </nav>
@@ -218,45 +180,11 @@ import SoftBadge from '@/components/SoftBadge.vue';
                                                 class="position-absolute m-2 z-index-3"
                                                 >即將過期</SoftBadge
                                             >
-                                            <!-- <span class="badge bg-warning text-dark position-absolute m-2">即將過期</span> -->
-                                            <div class="card-body position-relative">
-                                                <div class="d-flex justify-content-center align-items-center">
-                                                    <img :src="GreenPepper" alt="" class="w-75 mt-3" />
-                                                    <span
-                                                        class="amount-badge position-absolute translate-middle"
-                                                        style="top: 60%; left: 50%"
-                                                        >3個</span
-                                                    >
-                                                </div>
-                                                <h5 class="card-title mt-5 w-100 text-center">青椒</h5>
-                                                <p class="card-text w-100 text-center">蔬菜類</p>
-                                                <p
-                                                    class="card-text position-absolute translate-middle-x"
-                                                    style="bottom: 2%; left: 50%"
-                                                >
-                                                    2024-10-03
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- Additional product items go here -->
-                                </div>
-                            </div>
-
-                            <!-- Juices Tab -->
-                            <div class="tab-pane fade" id="nav-juices" role="tabpanel" aria-labelledby="nav-juices-tab">
-                                <div
-                                    class="product-grid row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5"
-                                >
-                                    <div class="col">
-                                        <div class="card shadow-sm position-relative">
-                                            <SoftBadge
-                                                variant="gradient"
-                                                color="info"
-                                                class="position-absolute m-2 z-index-3"
-                                                >即將過期</SoftBadge
-                                            >
-                                            <!-- <span class="badge bg-warning text-dark position-absolute m-2">即將過期</span> -->
+                                            <span class="position-absolute top-3 end-8 z-index-3">
+                                                <i class="fa-solid fa-pencil"></i>&ensp;<i
+                                                    class="fa-solid fa-trash"
+                                                ></i>
+                                            </span>
                                             <div class="card-body position-relative">
                                                 <div class="d-flex justify-content-center align-items-center">
                                                     <img :src="GreenPepper" alt="" class="w-75 mt-3" />
@@ -287,209 +215,9 @@ import SoftBadge from '@/components/SoftBadge.vue';
         </div>
     </section>
 
-    <section class="banner-section">
-        <div class="banner-ad bg-success-subtle block-2">
-            <div class="row banner-content p-5">
-                <div class="content-wrapper col-md-12">
-                    <h3>Trending Products</h3>
-                    <h3>Trending Products</h3>
-                    <h3>Trending Products</h3>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-1">
-        <div class="container-fluid">
-            <div
-                class="bg-secondary py-5 my-5 rounded-5"
-                style="background: url('images/bg-leaves-img-pattern.png') no-repeat"
-            >
-                <div class="container my-5">
-                    <div class="row">
-                        <div class="col-md-6 p-5">
-                            <div class="section-header">
-                                <h2 class="section-title display-4">
-                                    Get <span class="text-primary">25% Discount</span> on your first purchase
-                                </h2>
-                            </div>
-                            <p>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Dictumst amet, metus, sit massa
-                                posuere maecenas. At tellus ut nunc amet vel egestas.
-                            </p>
-                        </div>
-                        <div class="col-md-6 p-5">
-                            <form>
-                                <div class="mb-3">
-                                    <label for="name" class="form-label">Name</label>
-                                    <input
-                                        type="text"
-                                        class="form-control form-control-lg"
-                                        name="name"
-                                        id="name"
-                                        placeholder="Name"
-                                    />
-                                </div>
-                                <div class="mb-3">
-                                    <label for="" class="form-label">Email</label>
-                                    <input
-                                        type="email"
-                                        class="form-control form-control-lg"
-                                        name="email"
-                                        id="email"
-                                        placeholder="abc@mail.com"
-                                    />
-                                </div>
-                                <div class="form-check form-check-inline mb-3">
-                                    <label class="form-check-label" for="subscribe">
-                                        <input
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            id="subscribe"
-                                            value="subscribe"
-                                        />
-                                        Subscribe to the newsletter</label
-                                    >
-                                </div>
-                                <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-dark btn-lg">Submit</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-5">
-        <div class="container-fluid">
-            <h2 class="my-5">People are also looking for</h2>
-            <a href="#" class="badge bg-info me-2 mb-2">Blue diamon almonds</a>
-            <a href="#" class="badge bg-info me-2 mb-2">Angie’s Boomchickapop Corn</a>
-            <a href="#" class="badge bg-info me-2 mb-2">Salty kettle Corn</a>
-            <a href="#" class="badge bg-info me-2 mb-2">Chobani Greek Yogurt</a>
-            <a href="#" class="badge bg-info me-2 mb-2">Sweet Vanilla Yogurt</a>
-            <a href="#" class="badge bg-info me-2 mb-2">Foster Farms Takeout Crispy wings</a>
-            <a href="#" class="badge bg-info me-2 mb-2">Warrior Blend Organic</a>
-            <a href="#" class="badge bg-info me-2 mb-2">Chao Cheese Creamy</a>
-            <a href="#" class="badge bg-info me-2 mb-2">Chicken meatballs</a>
-            <a href="#" class="badge bg-info me-2 mb-2">Blue diamon almonds</a>
-            <a href="#" class="badge bg-info me-2 mb-2">Angie’s Boomchickapop Corn</a>
-            <a href="#" class="badge bg-info me-2 mb-2">Salty kettle Corn</a>
-            <a href="#" class="badge bg-info me-2 mb-2">Chobani Greek Yogurt</a>
-            <a href="#" class="badge bg-info me-2 mb-2">Sweet Vanilla Yogurt</a>
-            <a href="#" class="badge bg-info me-2 mb-2">Foster Farms Takeout Crispy wings</a>
-            <a href="#" class="badge bg-info me-2 mb-2">Warrior Blend Organic</a>
-            <a href="#" class="badge bg-info me-2 mb-2">Chao Cheese Creamy</a>
-            <a href="#" class="badge bg-info me-2 mb-2">Chicken meatballs</a>
-        </div>
-    </section>
-
-    <section class="py-5">
-        <div class="container-fluid">
-            <div class="row row-cols-1 row-cols-sm-3 row-cols-lg-5">
-                <div class="col">
-                    <div class="card mb-3 border-0">
-                        <div class="row">
-                            <div class="col-md-2 text-dark">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
-                                    <path
-                                        fill="currentColor"
-                                        d="M21.5 15a3 3 0 0 0-1.9-2.78l1.87-7a1 1 0 0 0-.18-.87A1 1 0 0 0 20.5 4H6.8l-.33-1.26A1 1 0 0 0 5.5 2h-2v2h1.23l2.48 9.26a1 1 0 0 0 1 .74H18.5a1 1 0 0 1 0 2h-13a1 1 0 0 0 0 2h1.18a3 3 0 1 0 5.64 0h2.36a3 3 0 1 0 5.82 1a2.94 2.94 0 0 0-.4-1.47A3 3 0 0 0 21.5 15Zm-3.91-3H9L7.34 6H19.2ZM9.5 20a1 1 0 1 1 1-1a1 1 0 0 1-1 1Zm8 0a1 1 0 1 1 1-1a1 1 0 0 1-1 1Z"
-                                    />
-                                </svg>
-                            </div>
-                            <div class="col-md-10">
-                                <div class="card-body p-0">
-                                    <h5>Free delivery</h5>
-                                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipi elit.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card mb-3 border-0">
-                        <div class="row">
-                            <div class="col-md-2 text-dark">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
-                                    <path
-                                        fill="currentColor"
-                                        d="M19.63 3.65a1 1 0 0 0-.84-.2a8 8 0 0 1-6.22-1.27a1 1 0 0 0-1.14 0a8 8 0 0 1-6.22 1.27a1 1 0 0 0-.84.2a1 1 0 0 0-.37.78v7.45a9 9 0 0 0 3.77 7.33l3.65 2.6a1 1 0 0 0 1.16 0l3.65-2.6A9 9 0 0 0 20 11.88V4.43a1 1 0 0 0-.37-.78ZM18 11.88a7 7 0 0 1-2.93 5.7L12 19.77l-3.07-2.19A7 7 0 0 1 6 11.88v-6.3a10 10 0 0 0 6-1.39a10 10 0 0 0 6 1.39Zm-4.46-2.29l-2.69 2.7l-.89-.9a1 1 0 0 0-1.42 1.42l1.6 1.6a1 1 0 0 0 1.42 0L15 11a1 1 0 0 0-1.42-1.42Z"
-                                    />
-                                </svg>
-                            </div>
-                            <div class="col-md-10">
-                                <div class="card-body p-0">
-                                    <h5>100% secure payment</h5>
-                                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipi elit.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card mb-3 border-0">
-                        <div class="row">
-                            <div class="col-md-2 text-dark">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
-                                    <path
-                                        fill="currentColor"
-                                        d="M22 5H2a1 1 0 0 0-1 1v4a3 3 0 0 0 2 2.82V22a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-9.18A3 3 0 0 0 23 10V6a1 1 0 0 0-1-1Zm-7 2h2v3a1 1 0 0 1-2 0Zm-4 0h2v3a1 1 0 0 1-2 0ZM7 7h2v3a1 1 0 0 1-2 0Zm-3 4a1 1 0 0 1-1-1V7h2v3a1 1 0 0 1-1 1Zm10 10h-4v-2a2 2 0 0 1 4 0Zm5 0h-3v-2a4 4 0 0 0-8 0v2H5v-8.18a3.17 3.17 0 0 0 1-.6a3 3 0 0 0 4 0a3 3 0 0 0 4 0a3 3 0 0 0 4 0a3.17 3.17 0 0 0 1 .6Zm2-11a1 1 0 0 1-2 0V7h2ZM4.3 3H20a1 1 0 0 0 0-2H4.3a1 1 0 0 0 0 2Z"
-                                    />
-                                </svg>
-                            </div>
-                            <div class="col-md-10">
-                                <div class="card-body p-0">
-                                    <h5>Quality guarantee</h5>
-                                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipi elit.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card mb-3 border-0">
-                        <div class="row">
-                            <div class="col-md-2 text-dark">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
-                                    <path
-                                        fill="currentColor"
-                                        d="M12 8.35a3.07 3.07 0 0 0-3.54.53a3 3 0 0 0 0 4.24L11.29 16a1 1 0 0 0 1.42 0l2.83-2.83a3 3 0 0 0 0-4.24A3.07 3.07 0 0 0 12 8.35Zm2.12 3.36L12 13.83l-2.12-2.12a1 1 0 0 1 0-1.42a1 1 0 0 1 1.41 0a1 1 0 0 0 1.42 0a1 1 0 0 1 1.41 0a1 1 0 0 1 0 1.42ZM12 2A10 10 0 0 0 2 12a9.89 9.89 0 0 0 2.26 6.33l-2 2a1 1 0 0 0-.21 1.09A1 1 0 0 0 3 22h9a10 10 0 0 0 0-20Zm0 18H5.41l.93-.93a1 1 0 0 0 0-1.41A8 8 0 1 1 12 20Z"
-                                    />
-                                </svg>
-                            </div>
-                            <div class="col-md-10">
-                                <div class="card-body p-0">
-                                    <h5>guaranteed savings</h5>
-                                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipi elit.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card mb-3 border-0">
-                        <div class="row">
-                            <div class="col-md-2 text-dark">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
-                                    <path
-                                        fill="currentColor"
-                                        d="M18 7h-.35A3.45 3.45 0 0 0 18 5.5a3.49 3.49 0 0 0-6-2.44A3.49 3.49 0 0 0 6 5.5A3.45 3.45 0 0 0 6.35 7H6a3 3 0 0 0-3 3v2a1 1 0 0 0 1 1h1v6a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-6h1a1 1 0 0 0 1-1v-2a3 3 0 0 0-3-3Zm-7 13H8a1 1 0 0 1-1-1v-6h4Zm0-9H5v-1a1 1 0 0 1 1-1h5Zm0-4H9.5A1.5 1.5 0 1 1 11 5.5Zm2-1.5A1.5 1.5 0 1 1 14.5 7H13ZM17 19a1 1 0 0 1-1 1h-3v-7h4Zm2-8h-6V9h5a1 1 0 0 1 1 1Z"
-                                    />
-                                </svg>
-                            </div>
-                            <div class="col-md-10">
-                                <div class="card-body p-0">
-                                    <h5>Daily offers</h5>
-                                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipi elit.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <section class="banner-ad">
+        <div class="row banner-content p-3">
+            <div class="content-wrapper text-center col-md-12"></div>
         </div>
     </section>
 </template>
@@ -497,7 +225,8 @@ import SoftBadge from '@/components/SoftBadge.vue';
 <style lang="css" scoped>
 /* *** Start editing below this line *** */
 .container-fluid {
-    max-width: 1600px;
+    padding: 0%;
+    margin: 0%;
 }
 .banner-blocks {
     display: grid;
@@ -541,6 +270,7 @@ import SoftBadge from '@/components/SoftBadge.vue';
     background-position: center;
     position: relative;
 }
+
 .banner-ad {
     position: relative;
     overflow: hidden;
@@ -565,8 +295,9 @@ import SoftBadge from '@/components/SoftBadge.vue';
 }
 .product-tabs .nav-tabs .nav-link.active,
 .product-tabs .nav-tabs .nav-item.show .nav-link {
-    /* border: none; */
-    border-bottom: 3px solid var(--accent-color);
+    border: white;
+    border-bottom: 3px solid rgb(127, 180, 255);
+    background-color: transparent;
 }
 .amount-badge {
     display: inline-block;
