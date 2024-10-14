@@ -1,10 +1,10 @@
 <script setup>
     import '@/assets/js/store.js'
-
+    import { useRouter } from "vue-router";
     import {computed, ref}from 'vue';
 
-    const BaseURL = import.meta.env.VITE_API_BASEURL;
-    
+    const BaseURL = import.meta.env.VITE_API_BASEURL;  // https://localhost:7188/api
+    const BaseUrlWithoutApi = BaseURL.replace('/api', '');  // 去掉 "/api" 得到基本的 URL;
     // 讀取所有商品
     const ApiURL=`${BaseURL}/Products/ProductsNcategory`;
     const product=ref({
@@ -15,8 +15,8 @@
     const loadProducts = async()=>{
         const response = await fetch(ApiURL);
         const datas = await response.json();
-        // console.log(datas);
         products.value = datas;
+        // console.log(datas);
     }
     
     // 讀取類別
@@ -27,8 +27,15 @@
         const datas = await response.json();
         console.log(datas);
         categories.value=datas;
+        console.log(BaseUrlWithoutApi)
     }
-    
+
+    // 跳轉至商品明細頁面
+    const router = useRouter();
+    const goToProductDetail = (id) => {
+    router.push({ name: 'storeProductDetailById', params: { id } });
+    };
+
     // 呼叫方法
     loadProducts();
     loadCategories();
@@ -37,14 +44,16 @@
 <template>
     <div>
         <!-- Single Page Header start -->
-            <div class="container-fluid page-header py-5">
+            <div class="container-fluid page-header py-5 mx-auto">
                 <h1 class="text-center custom-color display-6">商店</h1>
+            <div>
                 <ol class="breadcrumb justify-content-center mb-0">
                     <li class="breadcrumb-item"><a href="#">商店首頁</a></li>
                     <li class="breadcrumb-item"><a href="#">Pages</a></li>
                     <li class="breadcrumb-item active text-white">商店</li>
                 </ol>
             </div>
+        </div>
         <!-- Single Page Header End -->
 
         <!-- RouterLink Start -->
@@ -52,8 +61,7 @@
                 <h4>
                     <RouterLink :to="{ name: 'storeproduct' }" class="floating-icon"><i class="fa-solid fa-shop"></i></RouterLink>
                     <RouterLink :to="{ name: 'cart' }"  class="floating-icon-cart"><i class="fa-solid fa-cart-shopping"></i></RouterLink>
-                    <RouterLink :to="{ name: 'chickout' }">結帳</RouterLink> |
-                    <RouterLink :to="{ name: 'storeProductDetail' }">商店明細</RouterLink>
+                    <RouterLink :to="{ name: 'chickout' }">結帳</RouterLink>
                 </h4>
             </ol>    
         <!-- RouterLink End -->
@@ -111,18 +119,19 @@
                             <div class="col-lg-9">
                                 <div class="row g-4 justify-content-center">
                                     <div class="col-md-6 col-lg-6 col-xl-4" v-for="product in products" :key="product.productId">
-                                        <div class="rounded position-relative fruite-item">
+                                        <div class="rounded position-relative fruite-item ">
                                             <div class="fruite-img">
-                                                <img src="@/assets/img/Store/fruite-item-1.jpg" class="img-fluid w-100 rounded-top" alt="">
+                                                <!-- 獲取商品圖片url 加上?t=${Date.now()} 獲取時間當版本 避免讀快取 加上跳轉至商品明細vue-->
+                                                <img :src="`${BaseUrlWithoutApi}/images/ingredient/${product.photo}?t=${Date.now()}`" class="img-fluid w-100 rounded-top click-router" alt="" @click="goToProductDetail(product.productId)" >
                                             </div>
                                             <!-- 商品類別 -->
-                                            <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">{{ product.category }}</div>
-                                            <div class="p-4 border border-secondary border-top-0 rounded-bottom">
+                                            <div class="text-white bg-secondary px-3 py-1 rounded position-absolute click-router" @click="goToProductDetail(product.productId)" style="top: 10px; left: 10px;">{{ product.category }}</div>
+                                            <div class="p-3 pb-1 border border-secondary border-top-0 rounded-bottom">
                                                 <!-- 品名 -->
-                                                <h4>{{ product.productName }}</h4>
-                                                <div class="d-flex justify-content-between flex-lg-wrap">
+                                                <h4 class="click-router" @click="goToProductDetail(product.productId)">{{ product.productName }}</h4>
+                                                <div class="d-flex justify-content-center flex-lg-wrap">
                                                     <!-- 價格 單位量 單位 -->
-                                                    <p class="text-dark fs-5 fw-bold mb-0">$ {{product.price}} 元 / {{ product.unitQuantity }} / {{ product.unit }}</p>
+                                                    <p class="text-dark fs-5 fw-bold mb-0 click-router" @click="goToProductDetail(product.productId)">$ {{product.price}} 元 / {{ product.unitQuantity }} / {{ product.unit }}</p>
                                                     <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> 加入購物車</a>
                                                 </div>
                                             </div>
@@ -157,4 +166,8 @@
 <style lang="css" scoped>
     @import "@/assets/css/StoreBootstrap.min.css";
     @import "@/assets/css/StoreStyle.css";
+
+    .click-router {
+    cursor: pointer;
+    }
 </style>
