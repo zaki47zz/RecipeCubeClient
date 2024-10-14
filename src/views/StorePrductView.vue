@@ -67,8 +67,8 @@
         <!-- RouterLink End -->
 
         <!-- Fruits Shop Start-->
-        <div class="container-fluid fruite py-5">
-            <div class="container py-5">
+        <div class="container-fluid fruite py-1">
+            <div class="container py-1">
                 <div class="row g-4">
                     <div class="col-lg-12">
                         <div class="row g-4">

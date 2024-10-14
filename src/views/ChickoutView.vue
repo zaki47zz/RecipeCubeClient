@@ -25,8 +25,8 @@
         <!-- RouterLink End -->
 
         <!-- Checkout Page Start -->
-        <div class="container-fluid py-5">
-            <div class="container py-5">
+        <div class="container-fluid py-2">
+            <div class="container py-2">
                 <form action="#">
                     <div class="row g-5">
                         <div class="col-md-12 col-lg-6 col-xl-7">

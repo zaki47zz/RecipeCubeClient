@@ -53,8 +53,8 @@
         <!-- RouterLink End -->
 
         <!-- Single Product Start -->
-        <div class="container-fluid py-5 mt-5 d-flex justify-content-center">
-            <div class="container py-5">
+        <div class="container-fluid py-1 mt-5 d-flex justify-content-center">
+            <div class="container py-1">
                 <div class="row g-4 mb-5">
                     <div class="col-lg-12 col-xl-12">
                         <div class="row g-4">
