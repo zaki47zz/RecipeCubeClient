@@ -2,6 +2,7 @@
 body {
     font-family: 'Cinzel', 'Chocolate Classical Sans', system-ui, sans-serif !important;
     margin: 0;
+    overflow-x: hidden;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
