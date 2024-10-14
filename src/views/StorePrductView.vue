@@ -16,7 +16,7 @@
         const response = await fetch(ApiURL);
         const datas = await response.json();
         products.value = datas;
-        // console.log(datas);
+        console.log(datas);
     }
     
     // 讀取類別
@@ -35,6 +35,28 @@
     const goToProductDetail = (id) => {
     router.push({ name: 'storeProductDetailById', params: { id } });
     };
+
+    // 將商品加入購物車
+    const addToCart = (product)=>{
+
+        // 從 localStorage 取得購物車資料 如果還沒有名為cart的localStorage 則為空陣列
+        let cart = JSON.parse(localStorage.getItem('productCart')) || [];
+
+        // 檢查是否已經有這商品
+        const existingProduct = cart.find(item => item.productId === product.productId);
+
+        if(existingProduct){
+            // 如果商品存在購物車數量增加'1'
+            existingProduct.quantity += 1;
+        }else{
+            cart.push({...product, quantity:1});
+        }
+
+        // 將購物車內容存進localStorage
+        localStorage.setItem('productCart',JSON.stringify(cart));
+
+        alert(`${product.productName} 已加入購物車！`);
+    }
 
     // 呼叫方法
     loadProducts();
@@ -132,7 +154,7 @@
                                                 <div class="d-flex justify-content-center flex-lg-wrap">
                                                     <!-- 價格 單位量 單位 -->
                                                     <p class="text-dark fs-5 fw-bold mb-0 click-router" @click="goToProductDetail(product.productId)">$ {{product.price}} 元 / {{ product.unitQuantity }} / {{ product.unit }}</p>
-                                                    <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> 加入購物車</a>
+                                                    <dev @click="addToCart(product)" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> 加入購物車</dev>
                                                 </div>
                                             </div>
                                         </div>
