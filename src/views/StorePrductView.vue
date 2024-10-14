@@ -39,6 +39,29 @@
     // 將商品加入購物車
     const addToCart = (product)=>{
 
+        // 購物車清空邏輯=========================================================================
+
+        const userId = 3; //這是要寫在登入頁面的 1=>要從登入邏輯拿到userId
+        localStorage.setItem('userId',userId);  //寫進localStorage_userId
+        //-----------------------------------------
+        const currentUserId = localStorage.getItem('userId');
+        console.log(`目前登入的userId : ${currentUserId}`);
+        const storeUserId = localStorage.getItem('storeUserId');
+        console.log(`目前的storeUserId : ${storeUserId}`);
+
+        // 檢查用戶ID是否一致
+        if (storeUserId !== currentUserId){
+            //如果 目前登入的userId 不等於 localStorage 裡的UserId 清空 localStorage
+            localStorage.setItem('productCart',JSON.stringify([]));
+            localStorage.setItem('storeUserId',currentUserId);
+            console.log(`已經完成更改 localStorage_storeUserId : ${currentUserId} 且清除購物車`)
+        }
+        else{
+            console.log("跟上一個使用者是相同id不清除購物車")
+        }   
+        // ===================================================================================
+
+        
         // 從 localStorage 取得購物車資料 如果還沒有名為cart的localStorage 則為空陣列
         let cart = JSON.parse(localStorage.getItem('productCart')) || [];
 
@@ -154,7 +177,7 @@
                                                 <div class="d-flex justify-content-center flex-lg-wrap">
                                                     <!-- 價格 單位量 單位 -->
                                                     <p class="text-dark fs-5 fw-bold mb-0 click-router" @click="goToProductDetail(product.productId)">$ {{product.price}} 元 / {{ product.unitQuantity }} / {{ product.unit }}</p>
-                                                    <dev @click="addToCart(product)" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> 加入購物車</dev>
+                                                    <div @click="addToCart(product)" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> 加入購物車</div>
                                                 </div>
                                             </div>
                                         </div>
