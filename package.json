@@ -18,6 +18,7 @@
     "soft-ui-dashboard": "^1.0.1",
     "sweetalert2": "^11.14.3",
     "swiper": "^11.1.14",
+    "tippy.js": "^6.3.7",
     "vue": "^3.5.11",
     "vue-router": "^4.4.5",
     "vuex": "^4.1.0"

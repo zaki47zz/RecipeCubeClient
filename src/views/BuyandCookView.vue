@@ -1,4 +1,55 @@
-<script setup></script>
+<script setup>
+import SoftInput from '@/components/SoftInput.vue';
+import SoftSwitch from '@/components/SoftSwitch.vue';
+import Swiper from 'swiper';
+import { Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
+import { onMounted } from 'vue';
+
+const initSwiper = function () {
+    const category_swiper = new Swiper('.category-carousel', {
+        modules: [Navigation],
+        slidesPerView: 6,
+        spaceBetween: 30,
+        speed: 500,
+        navigation: {
+            nextEl: '.category-carousel-next',
+            prevEl: '.category-carousel-prev',
+        },
+        breakpoints: {
+            0: {
+                slidesPerView: 2,
+            },
+            768: {
+                slidesPerView: 3,
+            },
+            991: {
+                slidesPerView: 4,
+            },
+            1500: {
+                slidesPerView: 6,
+            },
+        },
+    });
+};
+
+const initTippy = function () {
+    tippy('#tooltip-wrapper', {
+        content: '啟用套餐功能，我們會為您搭配一份主餐與一份副餐!',
+        placement: 'right-end',
+        animation: 'fade',
+    });
+    console.log('已初始化 tippy');
+};
+
+onMounted(() => {
+    initSwiper();
+    initTippy();
+});
+</script>
 
 <template>
     <section class="banner-section">
@@ -16,7 +67,7 @@
         </div>
     </section>
 
-    <section class="py-5">
+    <section class="pt-5">
         <div class="container-fluid">
             <div class="row justify-content-center">
                 <div class="col-lg-3">
@@ -56,65 +107,84 @@
         </div>
     </section>
 
-    <!-- 改成swiper -->
-    <section>
-        <div class="my-1 d-flex justify-content-between align-items-center">
-            <h4>食材列表(改成SWIPER)</h4>
-            <div class="search-box">
-                <input type="text" class="form-control h-30 w-100 text-center" placeholder="搜尋" />
-            </div>
-        </div>
-        <div class="scroll-container d-flex gap-3 m-0 overflow-auto">
-            <!-- 常用食材 -->
-            <div class="card shadow p-2" style="min-width: 200px">
-                <h6 class="text-center">您的常用食材</h6>
-                <div class="d-flex flex-wrap justify-content-center gap-2">
-                    <span class="badge food-badge bg-success">青椒</span>
-                    <span class="badge food-badge bg-success">高麗菜</span>
-                    <span class="badge food-badge bg-success">菠菜</span>
+    <section class="py-3 overflow-hidden">
+        <div class="container-fluid banner-ad">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="section-header d-flex flex-wrap justify-content-between mb-1">
+                        <h2 class="section-title">食材列表</h2>
+                        <div class="d-flex align-items-center">
+                            <a href="#" class="btn-link text-decoration-none">滾動以查看所有類別 →</a>
+                            <div class="swiper-buttons">
+                                <button class="swiper-prev category-carousel-prev btn btn-yellow m-1">❮</button>
+                                <button class="swiper-next category-carousel-next btn btn-yellow m-1">❯</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <!-- 類別區塊 (多個可以複製) -->
-            <div class="card shadow p-2" style="min-width: 200px">
-                <h6 class="text-center">蔬菜類</h6>
-                <div class="d-flex flex-wrap justify-content-center gap-2">
-                    <span class="badge food-badge bg-success">青椒</span>
-                    <span class="badge food-badge bg-success">菠菜</span>
-                    <span class="badge food-badge bg-success">高麗菜</span>
-                    <span class="badge food-badge bg-success">青椒</span>
-                    <span class="badge food-badge bg-success">菠菜</span>
-                    <span class="badge food-badge bg-success">高麗菜</span>
-                    <span class="badge food-badge bg-success">青椒</span>
-                    <span class="badge food-badge bg-success">菠菜</span>
-                    <span class="badge food-badge bg-success">高麗菜</span>
-                    <span class="badge food-badge bg-success">青椒</span>
-                    <span class="badge food-badge bg-success">菠菜</span>
-                    <span class="badge food-badge bg-success">高麗菜</span>
+            <div class="row">
+                <div class="search-box position-relative">
+                    <SoftInput
+                        placeholder="輸入食材關鍵字..."
+                        icon="fas fa-search"
+                        iconDir="right"
+                        class="w-80 mx-auto text-center my-1"
+                    />
                 </div>
-            </div>
-
-            <div class="card shadow p-2" style="min-width: 200px">
-                <h6 class="text-center">牛肉類</h6>
-            </div>
-            <div class="card shadow p-2" style="min-width: 200px">
-                <h6 class="text-center">豬肉類</h6>
-            </div>
-            <div class="card shadow p-2" style="min-width: 200px">
-                <h6 class="text-center">雞肉類</h6>
-            </div>
-            <div class="card shadow p-2" style="min-width: 200px">
-                <h6 class="text-center">蛋奶類</h6>
-            </div>
-            <div class="card shadow p-2" style="min-width: 200px">
-                <h6 class="text-center">菌菇類</h6>
-            </div>
-            <div class="card shadow p-2" style="min-width: 200px">
-                <h6 class="text-center">液體類</h6>
-            </div>
-            <div class="p-2 text-center" style="min-width: 200px">
-                <p>沒有您想要的食材嗎?</p>
-                <button class="btn blur rounded-3 shadow text-center">加入自定義食材</button>
+                <div class="col-md-12">
+                    <div class="category-carousel swiper">
+                        <div class="swiper-wrapper">
+                            <div class="nav-link category-item swiper-slide">
+                                <h6 class="text-center">您的常用食材</h6>
+                                <div class="d-flex flex-wrap justify-content-center gap-2">
+                                    <span class="badge food-badge bg-success">青椒</span>
+                                    <span class="badge food-badge bg-success">高麗菜</span>
+                                    <span class="badge food-badge bg-success">菠菜</span>
+                                </div>
+                            </div>
+                            <div class="nav-link category-item swiper-slide">
+                                <h6 class="text-center">蔬菜類</h6>
+                                <div class="d-flex flex-wrap justify-content-center gap-2">
+                                    <span class="badge food-badge bg-success">青椒</span>
+                                    <span class="badge food-badge bg-success">菠菜</span>
+                                    <span class="badge food-badge bg-success">高麗菜</span>
+                                    <span class="badge food-badge bg-success">青椒</span>
+                                    <span class="badge food-badge bg-success">菠菜</span>
+                                    <span class="badge food-badge bg-success">高麗菜</span>
+                                    <span class="badge food-badge bg-success">青椒</span>
+                                    <span class="badge food-badge bg-success">菠菜</span>
+                                    <span class="badge food-badge bg-success">高麗菜</span>
+                                    <span class="badge food-badge bg-success">青椒</span>
+                                    <span class="badge food-badge bg-success">菠菜</span>
+                                    <span class="badge food-badge bg-success">高麗菜</span>
+                                </div>
+                            </div>
+                            <div class="nav-link category-item swiper-slide">
+                                <h6 class="text-center">牛肉類</h6>
+                            </div>
+                            <div class="nav-link category-item swiper-slide">
+                                <h6 class="text-center">豬肉類</h6>
+                            </div>
+                            <div class="nav-link category-item swiper-slide">
+                                <h6 class="text-center">雞肉類</h6>
+                            </div>
+                            <div class="nav-link category-item swiper-slide">
+                                <h6 class="text-center">蛋奶類</h6>
+                            </div>
+                            <div class="nav-link category-item swiper-slide">
+                                <h6 class="text-center">菌菇類</h6>
+                            </div>
+                            <div class="nav-link category-item swiper-slide">
+                                <h6 class="text-center">液體類</h6>
+                            </div>
+                            <div class="nav-link category-item swiper-slide">
+                                <h6 class="text-dark">沒有想要的食材?</h6>
+                                <button class="btn blur rounded-3 shadow text-center">加入自定義食材</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -122,7 +192,21 @@
     <section class="pt-3">
         <div class="container-fluid">
             <div class="row justify-content-center">
-                <div class="col-lg-3"><button class="btn bg-gradient-info shadow fs-5 w-100">產生食譜</button></div>
+                <div class="col-lg-3">
+                    <SoftSwitch name="set" id="set" class="switch-set">
+                        <span>
+                            套餐
+                            <span id="tooltip-wrapper">
+                                <i class="fa-solid fa-circle-question"></i>
+                            </span>
+                        </span>
+                    </SoftSwitch>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-3">
+                    <button class="btn bg-danger-subtle text-dark shadow fs-5 w-100">產生食譜</button>
+                </div>
             </div>
         </div>
     </section>
@@ -151,5 +235,74 @@
     position: relative;
     overflow: hidden;
     background: url('@/assets/img/ForBackground/ad-bg-pattern.png') no-repeat center / cover;
+}
+
+/* Swiper carousel */
+.swiper-prev,
+.swiper-next {
+    width: 38px;
+    height: 38px;
+    line-height: 38px;
+    background: #f1f1f1;
+    color: #222222;
+    padding: 0;
+    text-align: center;
+    border-radius: 10px;
+    --bs-btn-border-color: transparent;
+    --bs-btn-active-bg: #f8d7da;
+    --bs-btn-active-border-color: transparent;
+    --bs-btn-hover-bg: #f8d7da;
+    --bs-btn-hover-border-color: transparent;
+    --bs-btn-disabled-color: #ccc;
+    --bs-btn-disabled-bg: #eaeaea;
+    --bs-btn-disabled-border-color: #eaeaea;
+}
+.swiper-prev:hover,
+.swiper-next:hover {
+    background: #f8d7da;
+}
+.btn-link {
+    margin-right: 30px;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 22px;
+    text-align: right;
+    color: #787878;
+}
+
+/* category carousel */
+.category-carousel .category-item {
+    background: #ffffff;
+    border: 3px solid #ffd6d6;
+    box-shadow: 0px 5px 22px rgba(0, 0, 0, 0.04);
+    border-radius: 16px;
+    text-align: center;
+    padding: 20px;
+    margin: 20px 0;
+    transition:
+        box-shadow 0.3s ease-out,
+        transform 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 240px;
+}
+.category-carousel .category-item:hover {
+    transform: translate3d(0, -5px, 0);
+    box-shadow: 0px 21px 44px rgba(0, 0, 0, 0.08);
+}
+.category-carousel .category-item .category-title {
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 27px;
+    letter-spacing: 0.02em;
+    color: #222222;
+    margin-top: 0px;
+}
+
+.switch-set {
+    /* margin-left: calc(50% - 3.5vw); */
+    left: 50%;
+    transform: translateX(33%);
 }
 </style>

@@ -53,16 +53,16 @@ const alertClearCheck = () => {
             <div class="row justify-content-center my-5">
                 <div class="col-lg-3">
                     <div class="d-flex gap-4 align-items-center">
-                        <div class="text-center px-3 m-1 rounded-3 shadow">
-                            <h5><i class="fa-solid fa-box-open"></i> 管理食材</h5>
+                        <div class="driver text-center px-3 m-1 rounded-3">
+                            <h5><i class="fa-solid fa-box-open mt-3"></i> 管理食材</h5>
                             <p>對個別食材進行數量的修改或刪除</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-3">
                     <div class="d-flex gap-4 align-items-center">
-                        <div class="text-center px-3 m-1 rounded-3 shadow">
-                            <h5><i class="fa-solid fa-utensils"></i> 產生食譜</h5>
+                        <div class="driver text-center px-3 m-1 rounded-3">
+                            <h5><i class="fa-solid fa-utensils mt-3"></i> 產生食譜</h5>
                             <p>選取食材讓我們為您自動生成食譜</p>
                         </div>
                     </div>
@@ -292,11 +292,13 @@ const alertClearCheck = () => {
     <section class="pt-3">
         <div class="container-fluid">
             <div class="row justify-content-center">
-                <div class="col-lg-3"><button class="btn bg-gradient-info shadow fs-5 w-100">產生食譜</button></div>
+                <div class="col-lg-3">
+                    <button class="btn bg-primary-subtle text-dark shadow fs-5 w-100">產生食譜</button>
+                </div>
                 <div class="col-lg-3">
                     <button
                         type="button"
-                        class="btn blur shadow fs-5 w-100"
+                        class="btn blur shadow text-dark fs-5 w-100"
                         data-bs-toggle="offcanvas"
                         data-bs-target="#offcanvasIngredient"
                         aria-controls="offcanvasIngredient"
@@ -372,6 +374,16 @@ const alertClearCheck = () => {
 
 .card:hover img {
     transform: scale(1.1);
+}
+
+.driver {
+    box-shadow:
+        rgba(0, 0, 0, 0.16) 0px 10px 36px 0px,
+        rgba(0, 0, 0, 0.06) 0px 0px 0px 1px !important;
+    cursor: pointer;
+}
+.driver:hover {
+    transform: scale(1.05);
 }
 
 /* Media Queries */
