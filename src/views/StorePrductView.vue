@@ -1,5 +1,6 @@
 <script setup>
     import '@/assets/js/store.js'
+    import Swal from 'sweetalert2'
     import { useRouter } from "vue-router";
     import {computed, ref}from 'vue';
 
@@ -69,16 +70,27 @@
         const existingProduct = cart.find(item => item.productId === product.productId);
 
         if(existingProduct){
-            // 如果商品存在購物車數量增加'1'
-            existingProduct.quantity += 1;
+            // 商品存在 且 目前購物車數量+加入一單位的量<=stock
+            const totalQuantity = (existingProduct.quantity+1)*product.unitQuantity;
+            if(totalQuantity<=product.stock){
+                // 如果商品存在購物車數量增加'1'
+                existingProduct.quantity += 1;
+                localStorage.setItem('productCart',JSON.stringify(cart));
+                Swal.fire(`${product.productName} 已加入購物車！`);
+            }else{
+                Swal.fire(`不能超過庫存量，庫存為：${Math.floor(product.stock/product.unitQuantity)}，已經將 ${existingProduct.quantity} 個單位加入購物車`)
+            }
         }else{
-            cart.push({...product, quantity:1});
+            const totalQuantity = product.unitQuantity
+            if(totalQuantity<=product.stock){
+                cart.push({...product, quantity:1});
+                localStorage.setItem('productCart',JSON.stringify(cart));
+                Swal.fire(`${product.productName} 已加入購物車！`);
+            }else{
+                Swal.fire(`不能超過庫存量，庫存為：${Math.floor(product.stock/product.unitQuantity)} 個單位`)
+            }
         }
 
-        // 將購物車內容存進localStorage
-        localStorage.setItem('productCart',JSON.stringify(cart));
-
-        alert(`${product.productName} 已加入購物車！`);
     }
 
     // 呼叫方法
