@@ -1,7 +1,7 @@
 <script setup>
     import '@/assets/js/store.js'
-
-    import {ref,computed, onMounted} from 'vue';
+    import Swal from 'sweetalert2'
+    import {ref} from 'vue';
     import { useRoute } from 'vue-router';
     const BaseURL = import.meta.env.VITE_API_BASEURL;
     const BaseUrlWithoutApi = BaseURL.replace("/api","");  // 去掉 "/api" 得到基本的 URL;
@@ -27,7 +27,71 @@
         }
     }
     loadProductById(route.params.id);
-     
+    
+
+    // 將商品加入購物車
+    const addToCart = (product)=>{
+
+        // 購物車清空邏輯=========================================================================
+
+        const userId = 3; //這是要寫在登入頁面的 1=>要從登入邏輯拿到userId
+        localStorage.setItem('userId',userId);  //寫進localStorage_userId
+        //-----------------------------------------
+        const currentUserId = localStorage.getItem('userId');
+        console.log(`目前登入的userId : ${currentUserId}`);
+        const storeUserId = localStorage.getItem('storeUserId');
+        console.log(`目前的storeUserId : ${storeUserId}`);
+
+        // 檢查用戶ID是否一致
+        if (storeUserId !== currentUserId){
+            //如果 目前登入的userId 不等於 localStorage 裡的userId 清空 localStorage
+            localStorage.setItem('productCart',JSON.stringify([]));
+            localStorage.setItem('storeUserId',currentUserId);
+            console.log(`已經完成更改 localStorage_storeUserId : ${currentUserId} 且清除購物車`)
+        }
+        else{
+            console.log("跟上一個使用者是相同id不清除購物車")
+        }   
+        // ===================================================================================
+
+        // 從 localStorage 取得購物車資料 如果還沒有名為cart的localStorage 則為空陣列
+        let cart = JSON.parse(localStorage.getItem('productCart')) || [];
+
+        // 檢查是否已經有這商品
+        const existingProduct = cart.find(item => item.productId === product.productId);
+
+        if(existingProduct){
+            // 如果商品存在購物車數量增加'商品數量選擇input_selectQuantity的value'
+            existingProduct.quantity += selectQuantity.value;
+        }else{
+            cart.push({...product, quantity:selectQuantity.value});
+        }
+
+        // 將購物車內容存進localStorage
+        localStorage.setItem('productCart',JSON.stringify(cart));
+
+        Swal.fire(`${product.productName} 已加入購物車！`);
+       
+    }
+
+    // 商品數量選擇
+
+    // 數量的響應式變量
+    const selectQuantity = ref(1);
+
+    // 減少數量1但不能低於1
+    const decQuantity = () =>{
+        if(selectQuantity.value > 1){
+            selectQuantity.value -= 1;
+            console.log(`目前商品數量選擇:${selectQuantity.value}`)
+        }
+    }
+    // 增加數量1但不能超過stock 尚未做stock判斷
+    const incQuantity = () =>{
+        selectQuantity.value += 1; 
+        console.log(`目前商品數量選擇:${selectQuantity.value}`)
+    }
+
 </script>
 
 <template>
@@ -57,39 +121,40 @@
             <div class="container py-1">
                 <div class="row g-4 mb-5">
                     <div class="col-lg-12 col-xl-12">
-                        <div class="row g-4">
+                        <div class="row g-4" v-for="product in products" :key="product.productId">
                             <div class="col-lg-4">
                                 <div>
                                     <!-- 商品圖片 -->
-                                    <a href="#" v-for="product in products" :key="product.productId">
+                                    <div>
                                         <img :src="`${BaseUrlWithoutApi}/images/ingredient/${product.photo}?t=${Date.now()}`" class="img-fluid rounded" alt="Image">
-                                    </a>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-lg-8">
                                 <!-- 商品名稱 -->
-                                <h4 class="fw-bold mb-3" v-for="product in products" :key="product.productId">{{product.productName}}</h4>
+                                <h4 class="fw-bold mb-3">{{product.productName}}</h4>
                                 <!-- 商品類別 -->
-                                <p class="mb-3" v-for="product in products" :key="product.productId">類別: {{product.category}}</p>
+                                <p class="mb-3">類別: {{product.category}}</p>
                                 <!-- 商品價格 單位量 單位 -->
-                                <h5 class="fw-bold mb-3" v-for="product in products" :key="product.productId">$ {{product.price}} / {{ product.unitQuantity }} {{ product.unit }}</h5>
+                                <h5 class="fw-bold mb-3">$ {{product.price}} / {{ product.unitQuantity }} {{ product.unit }}</h5>
                                 <!-- 商品描述 -->
-                                <p class="mb-4" v-for="product in products" :key="product.productId">{{ product.description }}</p>
+                                <p class="mb-4">{{ product.description }}</p>
+                                <!-- 商品數量input btn -->
                                 <div class="input-group quantity mb-5" style="width: 100px;">
                                     <div class="input-group-btn">
-                                        <button class="btn btn-sm btn-minus rounded-circle bg-light border" >
+                                        <button class="btn btn-sm btn-minus rounded-circle bg-light border" @click="decQuantity">
                                             <i class="fa fa-minus"></i>
                                         </button>
                                     </div>
-                                    <input type="text" class="form-control form-control-sm text-center border-0" value="1">
+                                    <input type="text" class="form-control form-control-sm text-center border-0" :value="selectQuantity" readonly>
                                     <div class="input-group-btn">
-                                        <button class="btn btn-sm btn-plus rounded-circle bg-light border">
+                                        <button class="btn btn-sm btn-plus rounded-circle bg-light border" @click="incQuantity">
                                             <i class="fa fa-plus"></i>
                                         </button>
                                     </div>
                                 </div>
                                 <!-- 加入購物車按鈕 -->
-                                <a href="#" class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> 加入購物車</a>
+                                <div @click="addToCart(product)" class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> 加入購物車</div>
                             </div>
                         </div>
                     </div>

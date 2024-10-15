@@ -51,7 +51,7 @@
 
         // 檢查用戶ID是否一致
         if (storeUserId !== currentUserId){
-            //如果 目前登入的userId 不等於 localStorage 裡的UserId 清空 localStorage
+            //如果 目前登入的userId 不等於 localStorage 裡的userId 清空 localStorage
             localStorage.setItem('productCart',JSON.stringify([]));
             localStorage.setItem('storeUserId',currentUserId);
             console.log(`已經完成更改 localStorage_storeUserId : ${currentUserId} 且清除購物車`)
