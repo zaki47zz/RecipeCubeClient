@@ -182,9 +182,9 @@
         <div class="container-fluid page-header py-5">
             <h1 class="text-center custom-color display-6">商品明細</h1>
             <ol class="breadcrumb justify-content-center mb-0">
-                <li class="breadcrumb-item"><a href="#">商店首頁</a></li>
+                <!-- <li class="breadcrumb-item"><a href="#">商店首頁</a></li>
                 <li class="breadcrumb-item"><a href="#">Pages</a></li>
-                <li class="breadcrumb-item active text-white">商品明細</li>
+                <li class="breadcrumb-item active text-white">商品明細</li> -->
             </ol>
         </div>
         <!-- Single Page Header End -->
@@ -194,7 +194,6 @@
         <h4>
             <RouterLink :to="{ name: 'storeproduct' }" class="floating-icon"><i class="fa-solid fa-shop"></i></RouterLink>
             <RouterLink :to="{ name: 'cart' }"  class="floating-icon-cart"><i class="fa-solid fa-cart-shopping"></i></RouterLink>
-            <RouterLink :to="{ name: 'chickout' }">結帳</RouterLink>
         </h4>
         </ol>
         <!-- RouterLink End -->

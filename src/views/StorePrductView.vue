@@ -98,13 +98,13 @@
 <template>
     <div>
         <!-- Single Page Header start -->
-            <div class="container-fluid page-header py-5 mx-auto">
+            <div class="container-fluid page-header py-5 ">
                 <h1 class="text-center custom-color display-6">商店</h1>
             <div>
                 <ol class="breadcrumb justify-content-center mb-0">
-                    <li class="breadcrumb-item"><a href="#">商店首頁</a></li>
+                    <!-- <li class="breadcrumb-item"><a href="#">商店首頁</a></li>
                     <li class="breadcrumb-item"><a href="#">Pages</a></li>
-                    <li class="breadcrumb-item active text-white">商店</li>
+                    <li class="breadcrumb-item active text-white">商店</li> -->
                 </ol>
             </div>
         </div>
@@ -115,7 +115,6 @@
                 <h4>
                     <RouterLink :to="{ name: 'storeproduct' }" class="floating-icon"><i class="fa-solid fa-shop"></i></RouterLink>
                     <RouterLink :to="{ name: 'cart' }"  class="floating-icon-cart"><i class="fa-solid fa-cart-shopping"></i></RouterLink>
-                    <RouterLink :to="{ name: 'chickout' }">結帳</RouterLink>
                 </h4>
             </ol>    
         <!-- RouterLink End -->

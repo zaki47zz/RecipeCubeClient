@@ -1,5 +1,70 @@
 <script setup>
     import '@/assets/js/store.js'
+    import Swal from 'sweetalert2'
+    import {ref,computed,reactive} from 'vue';
+    import { useRouter } from 'vue-router';
+    const BaseURL = import.meta.env.VITE_API_BASEURL;
+    const BaseUrlWithoutApi = BaseURL.replace("/api","");  // 去掉 "/api" 得到基本的 URL;
+
+    // 讀取所有商品
+    const ApiURL=`${BaseURL}/Products/ProductsNcategory`;
+
+    const products=ref([]);
+    const loadProducts = async()=>{
+        const response = await fetch(ApiURL);
+        const datas = await response.json();
+        products.value = datas;
+        // console.log(datas);
+        loadProductCartLocalStorage();
+        // console.log('已加載loadProductCartLocalStorage')
+    }
+
+    // 從localStorage獲取購物車內容
+    const cartProducts = ref([]);
+    const loadProductCartLocalStorage=()=>{
+        let cart = JSON.parse(localStorage.getItem('productCart')) || [];
+        
+        // 過濾所有商品，找到購物車中存在的商品
+        cartProducts.value = products.value.map(product=>{
+            // 檢查該商品是否在購物車中
+            const cartProduct = cart.find(item => item.productId === product.productId);
+            // 如果有找到 則保留
+            if(cartProduct){
+                // 使用 reactive 來創建一個響應式物件
+                const reactiveProduct = reactive({
+                    ...product, // 展開原有產品屬性
+                    quantity: cartProduct.quantity // 設置 quantity
+                });
+                console.log(reactiveProduct.quantity)
+                // console.log(JSON.stringify(reactiveProduct, null, 2));
+                // console.log(`有找到購物車商品：${reactiveProduct.productName} , 商品數量:${reactiveProduct.quantity}`);
+                // 保留
+                console.log(`商品名稱: ${reactiveProduct.productName}, 數量: ${reactiveProduct.quantity}`);
+                return reactiveProduct; // 返回響應式產品
+            }else{
+                // 過濾掉不在購物車的商品
+                // console.log(`沒有找到購物車商品`);
+                return null;
+            }
+        }).filter(Boolean); //過濾掉null值
+    }
+    // 載入loadProducts
+    loadProducts();
+
+    //============================================================================================================================
+
+
+    //計算商品總價
+    const totalPrice = computed(()=>{
+        // reduce會迭代 cartProducts 陣列，累加到acc
+        return cartProducts.value.reduce((acc, product) => {
+            console.log("product.quantity", product.quantity)
+
+            return acc + (product.price * product.quantity);
+        },0);
+    })
+
+    //============================================================================================================================
 </script>
 
 <template>
@@ -7,9 +72,9 @@
     <div class="container-fluid page-header py-5">
             <h1 class="text-center custom-color display-6">結帳</h1>
             <ol class="breadcrumb justify-content-center mb-0">
-                <li class="breadcrumb-item"><a href="#">商店首頁</a></li>
+                <!-- <li class="breadcrumb-item"><a href="#">商店首頁</a></li>
                 <li class="breadcrumb-item"><a href="#">Pages</a></li>
-                <li class="breadcrumb-item active text-white">結帳</li>
+                <li class="breadcrumb-item active text-white">結帳</li> -->
             </ol>
         </div>
         <!-- Single Page Header End -->
@@ -19,7 +84,6 @@
                 <h4>
                     <RouterLink :to="{ name: 'storeproduct' }" class="floating-icon"><i class="fa-solid fa-shop"></i></RouterLink>
                     <RouterLink :to="{ name: 'cart' }"  class="floating-icon-cart"><i class="fa-solid fa-cart-shopping"></i></RouterLink>
-                    <RouterLink :to="{ name: 'chickout' }">結帳</RouterLink>
                 </h4>
             </ol>    
         <!-- RouterLink End -->
@@ -60,11 +124,11 @@
                                 <table class="table">
                                     <thead>
                                         <tr>
-                                            <th scope="col">Products</th>
-                                            <th scope="col">Name</th>
-                                            <th scope="col">Price</th>
-                                            <th scope="col">Quantity</th>
-                                            <th scope="col">Total</th>
+                                            <th scope="col">商品</th>
+                                            <th scope="col">品名</th>
+                                            <th scope="col">單價</th>
+                                            <th scope="col">數量</th>
+                                            <th scope="col">單品小計</th>
                                         </tr>
                                     </thead>
                                     <tbody>
