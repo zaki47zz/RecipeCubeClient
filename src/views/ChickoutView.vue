@@ -3,6 +3,7 @@
     import Swal from 'sweetalert2'
     import {ref,computed,reactive} from 'vue';
     import { useRouter } from 'vue-router';
+    import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
     const BaseURL = import.meta.env.VITE_API_BASEURL;
     const BaseUrlWithoutApi = BaseURL.replace("/api","");  // 去掉 "/api" 得到基本的 URL;
 
@@ -92,12 +93,12 @@
         <div class="container-fluid py-2">
             <div class="container py-2">
                 <form action="#">
-                    <div class="row ">
+                    <div class="row">
                         <div class="col-md-12 col-lg-6 col-xl-7">
                             <div class="row">
                                 <div class="col-md-12 col-lg-6">
                                     <div class="form-item w-100">
-                                        <label class="form-label my-3">姓名<sup>*</sup></label>
+                                        <label class="fs-5 form-label my-3">姓名<sup>*</sup></label>
                                         <input type="text" class="form-control">
                                     </div>
                                 </div>
@@ -236,6 +237,8 @@
                     </div>
                 </form>
             </div>
+              <!-- 引入購物車 sidebar -->
+            <SideBarCartComponent />
         </div>
         <!-- Checkout Page End -->
 

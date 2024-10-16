@@ -3,6 +3,7 @@
     import Swal from 'sweetalert2'
     import {ref} from 'vue';
     import { useRoute } from 'vue-router';
+    import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
     const BaseURL = import.meta.env.VITE_API_BASEURL;
     const BaseUrlWithoutApi = BaseURL.replace("/api","");  // 去掉 "/api" 得到基本的 URL;
 
@@ -246,6 +247,8 @@
                     </div>
                 </div>
             </div>
+              <!-- 引入購物車 sidebar -->
+            <SideBarCartComponent />
         </div>
         <!-- Single Product End -->
 </template>
