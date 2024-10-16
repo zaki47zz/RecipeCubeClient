@@ -92,7 +92,7 @@
         <div class="container-fluid py-2">
             <div class="container py-2">
                 <form action="#">
-                    <div class="row g-5">
+                    <div class="row ">
                         <div class="col-md-12 col-lg-6 col-xl-7">
                             <div class="row">
                                 <div class="col-md-12 col-lg-6">
@@ -121,7 +121,7 @@
                         </div>
                         <div class="col-md-12 col-lg-6 col-xl-5">
                             <div class="table-responsive">
-                                <table class="table">
+                                <table class="table" >
                                     <thead>
                                         <tr>
                                             <th scope="col">商品</th>
@@ -132,39 +132,18 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <th scope="row">
+                                        <tr v-for="product in cartProducts" :key="product.productId">
+                                            <th scope="row"> 
                                                 <div class="d-flex align-items-center mt-2">
-                                                    <img src="@/assets/img/Store/vegetable-item-2.jpg" class="img-fluid rounded-circle" style="width: 90px; height: 90px;" alt="">
+                                                    <img :src="`${BaseUrlWithoutApi}/images/ingredient/${product.photo}?t=${Date.now()}`"  class="img-fluid rounded-circle" style="width: 88px; height: 88px;" alt="">
                                                 </div>
                                             </th>
-                                            <td class="py-5">Awesome Brocoli</td>
-                                            <td class="py-5">$69.00</td>
-                                            <td class="py-5">2</td>
-                                            <td class="py-5">$138.00</td>
+                                            <td class="py-5">{{product.productName}}</td>
+                                            <td class="py-5">$ {{ product.price }}</td>
+                                            <td class="py-5">{{ product.quantity }}</td>
+                                            <td class="py-5">$ {{ product.price * product.quantity }}</td>
                                         </tr>
-                                        <tr>
-                                            <th scope="row">
-                                                <div class="d-flex align-items-center mt-2">
-                                                    <img src="@/assets/img/Store/vegetable-item-5.jpg" class="img-fluid rounded-circle" style="width: 90px; height: 90px;" alt="">
-                                                </div>
-                                            </th>
-                                            <td class="py-5">Potatoes</td>
-                                            <td class="py-5">$69.00</td>
-                                            <td class="py-5">2</td>
-                                            <td class="py-5">$138.00</td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row">
-                                                <div class="d-flex align-items-center mt-2">
-                                                    <img src="@/assets/img/Store/vegetable-item-3.png" class="img-fluid rounded-circle" style="width: 90px; height: 90px;" alt="">
-                                                </div>
-                                            </th>
-                                            <td class="py-5">Big Banana</td>
-                                            <td class="py-5">$69.00</td>
-                                            <td class="py-5">2</td>
-                                            <td class="py-5">$138.00</td>
-                                        </tr>
+                                        
                                         <tr>
                                             <th scope="row">
                                             </th>
