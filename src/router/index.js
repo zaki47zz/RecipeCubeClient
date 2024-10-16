@@ -14,9 +14,9 @@ import StorePrductView from '@/views/StorePrductView.vue';
 import ChickoutView from '@/views/ChickoutView.vue';
 import CartView from '@/views/CartView.vue';
 import StoreProductDetailView from '@/views/StoreProductDetailView.vue';
+import GenerateRecipeView from '@/views/GenerateRecipeView.vue';
 
 import { createRouter, createWebHistory } from 'vue-router';
-
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -84,27 +84,27 @@ const router = createRouter({
         {
             //http://localhost:5175/store
             path: '/store',
-            component:StoreView,
-            redirect:'/storeproduct',
+            component: StoreView,
+            redirect: '/storeproduct',
             name: 'store',
-            children:[
+            children: [
                 {
                     //http://localhost:5175/storeproduct
                     path: '/storeproduct',
                     component: StorePrductView,
-                    name: 'storeproduct'
+                    name: 'storeproduct',
                 },
                 {
                     //http://localhost:5175/chickout
                     path: '/chickout',
                     component: ChickoutView,
-                    name: 'chickout'
+                    name: 'chickout',
                 },
                 {
                     //http://localhost:5175/cart
                     path: '/cart',
                     component: CartView,
-                    name: 'cart'
+                    name: 'cart',
                 },
                 {
                     //http://localhost:5175/storeProductDetail
@@ -118,7 +118,12 @@ const router = createRouter({
                     component: StoreProductDetailView,
                     name: 'storeProductDetailById',
                 },
-            ]
+            ],
+        },
+        {
+            path: '/generaterecipe',
+            name: 'GenerateRecipe',
+            component: GenerateRecipeView,
         },
     ],
 });

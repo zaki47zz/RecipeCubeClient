@@ -282,7 +282,12 @@ onMounted(() => {
             </div>
             <div class="row justify-content-center">
                 <div class="col-lg-3">
-                    <button class="btn bg-danger-subtle text-dark shadow fs-5 w-100">產生食譜</button>
+                    <RouterLink
+                        class="btn bg-danger-subtle text-dark shadow fs-5 w-100"
+                        :to="{ name: 'GenerateRecipe' }"
+                    >
+                        產生食譜
+                    </RouterLink>
                 </div>
             </div>
             <div class="row justify-content-center">

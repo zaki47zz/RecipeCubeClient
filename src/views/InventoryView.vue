@@ -52,7 +52,7 @@ const alertClearCheck = () => {
             </div>
             <div class="row justify-content-center my-5">
                 <div class="col-lg-3">
-                    <div class="d-flex gap-4 align-items-center">
+                    <div class="d-flex gap-4 justify-content-center align-items-center">
                         <div class="driver text-center px-3 m-1 rounded-3">
                             <h5><i class="fa-solid fa-box-open mt-3"></i> 管理食材</h5>
                             <p>對個別食材進行數量的修改或刪除</p>
@@ -60,7 +60,7 @@ const alertClearCheck = () => {
                     </div>
                 </div>
                 <div class="col-lg-3">
-                    <div class="d-flex gap-4 align-items-center">
+                    <div class="d-flex gap-4 justify-content-center align-items-center">
                         <div class="driver text-center px-3 m-1 rounded-3">
                             <h5><i class="fa-solid fa-utensils mt-3"></i> 產生食譜</h5>
                             <p>選取食材讓我們為您自動生成食譜</p>
