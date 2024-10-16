@@ -2,12 +2,13 @@
     import '@/assets/js/store.js'
     import Swal from 'sweetalert2'
     import {ref,computed,reactive} from 'vue';
+    import { useRouter } from 'vue-router';
     const BaseURL = import.meta.env.VITE_API_BASEURL;
     const BaseUrlWithoutApi = BaseURL.replace("/api","");  // 去掉 "/api" 得到基本的 URL;
 
     // 讀取所有商品
     const ApiURL=`${BaseURL}/Products/ProductsNcategory`;
-  
+
     const products=ref([]);
     const loadProducts = async()=>{
         const response = await fetch(ApiURL);
@@ -92,7 +93,7 @@
             const totalQuantity = (product.unitQuantity*(product.quantity+1));
             // if(totalQuantity <= product.stock){
             //     product.quantity += 1;
-                 
+
             // }else{
             //     Swal.fire(`不能超過庫存量，庫存為：${Math.floor(product.stock/product.unitQuantity)}，已經將 ${existingProduct.quantity} 個單位加入購物車`)
             // }
@@ -166,6 +167,13 @@
             }
         });
     };
+
+    //=========================================================================================================================
+    // 導航至結帳頁面
+    const router = useRouter();
+    const goToCheckout = () =>{
+        router.push({name:'chickout'});
+    }
 </script>
 
 <template>
@@ -185,7 +193,7 @@
                 <h4>
                     <RouterLink :to="{ name: 'storeproduct' }" class="floating-icon"><i class="fa-solid fa-shop"></i></RouterLink>
                     <RouterLink :to="{ name: 'cart' }"  class="floating-icon-cart"><i class="fa-solid fa-cart-shopping"></i></RouterLink>
-                    <RouterLink :to="{ name: 'chickout' }">結帳</RouterLink>
+                    <!-- <RouterLink :to="{ name: 'chickout' }">結帳</RouterLink> -->
                 </h4>
             </ol>    
         <!-- RouterLink End -->
@@ -280,7 +288,7 @@
                                 <h5 class="mb-0 ps-4 me-4">總計:</h5>
                                 <p class="mb-0 pe-4">${{totalPrice}}</p>
                             </div>
-                            <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button">結帳</button>
+                            <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button" @click="goToCheckout">結帳</button>
                         </div>
                     </div>
                 </div>
