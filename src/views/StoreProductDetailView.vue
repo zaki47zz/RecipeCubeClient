@@ -235,12 +235,13 @@
                                             <i class="fa fa-plus"></i>
                                         </button>
                                     </div>
-                                    <div v-if="isSoldout">
+                                    <!-- <div v-if="isSoldout">
                                         <p>商品已無多餘庫存</p>
-                                    </div>
+                                    </div> -->
                                 </div>
                                 <!-- 加入購物車按鈕 -->
-                                <button  :disabled="isSoldout" @click="addToCart(product)" class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> 加入購物車</button>
+                                <button   @click="addToCart(product)" class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> 加入購物車</button>
+                                <!-- <button  :disabled="isSoldout" @click="addToCart(product)" class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> 加入購物車</button> -->
                             </div>
                         </div>
                     </div>
