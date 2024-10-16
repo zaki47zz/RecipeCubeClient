@@ -41,7 +41,6 @@ const send = async () => {
             } else {
                 console.error('找不到 certserialnumber');
             }
-
             alert(datas.message);
             console.log("解碼後的 JWT:", decoded);
         }
