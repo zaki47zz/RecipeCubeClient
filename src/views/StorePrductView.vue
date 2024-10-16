@@ -8,10 +8,7 @@
     const BaseUrlWithoutApi = BaseURL.replace('/api', '');  // 去掉 "/api" 得到基本的 URL;
     // 讀取所有商品
     const ApiURL=`${BaseURL}/Products/ProductsNcategory`;
-    const product=ref({
-        productId:0,
-        productName:"",
-    })
+  
     const products=ref([]);
     const loadProducts = async()=>{
         const response = await fetch(ApiURL);
