@@ -179,7 +179,7 @@
                                                 <img :src="`${BaseUrlWithoutApi}/images/ingredient/${product.photo}?t=${Date.now()}`" class="img-fluid w-100 rounded-top click-router" alt="" @click="goToProductDetail(product.productId)" >
                                             </div>
                                             <!-- 商品類別 -->
-                                            <div class="text-white bg-secondary px-3 py-1 rounded position-absolute click-router" @click="goToProductDetail(product.productId)" style="top: 10px; left: 10px;">{{ product.category }}</div>
+                                            <div class="text-white bg-secondary px-3 py-1 rounded position-absolute click-router" @click="goToProductDetail(product.productId)" style="top: 10px; left: 10px; border: 1.3px solid #81c408;">{{ product.category }}</div>
                                             <div class="p-3 pb-1 border border-secondary border-top-0 rounded-bottom">
                                                 <!-- 品名 -->
                                                 <h4 class="click-router" @click="goToProductDetail(product.productId)">{{ product.productName }}</h4>

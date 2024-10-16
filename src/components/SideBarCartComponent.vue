@@ -133,6 +133,17 @@ const totalPrice = computed(()=>{
         document.body.classList.remove('modal-open'); // 如果有modal-open類別，則移除
         router.push({name:'chickout'});
     }
+//=========================================================================================================================
+
+    const closeCartSidebar = () => {
+    // 隱藏側邊欄
+    let offcanvas = new Offcanvas(offcanvasCartRef.value);
+    offcanvas.hide();
+
+    // 恢復滾動
+    document.body.style.overflow = 'auto'; // 恢復滾動
+    document.body.classList.remove('modal-open'); // 移除 modal-open 類別
+};
 </script>
 
 <template>
@@ -142,7 +153,7 @@ const totalPrice = computed(()=>{
     <!-- 放購物車 Sidebar，從左側滑入 -->
     <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasCart" aria-labelledby="My Cart" ref="offcanvasCartRef">
       <div class="offcanvas-header justify-content-center">
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close" @click="closeCartSidebar"></button>
       </div>
       <div class="offcanvas-body">
         <div class="order-md-last" >
