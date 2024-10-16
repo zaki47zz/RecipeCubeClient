@@ -324,8 +324,6 @@ const alertClearCheck = () => {
     width: 100vw;
     margin-left: calc(50% - 50vw);
     overflow: hidden;
-    background: url('@/assets/img/ForBackground/background-pattern.jpg') no-repeat center / cover;
-    position: relative;
 }
 
 .banner-ad {

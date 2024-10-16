@@ -77,7 +77,7 @@ onMounted(() => {
                         </div>
                         <div class="text-md-start">
                             <h5>選擇食材</h5>
-                            <p>請在下方食材列表選擇食材</p>
+                            <p>填入您今天購買的食材</p>
                         </div>
                     </div>
                 </div>
@@ -189,7 +189,84 @@ onMounted(() => {
         </div>
     </section>
 
-    <section class="pt-3">
+    <section class="banner-section py-3 overflow-hidden p-5 bg-danger-subtle">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="d-flex justify-content-between mt-1">
+                        <h5>您選擇的食材</h5>
+                        <p class="badge bg-secondary"><i class="fa-solid fa-repeat"></i> 數量換算表</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="table-responsive p-1">
+                    <table class="table table-borderless text-center align-middle bg-white rounded-4">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="text-dark">編號</th>
+                                <th scope="col" class="text-dark">食材</th>
+                                <th scope="col" class="text-dark">數量</th>
+                                <th scope="col" class="text-dark">權限</th>
+                                <th scope="col" class="text-dark">期限</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row" class="text-dark">1</th>
+                                <td class="text-dark">菠菜</td>
+                                <td class="text-dark">
+                                    <input type="text" class="form-control inline-control w-30" /> 把
+                                </td>
+                                <td class="text-dark">
+                                    <select class="form-control inline-control text-center">
+                                        <option value="0">群組</option>
+                                        <option value="1">私人</option>
+                                    </select>
+                                </td>
+                                <td class="text-dark">
+                                    <input
+                                        type="date"
+                                        class="form-control inline-control text-center"
+                                        value="2024-10-30"
+                                    />
+                                </td>
+                                <td class="text-dark">
+                                    <i class="fa-solid fa-trash"></i>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="text-dark">1</th>
+                                <td class="text-dark">菠菜</td>
+                                <td class="text-dark">
+                                    <input type="text" class="form-control inline-control w-30" /> 把
+                                </td>
+                                <td class="text-dark">
+                                    <select class="form-control inline-control text-center">
+                                        <option value="0">群組</option>
+                                        <option value="1">私人</option>
+                                    </select>
+                                </td>
+                                <td class="text-dark">
+                                    <input
+                                        type="date"
+                                        class="form-control inline-control text-center"
+                                        value="2024-10-30"
+                                    />
+                                </td>
+                                <td class="text-dark">
+                                    <i class="fa-solid fa-trash"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pt-5">
         <div class="container-fluid">
             <div class="row justify-content-center">
                 <div class="col-lg-3">
@@ -206,6 +283,11 @@ onMounted(() => {
             <div class="row justify-content-center">
                 <div class="col-lg-3">
                     <button class="btn bg-danger-subtle text-dark shadow fs-5 w-100">產生食譜</button>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-3">
+                    <p class="text-center">(別擔心，剩餘食材將被加入庫存)</p>
                 </div>
             </div>
         </div>
@@ -227,8 +309,6 @@ onMounted(() => {
     width: 100vw;
     margin-left: calc(50% - 50vw);
     overflow: hidden;
-    background: url('@/assets/img/ForBackground/background-pattern.jpg') no-repeat center / cover;
-    position: relative;
 }
 
 .banner-ad {
@@ -298,6 +378,12 @@ onMounted(() => {
     letter-spacing: 0.02em;
     color: #222222;
     margin-top: 0px;
+}
+
+.post-it {
+    background: #f4e187;
+    padding: 1% 3% 3%;
+    text-align: center;
 }
 
 .switch-set {
