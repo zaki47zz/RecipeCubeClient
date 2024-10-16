@@ -36,11 +36,11 @@
                     ...product, // 展開原有產品屬性
                     quantity: cartProduct.quantity // 設置 quantity
                 });
-                console.log(reactiveProduct.quantity)
+                // console.log(reactiveProduct.quantity)
                 // console.log(JSON.stringify(reactiveProduct, null, 2));
                 // console.log(`有找到購物車商品：${reactiveProduct.productName} , 商品數量:${reactiveProduct.quantity}`);
                 // 保留
-                console.log(`商品名稱: ${reactiveProduct.productName}, 數量: ${reactiveProduct.quantity}`);
+                // console.log(`商品名稱: ${reactiveProduct.productName}, 數量: ${reactiveProduct.quantity}`);
                 return reactiveProduct; // 返回響應式產品
             }else{
                 // 過濾掉不在購物車的商品
@@ -59,7 +59,7 @@
     const totalPrice = computed(()=>{
         // reduce會迭代 cartProducts 陣列，累加到acc
         return cartProducts.value.reduce((acc, product) => {
-            console.log("product.quantity", product.quantity)
+            // console.log("product.quantity", product.quantity)
 
             return acc + (product.price * product.quantity);
         },0);
@@ -71,8 +71,8 @@
     const decQuantity = (product) => {
     if (product.quantity > 1) {
         product.quantity -= 1;  // 減少數量
-        console.log(`目前商品數量選擇:${product.quantity}`);
-        console.log(`目前商品庫存:${product.stock}`);
+        // console.log(`目前商品數量選擇:${product.quantity}`);
+        // console.log(`目前商品庫存:${product.stock}`);
 
         // 同步更新 localStorage
         updateCart(product);
@@ -129,10 +129,10 @@
         // 如果數量大於 0，更新數量；如果為 0 或無效，從購物車中刪除
         if (product.quantity > 0) {
             cart[cartProductIndex].quantity = product.quantity;  // 更新數量
-            console.log("更新localStorage成功")
+            // console.log("更新localStorage成功")
         } else {
             cart.splice(cartProductIndex, 1);  // 刪除該商品
-            console.log("更新localStorage失敗")
+            // console.log("刪除localStorage成功")
         }
     }
     
