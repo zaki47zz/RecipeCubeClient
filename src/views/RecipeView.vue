@@ -1,7 +1,7 @@
 <script setup>
 import Isotope from 'isotope-layout';
 import Swal from 'sweetalert2';
-import GreenPepper from '@/assets/img/ForComponent/GreenPepper.jpg';
+import WineWithBeef from '@/assets/img/ForComponent/WineWithBeef.jpg';
 import SoftBadge from '@/components/SoftBadge.vue';
 import SoftPagination from '@/components/SoftPagination.vue';
 import SoftPaginationItem from '@/components/SoftPaginationItem.vue';
@@ -74,38 +74,46 @@ const alertClearCheck = () => {
     <section class="py-1">
         <div class="container-fluid">
             <div class="col-sm-10 offset-sm-2 offset-md-0 col-lg-12 d-none d-lg-block">
-                <div class="row g-3 py-1 px-3 my-3 d-flex bg-warning-subtle rounded-4 shadow justify-content-between">
+                <div class="row g-3 py-1 px-3 mt-3 bg-warning-subtle rounded-4 shadow d-flex justify-content-between">
                     <!-- 分類欄 -->
                     <div class="col-md-2">
                         <p class="fw-bold">分類 CATEGORY</p>
                     </div>
-                    <div class="col-md-2 mt-2">
+                    <div class="col-md-2 my-auto">
                         <select class="form-select">
                             <option selected>葷素</option>
                             <option value="XX">XX</option>
                         </select>
                     </div>
-                    <div class="col-md-2 mt-2">
-                        <select class="form-select">
-                            <option selected>中西式</option>
-                            <option value="XX">XX</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 mt-2">
+                    <div class="col-md-2 my-auto">
                         <select class="form-select">
                             <option selected>類別</option>
                             <option value="XX">XX</option>
                         </select>
                     </div>
-                    <div class="col-md-2 mt-2">
+                    <div class="col-md-3 my-auto">
                         <select class="form-select">
                             <option selected>細部類別</option>
-                            <option value="0">公開</option>
-                            <option value="1">私有</option>
+                            <option value="XX">XX</option>
                         </select>
                     </div>
-                    <div class="col-md-2 mt-2">
-                        <input type="text" class="form-control w-100 text-center" placeholder="搜尋" />
+                    <div class="col-md-3 my-auto">
+                        <select class="form-select">
+                            <option selected>自訂食譜</option>
+                            <option value="XX">XX</option>
+                        </select>
+                    </div>
+                    <div class="col-md-9 my-auto">
+                        <input
+                            type="text"
+                            class="form-control w-100 rounded-3"
+                            placeholder="輸入食譜名稱或食材 (一次輸入多種食材請用逗號分隔，例如: 青椒,蘋果)"
+                        />
+                    </div>
+                    <div class="col-md-3 d-flex justify-content-center mb-0 p-0 my-auto">
+                        <button class="btn blur rounded-3 shadow w-85 p-2 mb-2" style="font-size: large">
+                            隨機推薦
+                        </button>
                     </div>
                 </div>
             </div>
@@ -113,7 +121,7 @@ const alertClearCheck = () => {
     </section>
 
     <section>
-        <div class="container-fluid">
+        <div class="container-fluid mt-3">
             <div class="row">
                 <div class="col-md-12">
                     <div class="banner-ad bootstrap-tabs product-tabs p-3">
@@ -135,17 +143,17 @@ const alertClearCheck = () => {
                                     <a
                                         href="#"
                                         class="nav-link fs-5 fw-bold text-dark"
-                                        id="nav-fruits-tab"
+                                        id="nav-group-tab"
                                         data-bs-toggle="tab"
-                                        data-bs-target="#nav-fruits"
+                                        data-bs-target="#nav-group"
                                         >群組食譜</a
                                     >
                                     <a
                                         href="#"
                                         class="nav-link fs-5 fw-bold text-dark"
-                                        id="nav-fruits-tab"
+                                        id="nav-user-tab"
                                         data-bs-toggle="tab"
-                                        data-bs-target="#nav-fruits"
+                                        data-bs-target="#nav-user"
                                         >您的食譜</a
                                     >
                                 </div>
@@ -159,77 +167,217 @@ const alertClearCheck = () => {
                                 role="tabpanel"
                                 aria-labelledby="nav-all-tab"
                             >
-                                <div
-                                    class="product-grid row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5"
-                                >
-                                    <div class="col">
-                                        <div class="card shadow-sm position-relative">
-                                            <SoftBadge
-                                                variant="gradient"
-                                                color="info"
-                                                class="position-absolute m-2 z-index-3"
-                                                >即將過期</SoftBadge
+                                <div class="row g-3 mt-2">
+                                    <div class="col-12 col-md-6">
+                                        <div
+                                            class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
+                                            style="height: 150px"
+                                        >
+                                            <div
+                                                class="d-flex"
+                                                :style="{
+                                                    width: '50%',
+                                                    height: '100%',
+                                                    backgroundImage: `url(${WineWithBeef})`,
+                                                    backgroundSize: 'cover',
+                                                    backgroundPosition: 'center',
+                                                    borderTopLeftRadius: '0.75rem',
+                                                    borderBottomLeftRadius: '0.75rem',
+                                                }"
+                                            ></div>
+
+                                            <!-- 右邊文字和標籤區 -->
+                                            <div
+                                                class="p-3 w-100 d-flex flex-column justify-content-center align-items-center"
                                             >
-                                            <!-- <span class="badge bg-warning text-dark position-absolute m-2">即將過期</span> -->
-                                            <div class="card-body position-relative">
-                                                <div class="d-flex justify-content-center align-items-center">
-                                                    <img :src="GreenPepper" alt="" class="w-75 mt-3" />
-                                                    <span class="amount-badge position-absolute translate-middle"
-                                                        >3個</span
-                                                    >
+                                                <h5 class="mb-3">紅酒燉牛肉</h5>
+                                                <div class="d-flex gap-2">
+                                                    <span class="badge bg-secondary">葷</span>
+                                                    <span class="badge bg-secondary">西式</span>
+                                                    <span class="badge bg-secondary">主餐</span>
                                                 </div>
-                                                <h5 class="card-title mt-5 w-100 text-center">青椒</h5>
-                                                <p class="card-text w-100 text-center">蔬菜類</p>
-                                                <p
-                                                    class="card-text position-absolute translate-middle-x"
-                                                    style="bottom: 2%; left: 50%"
-                                                >
-                                                    2024-10-03
-                                                </p>
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- Additional product items go here -->
+
+                                    <div class="col-12 col-md-6">
+                                        <div
+                                            class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
+                                            style="height: 150px"
+                                        >
+                                            <div
+                                                class="d-flex"
+                                                :style="{
+                                                    width: '50%',
+                                                    height: '100%',
+                                                    backgroundImage: `url(${WineWithBeef})`,
+                                                    backgroundSize: 'cover',
+                                                    backgroundPosition: 'center',
+                                                    borderTopLeftRadius: '0.75rem',
+                                                    borderBottomLeftRadius: '0.75rem',
+                                                }"
+                                            ></div>
+
+                                            <!-- 右邊文字和標籤區 -->
+                                            <div
+                                                class="p-3 w-100 d-flex flex-column justify-content-center align-items-center"
+                                            >
+                                                <h5 class="mb-3">紅酒燉牛肉</h5>
+                                                <div class="d-flex gap-2">
+                                                    <span class="badge bg-secondary">葷</span>
+                                                    <span class="badge bg-secondary">西式</span>
+                                                    <span class="badge bg-secondary">主餐</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Fruits and Veges Tab -->
-                            <div class="tab-pane fade" id="nav-fruits" role="tabpanel" aria-labelledby="nav-fruits-tab">
-                                <div
-                                    class="product-grid row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5"
-                                >
-                                    <div class="col">
-                                        <div class="card shadow-sm position-relative mt-1">
-                                            <SoftBadge
-                                                variant="gradient"
-                                                color="info"
-                                                class="position-absolute m-2 z-index-3"
-                                                >即將過期</SoftBadge
+                            <!-- 群組 Tab -->
+                            <div
+                                class="tab-pane fade show"
+                                id="nav-group"
+                                role="tabpanel"
+                                aria-labelledby="nav-group-tab"
+                            >
+                                <div class="row g-3 mt-2">
+                                    <div class="col-12 col-md-6">
+                                        <div
+                                            class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
+                                            style="height: 150px"
+                                        >
+                                            <div
+                                                class="d-flex"
+                                                :style="{
+                                                    width: '50%',
+                                                    height: '100%',
+                                                    backgroundImage: `url(${WineWithBeef})`,
+                                                    backgroundSize: 'cover',
+                                                    backgroundPosition: 'center',
+                                                    borderTopLeftRadius: '0.75rem',
+                                                    borderBottomLeftRadius: '0.75rem',
+                                                }"
+                                            ></div>
+
+                                            <!-- 右邊文字和標籤區 -->
+                                            <div
+                                                class="p-3 w-100 d-flex flex-column justify-content-center align-items-center"
                                             >
-                                            <span class="position-absolute top-3 end-8 z-index-3">
-                                                <i class="fa-solid fa-pencil"></i>&ensp;<i
-                                                    class="fa-solid fa-trash"
-                                                ></i>
-                                            </span>
-                                            <div class="card-body position-relative">
-                                                <div class="d-flex justify-content-center align-items-center">
-                                                    <img :src="GreenPepper" alt="" class="w-75 mt-3" />
-                                                    <span class="amount-badge position-absolute translate-middle"
-                                                        >3個</span
-                                                    >
+                                                <h5 class="mb-3">紅酒燉牛肉</h5>
+                                                <div class="d-flex gap-2">
+                                                    <span class="badge bg-secondary">葷</span>
+                                                    <span class="badge bg-secondary">西式</span>
+                                                    <span class="badge bg-secondary">主餐</span>
                                                 </div>
-                                                <h5 class="card-title mt-5 w-100 text-center">青椒</h5>
-                                                <p class="card-text w-100 text-center">蔬菜類</p>
-                                                <p
-                                                    class="card-text position-absolute translate-middle-x"
-                                                    style="bottom: 2%; left: 50%"
-                                                >
-                                                    2024-10-03
-                                                </p>
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- Additional product items go here -->
+
+                                    <div class="col-12 col-md-6">
+                                        <div
+                                            class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
+                                            style="height: 150px"
+                                        >
+                                            <div
+                                                class="d-flex"
+                                                :style="{
+                                                    width: '50%',
+                                                    height: '100%',
+                                                    backgroundImage: `url(${WineWithBeef})`,
+                                                    backgroundSize: 'cover',
+                                                    backgroundPosition: 'center',
+                                                    borderTopLeftRadius: '0.75rem',
+                                                    borderBottomLeftRadius: '0.75rem',
+                                                }"
+                                            ></div>
+
+                                            <!-- 右邊文字和標籤區 -->
+                                            <div
+                                                class="p-3 w-100 d-flex flex-column justify-content-center align-items-center"
+                                            >
+                                                <h5 class="mb-3">紅酒燉牛肉</h5>
+                                                <div class="d-flex gap-2">
+                                                    <span class="badge bg-secondary">葷</span>
+                                                    <span class="badge bg-secondary">西式</span>
+                                                    <span class="badge bg-secondary">主餐</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 自己 tab -->
+                            <div
+                                class="tab-pane fade show"
+                                id="nav-user"
+                                role="tabpanel"
+                                aria-labelledby="nav-user-tab"
+                            >
+                                <div class="row g-3 mt-2">
+                                    <div class="col-12 col-md-6">
+                                        <div
+                                            class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
+                                            style="height: 150px"
+                                        >
+                                            <div
+                                                class="d-flex"
+                                                :style="{
+                                                    width: '50%',
+                                                    height: '100%',
+                                                    backgroundImage: `url(${WineWithBeef})`,
+                                                    backgroundSize: 'cover',
+                                                    backgroundPosition: 'center',
+                                                    borderTopLeftRadius: '0.75rem',
+                                                    borderBottomLeftRadius: '0.75rem',
+                                                }"
+                                            ></div>
+
+                                            <!-- 右邊文字和標籤區 -->
+                                            <div
+                                                class="p-3 w-100 d-flex flex-column justify-content-center align-items-center"
+                                            >
+                                                <h5 class="mb-3">紅酒燉牛肉</h5>
+                                                <div class="d-flex gap-2">
+                                                    <span class="badge bg-secondary">葷</span>
+                                                    <span class="badge bg-secondary">西式</span>
+                                                    <span class="badge bg-secondary">主餐</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6">
+                                        <div
+                                            class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
+                                            style="height: 150px"
+                                        >
+                                            <div
+                                                class="d-flex"
+                                                :style="{
+                                                    width: '50%',
+                                                    height: '100%',
+                                                    backgroundImage: `url(${WineWithBeef})`,
+                                                    backgroundSize: 'cover',
+                                                    backgroundPosition: 'center',
+                                                    borderTopLeftRadius: '0.75rem',
+                                                    borderBottomLeftRadius: '0.75rem',
+                                                }"
+                                            ></div>
+
+                                            <!-- 右邊文字和標籤區 -->
+                                            <div
+                                                class="p-3 w-100 d-flex flex-column justify-content-center align-items-center"
+                                            >
+                                                <h5 class="mb-3">紅酒燉牛肉</h5>
+                                                <div class="d-flex gap-2">
+                                                    <span class="badge bg-secondary">葷</span>
+                                                    <span class="badge bg-secondary">西式</span>
+                                                    <span class="badge bg-secondary">主餐</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
