@@ -19,7 +19,7 @@ const fetchInventories = async () => {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        inventories.value = data; // 將獲取到的數據存入 recipes 變量
+        inventories.value = data;
         totalInventories.value = inventories.value.length;
     } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
@@ -52,13 +52,35 @@ const alertClearCheck = () => {
 
 onMounted(() => {
     fetchInventories();
+    document.addEventListener('click', (event) => {
+        console.log('Clicked element:', event.target);
+        debugCounter.value++;
+    });
 });
 
 //卡片點擊
 const activateCard = (event) => {
-    event.currentTarget.classList.toggle('active');
+    event.currentTarget.closest('.card').classList.toggle('active');
     console.log('activate');
 };
+//取消active(避免選到重複的Id)
+const deactivateCard = () => {
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card) => {
+        card.classList.remove('active');
+    });
+};
+
+const editCard = () => {
+    console.log('修改邏輯');
+};
+
+const deleteCard = () => {
+    console.log('刪除邏輯');
+};
+
+// 用於調試的響應式變數
+const debugCounter = ref(0);
 </script>
 
 <template>
@@ -155,6 +177,7 @@ const activateCard = (event) => {
                                         id="nav-all-tab"
                                         data-bs-toggle="tab"
                                         data-bs-target="#nav-all"
+                                        @click="deactivateCard"
                                         >所有食材</a
                                     >
                                     <a
@@ -162,6 +185,7 @@ const activateCard = (event) => {
                                         id="nav-expire-tab"
                                         data-bs-toggle="tab"
                                         data-bs-target="#nav-expire"
+                                        @click="deactivateCard"
                                         >即期或過期食材</a
                                     >
                                 </div>
@@ -177,7 +201,7 @@ const activateCard = (event) => {
                             >
                                 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
                                     <div class="col" v-for="inventory in inventories" :key="inventory.id">
-                                        <div class="card h-100 p-0 shadow-sm position-relative" @click="activateCard">
+                                        <div class="card h-100 p-0 shadow-sm position-relative">
                                             <SoftBadge
                                                 v-if="inventory.isExpiring"
                                                 variant="gradient"
@@ -186,11 +210,23 @@ const activateCard = (event) => {
                                             >
                                                 即將過期
                                             </SoftBadge>
+                                            <SoftBadge
+                                                v-if="inventory.isExpired"
+                                                variant="gradient"
+                                                color="warning"
+                                                class="position-absolute top-2 start-2"
+                                            >
+                                                已過期
+                                            </SoftBadge>
                                             <span class="position-absolute top-0 end-0 p-2 z-index-3">
-                                                <i class="fa-solid fa-pencil me-2"></i>
-                                                <i class="fa-solid fa-trash"></i>
+                                                <button class="card-control" @click="editCard">
+                                                    <i class="fa-solid fa-pencil"></i>
+                                                </button>
+                                                <button class="card-control" @click="deleteCard">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
                                             </span>
-                                            <div class="card-body d-flex flex-column">
+                                            <div class="card-body d-flex flex-column" @click="activateCard">
                                                 <div class="image-container mb-3">
                                                     <img
                                                         :src="getRecipeImageUrl(inventory.photo)"
@@ -217,7 +253,13 @@ const activateCard = (event) => {
                                 aria-labelledby="nav-expire-tab"
                             >
                                 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
-                                    <div class="col" v-for="inventory in inventories" :key="inventory.id">
+                                    <div
+                                        class="col"
+                                        v-for="inventory in inventories.filter(
+                                            (i) => i.isExpiring == true || i.isExpired == true
+                                        )"
+                                        :key="inventory.id"
+                                    >
                                         <div class="card h-100 shadow-sm position-relative">
                                             <SoftBadge
                                                 v-if="inventory.isExpiring"
@@ -227,11 +269,23 @@ const activateCard = (event) => {
                                             >
                                                 即將過期
                                             </SoftBadge>
+                                            <SoftBadge
+                                                v-if="inventory.isExpired"
+                                                variant="gradient"
+                                                color="warning"
+                                                class="position-absolute top-2 start-2"
+                                            >
+                                                已過期
+                                            </SoftBadge>
                                             <span class="position-absolute top-0 end-0 p-2 z-index-3">
-                                                <i class="fa-solid fa-pencil me-2"></i>
-                                                <i class="fa-solid fa-trash"></i>
+                                                <button class="card-control" @click="editCard">
+                                                    <i class="fa-solid fa-pencil"></i>
+                                                </button>
+                                                <button class="card-control" @click="deleteCard">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
                                             </span>
-                                            <div class="card-body d-flex flex-column">
+                                            <div class="card-body d-flex flex-column" @click="activateCard">
                                                 <div class="image-container mb-3">
                                                     <img
                                                         :src="getRecipeImageUrl(inventory.photo)"
@@ -402,6 +456,17 @@ const activateCard = (event) => {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+}
+
+.card-control {
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 0 3px 0 3px;
+}
+
+.card-control:hover {
+    transform: scale(1.1);
 }
 
 .image-container {
