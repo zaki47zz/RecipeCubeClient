@@ -44,7 +44,12 @@ const fetchRecipes = async () => {
         console.error('There was a problem with the fetch operation:', error);
     }
 };
-
+const dialogVisible = computed({
+    get: () => recipeStore.dialogVisible,
+    set: (value) => {
+        recipeStore.dialogVisible = value;
+    },
+});
 // 在組件加載後獲取數據
 onMounted(() => {
     fetchRecipes();
@@ -57,7 +62,8 @@ const paginatedRecipes = computed(() => {
     const end = start + pageSize.value;
     return recipes.value.slice(start, end);
 });
-
+// 使用計算屬性來取得分頁的食譜
+// const paginatedRecipes = computed(() => recipeStore.paginatedRecipes);
 const changePage = (page) => {
     if (page >= 1 && page <= totalPages.value) {
         currentPage.value = page;
@@ -452,6 +458,7 @@ const getRecipeImageUrl = (fileName) => {
                                             style="max-width: 80px; height: 45px; border-radius: 8px; padding: 0 20px;">前往</button>
                                     </div>
                                 </div>
+                                <!-- 分頁導航結束 -->
                             </div>
                         </div>
                     </div>
@@ -461,8 +468,15 @@ const getRecipeImageUrl = (fileName) => {
     </section>
 
     <!-- Recipe Detail Component -->
-    <RecipeDetailComponent v-if="recipeStore.selectedRecipe" :recipe="recipeStore.selectedRecipe">
-    </RecipeDetailComponent>
+    <!-- <RecipeDetailComponent v-if="recipeStore.selectedRecipe" :recipe="recipeStore.selectedRecipe">
+    </RecipeDetailComponent> -->
+    <el-dialog v-model="recipeStore.dialogVisible" title="食譜詳細資訊" width="50%" @close="recipeStore.closeDialog">
+        <RecipeDetailComponent :recipe="recipeStore.selectedRecipe" v-if="recipeStore.selectedRecipe">
+        </RecipeDetailComponent>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="recipeStore.closeDialog">關閉</el-button>
+        </span>
+    </el-dialog>
 </template>
 
 <style lang="css" scoped>

@@ -1,22 +1,3 @@
-<script setup>
-import { computed } from 'vue';
-
-// 接收 props 傳入的食譜數據
-const props = defineProps({
-    recipe: {
-        type: Object,
-        required: true,
-    }
-});
-
-// 計算圖片的完整 URL（類似於主組件的 `getRecipeImageUrl`）
-const getRecipeImageUrl = (fileName) => {
-    const BaseURL = import.meta.env.VITE_API_BASEURL;
-    const BaseUrlWithoutApi = BaseURL.replace('/api', '');
-    return `${BaseUrlWithoutApi}/images/recipe/${fileName || 'default_image.jpg'}`;
-};
-</script>
-
 <template>
     <div v-if="recipe" class="recipe-detail-container">
         <h2 class="recipe-title">{{ recipe.recipeName }}</h2>
@@ -29,10 +10,24 @@ const getRecipeImageUrl = (fileName) => {
             <p><strong>描述:</strong> {{ recipe.steps }}</p>
         </div>
     </div>
-    <div v-else>
-        <p>尚未選擇食譜</p>
-    </div>
 </template>
+
+<script setup>
+import { computed } from 'vue';
+
+const props = defineProps({
+    recipe: {
+        type: Object,
+        required: true,
+    },
+});
+
+const getRecipeImageUrl = (fileName) => {
+    const BaseURL = import.meta.env.VITE_API_BASEURL;
+    const BaseUrlWithoutApi = BaseURL.replace('/api', '');
+    return `${BaseUrlWithoutApi}/images/recipe/${fileName || 'default_image.jpg'}`;
+};
+</script>
 
 <style scoped>
 .recipe-detail-container {
