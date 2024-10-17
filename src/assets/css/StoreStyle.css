@@ -282,7 +282,10 @@
     background-repeat: no-repeat;
     background-size: cover;
     display: flex; /* 使用 flexbox */
-     justify-content: center; /* 水平居中 */
+    justify-content: center; /* 水平居中 */
+    width: 100vw ;
+    left: 50%; /* 從中間開始 */
+    margin-left: -50vw; /* 向左移動，確保全寬 */
 }
 
 @media (min-width: 992px) {

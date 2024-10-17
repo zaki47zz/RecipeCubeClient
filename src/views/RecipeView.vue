@@ -4,6 +4,7 @@ import { useRecipeStore } from '@/stores/recipeStore';
 import Isotope from 'isotope-layout';
 import Swal from 'sweetalert2';
 import WineWithBeef from '@/assets/img/ForComponent/WineWithBeef.jpg';
+import BannerRecipe from '@/assets/img/ForBackground/banner-recipe.jpg';
 import SoftBadge from '@/components/SoftBadge.vue';
 import SoftPagination from '@/components/SoftPagination.vue';
 import SoftPaginationItem from '@/components/SoftPaginationItem.vue';
@@ -119,25 +120,21 @@ const getRecipeImageUrl = (fileName) => {
 
     <section class="pt-5">
         <div class="container-fluid">
-            <div class="row justify-content-center">
-                <div class="text-center">
-                    <h4>在下方食材列表，您可以看到您所屬群組的庫存食材，您可以進行兩種操作</h4>
-                </div>
-            </div>
-            <div class="row justify-content-center my-5">
-                <div class="col-lg-3">
-                    <div class="d-flex gap-4 align-items-center">
-                        <div class="driver text-center px-3 m-1 rounded-3">
-                            <h5><i class="fa-solid fa-box-open mt-3"></i> 管理食材</h5>
-                            <p>對個別食材進行數量的修改或刪除</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3">
-                    <div class="d-flex gap-4 align-items-center">
-                        <div class="driver text-center px-3 m-1 rounded-3">
-                            <h5><i class="fa-solid fa-utensils mt-3"></i> 產生食譜</h5>
-                            <p>選取食材讓我們為您自動生成食譜</p>
+            <div
+                class="pt-5 rounded-4"
+                :style="{
+                    width: '100%',
+                    height: '100%',
+                    backgroundImage: `url(${BannerRecipe})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                }"
+            >
+                <div class="row p-3">
+                    <div class="col-md-6 d-flex flex-column align-items-center">
+                        <h2 class="mt-3 text-white">左思右想還是不知道煮什麼嗎?</h2>
+                        <div class="d-flex gap-2 flex-wrap mb-5">
+                            <button class="btn btn-lg bg-gradient-warning fs-6">推薦我食譜!</button>
                         </div>
                     </div>
                 </div>
@@ -145,7 +142,18 @@ const getRecipeImageUrl = (fileName) => {
         </div>
     </section>
 
-    <section class="py-1">
+    <section>
+        <div class="container-fluid mt-5">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h3 style="color: lightslategray; display: block">- 或是 -</h3>
+                    <h4 class="mt-3" style="color: lightslategray; display: block">利用檢索功能查找您想要的食譜</h4>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pt-3 p-2">
         <div class="container-fluid">
             <div class="col-sm-10 offset-sm-2 offset-md-0 col-lg-12 d-none d-lg-block">
                 <div class="row g-3 py-1 px-3 mt-3 bg-warning-subtle rounded-4 shadow d-flex justify-content-between">
@@ -161,6 +169,12 @@ const getRecipeImageUrl = (fileName) => {
                     </div>
                     <div class="col-md-2 my-auto">
                         <select class="form-select">
+                            <option selected>中西式</option>
+                            <option value="XX">XX</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 my-auto">
+                        <select class="form-select">
                             <option selected>類別</option>
                             <option value="XX">XX</option>
                         </select>
@@ -171,20 +185,9 @@ const getRecipeImageUrl = (fileName) => {
                             <option value="XX">XX</option>
                         </select>
                     </div>
-                    <div class="col-md-3 my-auto">
-                        <select class="form-select">
-                            <option selected>自訂食譜</option>
-                            <option value="XX">XX</option>
-                        </select>
-                    </div>
-                    <div class="col-md-9 my-auto">
+                    <div class="col-md-12 mt-0 mb-2">
                         <input type="text" class="form-control w-100 rounded-3"
                             placeholder="輸入食譜名稱或食材 (一次輸入多種食材請用逗號分隔，例如: 青椒,蘋果)" />
-                    </div>
-                    <div class="col-md-3 d-flex justify-content-center mb-0 p-0 my-auto">
-                        <button class="btn blur rounded-3 shadow w-85 p-2 mb-2" style="font-size: large">
-                            隨機推薦
-                        </button>
                     </div>
                 </div>
             </div>
@@ -492,8 +495,6 @@ const getRecipeImageUrl = (fileName) => {
     width: 100vw;
     margin-left: calc(50% - 50vw);
     overflow: hidden;
-    background: url('@/assets/img/ForBackground/background-pattern.jpg') no-repeat center / cover;
-    position: relative;
 }
 
 .banner-ad {
