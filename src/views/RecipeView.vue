@@ -99,7 +99,16 @@ const pagesAroundCurrent = computed(() => {
 const getRecipeImageUrl = (fileName) => {
     return `${BaseUrlWithoutApi}/images/recipe/${fileName}`;
 };
+const resetActiveStep = ref(false);
 
+// 當打開對話框時，重置子組件中的 activeStep
+const onDialogOpened = () => {
+    resetActiveStep.value = true;
+    // 確保這個重置只發生一次
+    setTimeout(() => {
+        resetActiveStep.value = false;
+    }, 0);
+};
 </script>
 
 <template>
@@ -120,16 +129,13 @@ const getRecipeImageUrl = (fileName) => {
 
     <section class="pt-5">
         <div class="container-fluid">
-            <div
-                class="pt-5 rounded-4"
-                :style="{
-                    width: '100%',
-                    height: '100%',
-                    backgroundImage: `url(${BannerRecipe})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                }"
-            >
+            <div class="pt-5 rounded-4" :style="{
+                width: '100%',
+                height: '100%',
+                backgroundImage: `url(${BannerRecipe})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+            }">
                 <div class="row p-3">
                     <div class="col-md-6 d-flex flex-column align-items-center">
                         <h2 class="mt-3 text-white">左思右想還是不知道煮什麼嗎?</h2>
@@ -473,11 +479,13 @@ const getRecipeImageUrl = (fileName) => {
     <!-- Recipe Detail Component -->
     <!-- <RecipeDetailComponent v-if="recipeStore.selectedRecipe" :recipe="recipeStore.selectedRecipe">
     </RecipeDetailComponent> -->
-    <el-dialog v-model="recipeStore.dialogVisible" title="食譜詳細資訊" width="50%" @close="recipeStore.closeDialog">
-        <RecipeDetailComponent :recipe="recipeStore.selectedRecipe" v-if="recipeStore.selectedRecipe">
+    <el-dialog v-model="recipeStore.dialogVisible" title="食譜詳細資訊" width="65%" @close="recipeStore.closeDialog" center
+        @opened="onDialogOpened">
+        <RecipeDetailComponent :recipe="recipeStore.selectedRecipe" :reset-active-step="resetActiveStep"
+            v-if="recipeStore.selectedRecipe">
         </RecipeDetailComponent>
-        <span slot="footer" class="dialog-footer">
-            <el-button @click="recipeStore.closeDialog">關閉</el-button>
+        <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
+            <el-button @click="recipeStore.closeDialog" type="danger">關閉</el-button>
         </span>
     </el-dialog>
 </template>
