@@ -331,7 +331,11 @@ const activateCard = (event) => {
         <div class="container-fluid">
             <div class="row justify-content-center">
                 <div class="col-lg-3">
-                    <button class="btn bg-primary-subtle text-dark shadow fs-5 w-100">產生食譜</button>
+                    <RouterLink
+                        class="btn bg-primary-subtle text-dark shadow fs-5 w-100"
+                        :to="{ name: 'GenerateRecipe' }"
+                        >產生食譜</RouterLink
+                    >
                 </div>
                 <div class="col-lg-3">
                     <button
