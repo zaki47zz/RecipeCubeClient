@@ -1,7 +1,7 @@
 <script setup>
     import '@/assets/js/store.js'
     import Swal from 'sweetalert2'
-    import {ref,computed,reactive} from 'vue';
+    import {ref,computed,reactive,onMounted,onBeforeUnmount} from 'vue';
     import { useRouter } from 'vue-router';
     import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
     const BaseURL = import.meta.env.VITE_API_BASEURL;
@@ -175,6 +175,19 @@
     const goToCheckout = () =>{
         router.push({name:'chickout'});
     }
+
+    // ======================================================================================================================
+    // 組件掛載時監聽 localStorage 的變化
+    onMounted(() => {
+    loadProducts(); // 初始加載購物車商品
+    window.addEventListener('storage', loadProducts);
+    });
+
+    // 組件卸載時移除監聽器
+    onBeforeUnmount(() => {
+    window.removeEventListener('storage', loadProducts);
+    });
+
 </script>
 
 <template>

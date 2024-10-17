@@ -57,6 +57,7 @@ const loadProductCartLocalStorage=()=>{
             return null;
         }
     }).filter(Boolean); //過濾掉null值
+
 }
 // 載入loadProducts
 loadProducts();
@@ -120,6 +121,9 @@ const totalPrice = computed(()=>{
             });
 
             loadProductCartLocalStorage();  //重新載入localStorage
+
+             // 手動觸發 storage 事件通知 CartView 更新購物車
+              window.dispatchEvent(new Event('storage')); // 這行手動觸發
             }
         });
     };
@@ -144,6 +148,20 @@ const totalPrice = computed(()=>{
     document.body.style.overflow = 'auto'; // 恢復滾動
     document.body.classList.remove('modal-open'); // 移除 modal-open 類別
 };
+
+//=========================================================================================================================
+    // 取得localStorage_productCart的長度
+    const getCartlenghtFromLocalStorage = () => {
+      const cart = JSON.parse(localStorage.getItem('productCart')) || [];
+      return cart.length;
+    };
+
+//======================================================================================================================== 
+    // 監聽SideBarCartComponent
+    window.windowCartComponent = () => {
+      const cartData = localStorage.getItem('productCart');
+      return cartData ? JSON.parse(cartData) : [];
+    };
 </script>
 
 <template>
@@ -156,12 +174,23 @@ const totalPrice = computed(()=>{
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close" @click="closeCartSidebar"></button>
       </div>
       <div class="offcanvas-body">
-        <div class="order-md-last" >
+        <!-- localStorage_productCart.length 為 0 顯示 -->
+        <div v-show="getCartlenghtFromLocalStorage() === 0">
           <h4 class="d-flex justify-content-between align-items-center mb-3">
             <span class="text-primary" >我的購物車</span>
-            <span class="badge custom-badge rounded-pill">3</span>
+            <span class="badge custom-badge rounded-pill">{{ getCartlenghtFromLocalStorage() }}</span>
           </h4>
-          <ul class="list-group mb-3" v-for="product in cartProducts" :key="product.productId">
+          <p>
+            快買些東西吧，購物車是空的！
+          </p>
+        </div>
+        <!-- localStorage_productCart.length 為 0 隱藏 -->
+        <div class="order-md-last" v-show="getCartlenghtFromLocalStorage() > 0">
+          <h4 class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-primary" >我的購物車</span>
+            <span class="badge custom-badge rounded-pill">{{ getCartlenghtFromLocalStorage() }}</span>
+          </h4>
+          <ul class="list-group mb-3" v-for="product in cartProducts" :key="product.productId" >
             <li class="list-group-item d-flex justify-content-between lh-sm">
               <div>
                 <h6 class="my-0 custom-title mb-3"  style="font-weight: bold;">{{product.productName}}</h6>
@@ -172,7 +201,6 @@ const totalPrice = computed(()=>{
                   <i class="fa fa-times text-danger"></i>
                 </button>
               </div>
-              
             </li>
           </ul>
           
@@ -181,8 +209,8 @@ const totalPrice = computed(()=>{
               <strong class=" me-3 custom-totalPrice">$ {{ totalPrice }}</strong>
             </div>
           
-          <button class="w-100 custom-btn btn-lg" @click="goToCheckout">前往結帳</button>
         </div>
+          <button class="w-100 custom-btn btn-lg" @click="goToCheckout" :disabled="getCartlenghtFromLocalStorage() === 0">前往結帳</button>
       </div>
     </div>
 
@@ -239,5 +267,14 @@ const totalPrice = computed(()=>{
 
 .custom-totalPrice{
   font-size: 1.2rem; /* 調整字體大小 */
+}
+
+.offcanvas-start{
+  background-image: url('@/assets/img/ForBackground/background-pattern.jpg'); /* 圖片路徑 */
+  background-size: cover; /* 使圖片覆蓋整個側邊欄 */
+  background-position: center; /* 圖片居中 */
+  background-repeat: no-repeat; /* 不重複圖片 */
+  width: 250px; /* 側邊欄寬度，根據需求調整 */
+  height: 100vh; /* 側邊欄高度設置為整個視窗高度 */  
 }
 </style>
