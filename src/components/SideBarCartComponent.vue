@@ -32,6 +32,26 @@ const loadProducts = async()=>{
 // 從localStorage獲取購物車內容
 const cartProducts = ref([]);
 const loadProductCartLocalStorage=()=>{
+
+        // 購物車清空邏輯=========================================================================
+        
+        const currentUserId = localStorage.getItem('UserId');
+        // console.log(`目前登入的userId : ${currentUserId}`);
+        const storeUserId = localStorage.getItem('storeUserId');
+        // console.log(`目前的storeUserId : ${storeUserId}`);
+
+        // 檢查用戶ID是否一致
+        if (storeUserId !== currentUserId){
+            //如果 目前登入的userId 不等於 localStorage 裡的userId 清空 localStorage
+            localStorage.setItem('productCart',JSON.stringify([]));
+            localStorage.setItem('storeUserId',currentUserId);
+            // console.log(`已經完成更改 localStorage_storeUserId : ${currentUserId} 且清除購物車`)
+        }
+        else{
+            // console.log("跟上一個使用者是相同id不清除購物車")
+        }   
+
+
     let cart = JSON.parse(localStorage.getItem('productCart')) || [];
     
     // 過濾所有商品，找到購物車中存在的商品
