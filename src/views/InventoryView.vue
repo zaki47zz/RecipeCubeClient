@@ -1,7 +1,6 @@
 <script setup>
 import Isotope from 'isotope-layout';
 import Swal from 'sweetalert2';
-import GreenPepper from '@/assets/img/ForComponent/GreenPepper.jpg';
 import SoftBadge from '@/components/SoftBadge.vue';
 import SoftPagination from '@/components/SoftPagination.vue';
 import SoftPaginationItem from '@/components/SoftPaginationItem.vue';
@@ -31,19 +30,6 @@ const getRecipeImageUrl = (fileName) => {
     return `${BaseUrlWithoutApi}/images/ingredient/${fileName}`;
 };
 
-const initIsotope = () => {
-    const iso = new Isotope(document.querySelector('.product-grid'), {
-        itemSelector: '.product-grid-item',
-        layoutMode: 'fitRows',
-        getSortData: {
-            name: '.product-name',
-            category: '.product-category',
-        },
-        transitionDuration: 0.8,
-    });
-    console.log('已初始化isotope');
-};
-
 const alertClearCheck = () => {
     Swal.fire({
         title: '您確定嗎?',
@@ -65,9 +51,14 @@ const alertClearCheck = () => {
 };
 
 onMounted(() => {
-    initIsotope();
     fetchInventories();
 });
+
+//卡片點擊
+const activateCard = (event) => {
+    event.currentTarget.classList.toggle('active');
+    console.log('activate');
+};
 </script>
 
 <template>
@@ -160,7 +151,6 @@ onMounted(() => {
                             <nav>
                                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
                                     <a
-                                        href="#"
                                         class="nav-link fs-5 fw-bold text-dark active"
                                         id="nav-all-tab"
                                         data-bs-toggle="tab"
@@ -168,11 +158,10 @@ onMounted(() => {
                                         >所有食材</a
                                     >
                                     <a
-                                        href="#"
                                         class="nav-link fs-5 fw-bold text-dark"
-                                        id="nav-fruits-tab"
+                                        id="nav-expire-tab"
                                         data-bs-toggle="tab"
-                                        data-bs-target="#nav-fruits"
+                                        data-bs-target="#nav-expire"
                                         >即期或過期食材</a
                                     >
                                 </div>
@@ -186,74 +175,76 @@ onMounted(() => {
                                 role="tabpanel"
                                 aria-labelledby="nav-all-tab"
                             >
-                                <div
-                                    class="product-grid row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5"
-                                >
-                                    <div class="product-grid-item col">
-                                        <div class="card shadow-sm position-relative">
+                                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
+                                    <div class="col" v-for="inventory in inventories" :key="inventory.id">
+                                        <div class="card h-100 p-0 shadow-sm position-relative" @click="activateCard">
                                             <SoftBadge
-                                                v-if="true"
+                                                v-if="inventory.isExpiring"
                                                 variant="gradient"
                                                 color="info"
-                                                class="position-absolute m-2 z-index-3"
-                                                >即將過期</SoftBadge
+                                                class="position-absolute top-2 start-2"
                                             >
-                                            <!-- <span class="badge bg-warning text-dark position-absolute m-2">即將過期</span> -->
-                                            <div class="card-body position-relative">
-                                                <div class="d-flex justify-content-center align-items-center">
-                                                    <img :src="GreenPepper" alt="" class="w-75 mt-3" />
-                                                    <span class="amount-badge position-absolute translate-middle"
-                                                        >3個</span
+                                                即將過期
+                                            </SoftBadge>
+                                            <span class="position-absolute top-0 end-0 p-2 z-index-3">
+                                                <i class="fa-solid fa-pencil me-2"></i>
+                                                <i class="fa-solid fa-trash"></i>
+                                            </span>
+                                            <div class="card-body d-flex flex-column">
+                                                <div class="image-container mb-3">
+                                                    <img
+                                                        :src="getRecipeImageUrl(inventory.photo)"
+                                                        :alt="inventory.ingredientName"
+                                                        class="product-image"
+                                                    />
+                                                    <span class="amount-badge"
+                                                        >{{ inventory.quantity }}{{ inventory.unit }}</span
                                                     >
                                                 </div>
-                                                <h5 class="card-title mt-5 w-100 text-center product-name">青椒</h5>
-                                                <p class="card-text w-100 text-center product-category">蔬菜類</p>
-                                                <p
-                                                    class="card-text position-absolute translate-middle-x"
-                                                    style="bottom: 2%; left: 50%"
-                                                >
-                                                    2024-10-03
-                                                </p>
+                                                <h5 class="card-title text-center">{{ inventory.ingredientName }}</h5>
+                                                <p class="card-text text-center">{{ inventory.category }}</p>
+                                                <p class="card-text text-center mt-auto">{{ inventory.expiryDate }}</p>
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- Additional product items go here -->
                                 </div>
                             </div>
 
-                            <!-- Fruits and Veges Tab -->
-                            <div class="tab-pane fade" id="nav-fruits" role="tabpanel" aria-labelledby="nav-fruits-tab">
-                                <div
-                                    class="product-grid-item row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5"
-                                >
-                                    <div class="product-grid-item col">
-                                        <div class="card shadow-sm position-relative mt-1">
+                            <div
+                                class="tab-pane fade show"
+                                id="nav-expire"
+                                role="tabpanel"
+                                aria-labelledby="nav-expire-tab"
+                            >
+                                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
+                                    <div class="col" v-for="inventory in inventories" :key="inventory.id">
+                                        <div class="card h-100 shadow-sm position-relative">
                                             <SoftBadge
+                                                v-if="inventory.isExpiring"
                                                 variant="gradient"
                                                 color="info"
-                                                class="position-absolute m-2 z-index-3"
-                                                >即將過期</SoftBadge
+                                                class="position-absolute top-2 start-2"
                                             >
-                                            <span class="position-absolute top-3 end-8 z-index-3">
-                                                <i class="fa-solid fa-pencil"></i>&ensp;<i
-                                                    class="fa-solid fa-trash"
-                                                ></i>
+                                                即將過期
+                                            </SoftBadge>
+                                            <span class="position-absolute top-0 end-0 p-2 z-index-3">
+                                                <i class="fa-solid fa-pencil me-2"></i>
+                                                <i class="fa-solid fa-trash"></i>
                                             </span>
-                                            <div class="card-body position-relative">
-                                                <div class="d-flex justify-content-center align-items-center">
-                                                    <img :src="GreenPepper" alt="" class="w-75 mt-3" />
-                                                    <span class="amount-badge position-absolute translate-middle"
-                                                        >3個</span
+                                            <div class="card-body d-flex flex-column">
+                                                <div class="image-container mb-3">
+                                                    <img
+                                                        :src="getRecipeImageUrl(inventory.photo)"
+                                                        :alt="inventory.ingredientName"
+                                                        class="product-image"
+                                                    />
+                                                    <span class="amount-badge"
+                                                        >{{ inventory.quantity }}{{ inventory.unit }}</span
                                                     >
                                                 </div>
-                                                <h5 class="card-title mt-5 w-100 text-center">青椒</h5>
-                                                <p class="card-text w-100 text-center">蔬菜類</p>
-                                                <p
-                                                    class="card-text position-absolute translate-middle-x"
-                                                    style="bottom: 2%; left: 50%"
-                                                >
-                                                    2024-10-03
-                                                </p>
+                                                <h5 class="card-title text-center">{{ inventory.ingredientName }}</h5>
+                                                <p class="card-text text-center">{{ inventory.category }}</p>
+                                                <p class="card-text text-center mt-auto">{{ inventory.expiryDate }}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -392,33 +383,73 @@ onMounted(() => {
     background-color: transparent;
 }
 
-/* Badge Styles */
-.amount-badge {
-    display: inline-block;
-    padding: 0.55em 1.5em;
-    top: 60%;
-    left: 50%;
-    font-size: 1em;
-    font-weight: 700;
-    line-height: 1;
-    color: black;
-    text-align: center;
-    white-space: nowrap;
-    vertical-align: baseline;
-    border: 2px solid black;
-    border-radius: 1.5rem;
+.card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Card Styles */
-.card img {
+.card.active {
+    border: 3px solid rgb(255, 204, 103);
+    opacity: 80%;
+}
+
+.card-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.image-container {
+    width: 100%;
+    height: 200px;
+    margin-top: 15px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+}
+
+.product-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease-in-out;
 }
 
-.card:hover img {
-    transform: scale(1.1);
+.amount-badge {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.25em 0.75em;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: black;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid black;
+    border-radius: 1rem;
+}
+
+.product-name {
+    margin-top: 20px;
+    text-align: center;
+    width: 100%;
+}
+
+.product-category,
+.expiry-date {
+    text-align: center;
+    width: 100%;
+}
+
+.expiry-date {
+    position: absolute;
+    bottom: 0%;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .driver {
