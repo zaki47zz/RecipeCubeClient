@@ -5,7 +5,6 @@ import Isotope from 'isotope-layout';
 import Swal from 'sweetalert2';
 import WineWithBeef from '@/assets/img/ForComponent/WineWithBeef.jpg';
 import BannerRecipe from '@/assets/img/ForBackground/banner-recipe.jpg';
-import SoftBadge from '@/components/SoftBadge.vue';
 import SoftPagination from '@/components/SoftPagination.vue';
 import SoftPaginationItem from '@/components/SoftPaginationItem.vue';
 import RecipeDetailComponent from '@/components/RecipeDetailComponent.vue';
