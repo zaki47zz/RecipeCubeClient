@@ -5,6 +5,44 @@ import GreenPepper from '@/assets/img/ForComponent/GreenPepper.jpg';
 import SoftBadge from '@/components/SoftBadge.vue';
 import SoftPagination from '@/components/SoftPagination.vue';
 import SoftPaginationItem from '@/components/SoftPaginationItem.vue';
+import { onMounted, ref } from 'vue';
+const BaseURL = import.meta.env.VITE_API_BASEURL;
+const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL(抓圖片要用的);
+const ApiURL = `${BaseURL}/Inventories`;
+const InventoriesURL = `${ApiURL}/${localStorage.getItem('UserId')}`;
+const inventories = ref([]);
+const totalInventories = ref(0);
+
+const fetchInventories = async () => {
+    try {
+        const response = await fetch(InventoriesURL);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        inventories.value = data; // 將獲取到的數據存入 recipes 變量
+        totalInventories.value = inventories.value.length;
+    } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+    }
+};
+
+const getRecipeImageUrl = (fileName) => {
+    return `${BaseUrlWithoutApi}/images/ingredient/${fileName}`;
+};
+
+const initIsotope = () => {
+    const iso = new Isotope(document.querySelector('.product-grid'), {
+        itemSelector: '.product-grid-item',
+        layoutMode: 'fitRows',
+        getSortData: {
+            name: '.product-name',
+            category: '.product-category',
+        },
+        transitionDuration: 0.8,
+    });
+    console.log('已初始化isotope');
+};
 
 const alertClearCheck = () => {
     Swal.fire({
@@ -25,6 +63,11 @@ const alertClearCheck = () => {
         }
     });
 };
+
+onMounted(() => {
+    initIsotope();
+    fetchInventories();
+});
 </script>
 
 <template>
@@ -47,12 +90,14 @@ const alertClearCheck = () => {
         <div class="container-fluid">
             <div class="row justify-content-center">
                 <div class="text-center">
-                    <h4>在下方食材列表，您可以看到您所屬群組的庫存食材，您可以進行兩種操作</h4>
+                    <h4>
+                        在下方食材列表，您可以看到您所屬群組的庫存食材，您可以進行兩種操作(這裡之後用driver.js做導覽)
+                    </h4>
                 </div>
             </div>
             <div class="row justify-content-center my-5">
                 <div class="col-lg-3">
-                    <div class="d-flex gap-4 align-items-center">
+                    <div class="d-flex gap-4 justify-content-center align-items-center">
                         <div class="driver text-center px-3 m-1 rounded-3">
                             <h5><i class="fa-solid fa-box-open mt-3"></i> 管理食材</h5>
                             <p>對個別食材進行數量的修改或刪除</p>
@@ -60,7 +105,7 @@ const alertClearCheck = () => {
                     </div>
                 </div>
                 <div class="col-lg-3">
-                    <div class="d-flex gap-4 align-items-center">
+                    <div class="d-flex gap-4 justify-content-center align-items-center">
                         <div class="driver text-center px-3 m-1 rounded-3">
                             <h5><i class="fa-solid fa-utensils mt-3"></i> 產生食譜</h5>
                             <p>選取食材讓我們為您自動生成食譜</p>
@@ -144,9 +189,10 @@ const alertClearCheck = () => {
                                 <div
                                     class="product-grid row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5"
                                 >
-                                    <div class="col">
+                                    <div class="product-grid-item col">
                                         <div class="card shadow-sm position-relative">
                                             <SoftBadge
+                                                v-if="true"
                                                 variant="gradient"
                                                 color="info"
                                                 class="position-absolute m-2 z-index-3"
@@ -160,8 +206,8 @@ const alertClearCheck = () => {
                                                         >3個</span
                                                     >
                                                 </div>
-                                                <h5 class="card-title mt-5 w-100 text-center">青椒</h5>
-                                                <p class="card-text w-100 text-center">蔬菜類</p>
+                                                <h5 class="card-title mt-5 w-100 text-center product-name">青椒</h5>
+                                                <p class="card-text w-100 text-center product-category">蔬菜類</p>
                                                 <p
                                                     class="card-text position-absolute translate-middle-x"
                                                     style="bottom: 2%; left: 50%"
@@ -178,9 +224,9 @@ const alertClearCheck = () => {
                             <!-- Fruits and Veges Tab -->
                             <div class="tab-pane fade" id="nav-fruits" role="tabpanel" aria-labelledby="nav-fruits-tab">
                                 <div
-                                    class="product-grid row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5"
+                                    class="product-grid-item row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5"
                                 >
-                                    <div class="col">
+                                    <div class="product-grid-item col">
                                         <div class="card shadow-sm position-relative mt-1">
                                             <SoftBadge
                                                 variant="gradient"
@@ -211,7 +257,6 @@ const alertClearCheck = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- Additional product items go here -->
                                 </div>
                             </div>
                         </div>
@@ -280,8 +325,10 @@ const alertClearCheck = () => {
                         </li>
                     </ul>
 
-                    <button class="w-100 btn bg-gradient-info shadow fs-5" type="submit">產生食譜</button>
-                    <button class="w-100 btn blur text-danger shadow fs-5" type="submit" @click="alertClearCheck">
+                    <RouterLink class="w-100 btn bg-gradient-info shadow fs-5" :to="{ name: 'GenerateRecipe' }"
+                        >產生食譜</RouterLink
+                    >
+                    <button class="w-100 btn blur text-danger shadow fs-5" @click="alertClearCheck">
                         清空所選食材
                     </button>
                 </div>

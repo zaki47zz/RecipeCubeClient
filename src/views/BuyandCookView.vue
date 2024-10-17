@@ -37,12 +37,16 @@ const initSwiper = function () {
 };
 
 const initTippy = function () {
-    tippy('#tooltip-wrapper', {
-        content: '啟用套餐功能，我們會為您搭配一份主餐與一份副餐!',
+    tippy('#tooltip-wrapper-set', {
+        content: '啟用此功能，我們會為您搭配一份主餐與一份副餐!',
         placement: 'right-end',
         animation: 'fade',
     });
-    console.log('已初始化 tippy');
+    tippy('#tooltip-wrapper-inventory', {
+        content: '啟用此功能，我們會同時使用您庫存內的食材進行食譜搜索，如不想使用庫存內食材，請取消。',
+        placement: 'right-end',
+        animation: 'fade',
+    });
 };
 
 onMounted(() => {
@@ -273,7 +277,7 @@ onMounted(() => {
                     <SoftSwitch name="set" id="set" class="switch-set">
                         <span>
                             套餐
-                            <span id="tooltip-wrapper">
+                            <span id="tooltip-wrapper-set">
                                 <i class="fa-solid fa-circle-question"></i>
                             </span>
                         </span>
@@ -282,7 +286,24 @@ onMounted(() => {
             </div>
             <div class="row justify-content-center">
                 <div class="col-lg-3">
-                    <button class="btn bg-danger-subtle text-dark shadow fs-5 w-100">產生食譜</button>
+                    <SoftSwitch name="inventory" id="inventory" checked="true" class="switch-inventory">
+                        <span>
+                            使用庫存食材
+                            <span id="tooltip-wrapper-inventory">
+                                <i class="fa-solid fa-circle-question"></i>
+                            </span>
+                        </span>
+                    </SoftSwitch>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-3">
+                    <RouterLink
+                        class="btn bg-danger-subtle text-dark shadow fs-5 w-100"
+                        :to="{ name: 'GenerateRecipe' }"
+                    >
+                        產生食譜
+                    </RouterLink>
                 </div>
             </div>
             <div class="row justify-content-center">
@@ -390,5 +411,11 @@ onMounted(() => {
     /* margin-left: calc(50% - 3.5vw); */
     left: 50%;
     transform: translateX(33%);
+}
+
+.switch-inventory {
+    /* margin-left: calc(50% - 3.5vw); */
+    left: 50%;
+    transform: translateX(24%);
 }
 </style>
