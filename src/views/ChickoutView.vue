@@ -1,10 +1,42 @@
 <script setup>
     import '@/assets/js/store.js'
     import Swal from 'sweetalert2'
-    import {ref,computed,reactive} from 'vue';
+    import {ref,computed,reactive,onMounted,onBeforeUnmount} from 'vue';
     import { useRouter } from 'vue-router';
+    import CircularJSON from 'circular-json';
+    import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
     const BaseURL = import.meta.env.VITE_API_BASEURL;
     const BaseUrlWithoutApi = BaseURL.replace("/api","");  // 去掉 "/api" 得到基本的 URL;
+
+    // 讀取使用者資料
+    const userId = localStorage.getItem('UserId');
+    const user = ref({});
+    const loadUser = async(userId)=>{
+        try{
+            const response = await fetch(`${BaseURL}/Users/${userId}`)
+            if(!response.ok){
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Something went wrong!",
+                    footer: '<a href="#">Why do I have this issue?</a>'
+                });
+                return; //有錯誤則停止執行
+            }
+            const data = await response.json();
+            user.value=data;
+            console.log(data);
+        }catch(error){
+            console.log('fetch 請求會員失敗' , error);
+        }
+    }
+    if(userId){
+        loadUser(userId);
+    }else{
+        console.log('userId不存在，無法帶入使用者資料')
+    }
+
+
 
     // 讀取所有商品
     const ApiURL=`${BaseURL}/Products/ProductsNcategory`;
@@ -57,6 +89,7 @@
     //計算商品總價
     const totalPrice = computed(()=>{
         // reduce會迭代 cartProducts 陣列，累加到acc
+        console.log(cartProducts.value)
         return cartProducts.value.reduce((acc, product) => {
             console.log("product.quantity", product.quantity)
 
@@ -64,7 +97,90 @@
         },0);
     })
 
-    //============================================================================================================================
+    // ======================================================================================================================
+    // 組件掛載時監聽 localStorage 的變化
+    onMounted(() => {
+    loadProducts(); // 初始加載購物車商品
+    window.addEventListener('storage', loadProducts);
+    });
+
+    // 組件卸載時移除監聽器
+    onBeforeUnmount(() => {
+    window.removeEventListener('storage', loadProducts);
+    });
+
+    //=========================================================================================================================
+
+    // 產生訂單編號
+    const generateOrderNumber = () =>{
+        const now = new Date();
+
+        // 格式化時間
+        const year = now.getFullYear();
+        const mounth = String(now.getMonth() + 1).padStart(2,'0'); // 月份從0開始 要加1
+        const day = String(now.getDate()).padStart(2,'0');
+        const hours = String(now.getHours()).padStart(2,'0');
+        const minutes = String(now.getMinutes()).padStart(2,'0');
+        const seconds = String(now.getSeconds()).padStart(2,'0');
+
+        // radom
+        const redomNum = Math.floor(Math.random() * 100).toString().padStart(2,'0');
+
+        let orderNumber=Number(`${year}${mounth}${day}${hours}${minutes}${seconds}${redomNum}`)
+        return orderNumber;
+    }
+
+    // 得到現在時間(訂單下單時間用)
+    const dateTimeOrder = () => {
+    const now = new Date();
+
+    // 調整時間為台灣時區 (UTC+8)
+    const taiwanTime = new Date(now.setHours(now.getHours() + 8));
+
+    // 使用 toISOString() 獲取 ISO 格式的日期時間字串
+    const orderTime = taiwanTime.toISOString();
+
+    return orderTime; // 返回台灣時間的 ISO 格式字串
+};
+
+    // 沒有響應式的自己創
+    const userInput = ref({
+        orderAddress:"",
+        orderRemark:"",
+    });
+
+    //結帳創建訂單
+    const addOrder = async()=>{
+        const order ={
+            orderId:generateOrderNumber(),
+            userId:userId,
+            orderTime:dateTimeOrder(),
+            totalAmount:totalPrice.value,
+            status:false,
+            orderAddress:userInput.value.orderAddress,
+            orderPhone:user.value.phoneNumber,
+            orderEmail:user.value.email,
+            orderRemark:userInput.value.orderRemark,
+            orderName:user.value.userName,
+        }
+        console.log('Order before JSON.stringify:', order);
+        try{
+            const orderJson = CircularJSON.stringify(order);
+            const response = await fetch(`${BaseURL}/Orders`,{
+                method:'POST',
+                headers:{
+                    'Content-Type': 'application/json'
+                },
+                body:orderJson,
+            });
+            
+            if(!response.ok){
+                console.log(`訂單創建失敗：${await response.text()}`);
+            }
+        }catch(error){
+            console.error("訂單創建失敗(catch)",error);
+        }
+    };
 </script>
 
 <template>
@@ -92,31 +208,31 @@
         <div class="container-fluid py-2">
             <div class="container py-2">
                 <form action="#">
-                    <div class="row ">
+                    <div class="row">
                         <div class="col-md-12 col-lg-6 col-xl-7">
                             <div class="row">
                                 <div class="col-md-12 col-lg-6">
                                     <div class="form-item w-100">
-                                        <label class="form-label my-3">姓名<sup>*</sup></label>
-                                        <input type="text" class="form-control">
+                                        <label class="fs-5 form-label my-3">姓名<sup>*</sup></label>
+                                        <input type="text" class="form-control" v-model="user.userName">
                                     </div>
                                 </div>
                             </div>
                             <div class="form-item">
                                 <label class="form-label my-3">地址<sup>*</sup></label>
-                                <input type="text" class="form-control" placeholder="地址">
+                                <input type="text" class="form-control" placeholder="請輸入地址" v-model="userInput.orderAddress">
                             </div>
                             <div class="form-item">
                                 <label class="form-label my-3">電話<sup>*</sup></label>
-                                <input type="tel" class="form-control">
+                                <input type="tel" class="form-control" v-model="user.phoneNumber">
                             </div>
                             <div class="form-item">
                                 <label class="form-label my-3">電子郵件<sup>*</sup></label>
-                                <input type="email" class="form-control">
+                                <input type="email" class="form-control" v-model="user.email">
                             </div>
                             <div class="form-item">
                                 <label class="form-label my-3">備註</label>
-                                <textarea name="text" class="form-control" spellcheck="false" cols="30" rows="11" placeholder="Oreder Notes (Optional)"></textarea>
+                                <textarea name="text" class="form-control" spellcheck="false" cols="30" rows="11" placeholder="請輸入備註" v-model="userInput.orderRemark"></textarea>
                             </div>
                         </div>
                         <div class="col-md-12 col-lg-6 col-xl-5">
@@ -150,11 +266,11 @@
                                             <td class="py-5"></td>
                                             <td class="py-5"></td>
                                             <td class="py-5">
-                                                <p class="mb-0 text-dark py-3">Subtotal</p>
+                                                <p class="mb-0 text-dark py-3">訂單小計</p>
                                             </td>
                                             <td class="py-5">
                                                 <div class="py-3 border-bottom border-top">
-                                                    <p class="mb-0 text-dark">$414.00</p>
+                                                    <p class="mb-0 text-dark">$ {{totalPrice}}</p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -183,13 +299,13 @@
                                             <th scope="row">
                                             </th>
                                             <td class="py-5">
-                                                <p class="mb-0 text-dark text-uppercase py-3">TOTAL</p>
+                                                <p class="mb-0 text-dark text-uppercase py-3">訂單總價</p>
                                             </td>
                                             <td class="py-5"></td>
                                             <td class="py-5"></td>
                                             <td class="py-5">
                                                 <div class="py-3 border-bottom border-top">
-                                                    <p class="mb-0 text-dark">$135.00</p>
+                                                    <p class="mb-0 text-dark">$ {{totalPrice}}</p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -230,12 +346,14 @@
                                 </div>
                             </div>
                             <div class="row g-4 text-center align-items-center justify-content-center pt-4">
-                                <button type="button" class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">Place Order</button>
+                                <button type="button" class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary" @click="addOrder()">Place Order</button>
                             </div>
                         </div>
                     </div>
                 </form>
             </div>
+              <!-- 引入購物車 sidebar -->
+            <SideBarCartComponent />
         </div>
         <!-- Checkout Page End -->
 

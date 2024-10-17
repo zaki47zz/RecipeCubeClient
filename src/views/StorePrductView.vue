@@ -3,6 +3,7 @@
     import Swal from 'sweetalert2'
     import { useRouter } from "vue-router";
     import {computed, ref}from 'vue';
+    import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
 
     const BaseURL = import.meta.env.VITE_API_BASEURL;  // https://localhost:7188/api
     const BaseUrlWithoutApi = BaseURL.replace('/api', '');  // 去掉 "/api" 得到基本的 URL;
@@ -38,24 +39,21 @@
     const addToCart = (product)=>{
 
         // 購物車清空邏輯=========================================================================
-
-        const userId = 3; //這是要寫在登入頁面的 1=>要從登入邏輯拿到userId
-        localStorage.setItem('userId',userId);  //寫進localStorage_userId
-        //-----------------------------------------
-        const currentUserId = localStorage.getItem('userId');
-        console.log(`目前登入的userId : ${currentUserId}`);
+        
+        const currentUserId = localStorage.getItem('UserId');
+        // console.log(`目前登入的userId : ${currentUserId}`);
         const storeUserId = localStorage.getItem('storeUserId');
-        console.log(`目前的storeUserId : ${storeUserId}`);
+        // console.log(`目前的storeUserId : ${storeUserId}`);
 
         // 檢查用戶ID是否一致
         if (storeUserId !== currentUserId){
             //如果 目前登入的userId 不等於 localStorage 裡的userId 清空 localStorage
             localStorage.setItem('productCart',JSON.stringify([]));
             localStorage.setItem('storeUserId',currentUserId);
-            console.log(`已經完成更改 localStorage_storeUserId : ${currentUserId} 且清除購物車`)
+            // console.log(`已經完成更改 localStorage_storeUserId : ${currentUserId} 且清除購物車`)
         }
         else{
-            console.log("跟上一個使用者是相同id不清除購物車")
+            // console.log("跟上一個使用者是相同id不清除購物車")
         }   
         // ===================================================================================
 
@@ -178,7 +176,7 @@
                                                 <img :src="`${BaseUrlWithoutApi}/images/ingredient/${product.photo}?t=${Date.now()}`" class="img-fluid w-100 rounded-top click-router" alt="" @click="goToProductDetail(product.productId)" >
                                             </div>
                                             <!-- 商品類別 -->
-                                            <div class="text-white bg-secondary px-3 py-1 rounded position-absolute click-router" @click="goToProductDetail(product.productId)" style="top: 10px; left: 10px;">{{ product.category }}</div>
+                                            <div class="text-white bg-secondary px-3 py-1 rounded position-absolute click-router" @click="goToProductDetail(product.productId)" style="top: 10px; left: 10px; border: 1.3px solid #81c408;">{{ product.category }}</div>
                                             <div class="p-3 pb-1 border border-secondary border-top-0 rounded-bottom">
                                                 <!-- 品名 -->
                                                 <h4 class="click-router" @click="goToProductDetail(product.productId)">{{ product.productName }}</h4>
@@ -213,7 +211,15 @@
          
         <!-- Back to Top -->
         <a href="#" class="btn btn-primary border-3 border-primary rounded-circle back-to-top"><i class="fa fa-arrow-up"></i></a>   
+
+        <!-- 引入購物車 sidebar -->
+      <SideBarCartComponent />
+
     </div>
+
+
+
+    
 </template>
 
 <style lang="css" scoped>

@@ -1,8 +1,9 @@
 <script setup>
     import '@/assets/js/store.js'
     import Swal from 'sweetalert2'
-    import {ref,computed,reactive} from 'vue';
+    import {ref,computed,reactive,onMounted,onBeforeUnmount} from 'vue';
     import { useRouter } from 'vue-router';
+    import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
     const BaseURL = import.meta.env.VITE_API_BASEURL;
     const BaseUrlWithoutApi = BaseURL.replace("/api","");  // 去掉 "/api" 得到基本的 URL;
 
@@ -22,6 +23,26 @@
     // 從localStorage獲取購物車內容
     const cartProducts = ref([]);
     const loadProductCartLocalStorage=()=>{
+        
+        // 購物車清空邏輯=========================================================================
+        
+        const currentUserId = localStorage.getItem('UserId');
+        // console.log(`目前登入的userId : ${currentUserId}`);
+        const storeUserId = localStorage.getItem('storeUserId');
+        // console.log(`目前的storeUserId : ${storeUserId}`);
+
+        // 檢查用戶ID是否一致
+        if (storeUserId !== currentUserId){
+            //如果 目前登入的userId 不等於 localStorage 裡的userId 清空 localStorage
+            localStorage.setItem('productCart',JSON.stringify([]));
+            localStorage.setItem('storeUserId',currentUserId);
+            // console.log(`已經完成更改 localStorage_storeUserId : ${currentUserId} 且清除購物車`)
+        }
+        else{
+            // console.log("跟上一個使用者是相同id不清除購物車")
+        }   
+
+
         let cart = JSON.parse(localStorage.getItem('productCart')) || [];
         
         // 過濾所有商品，找到購物車中存在的商品
@@ -35,11 +56,11 @@
                     ...product, // 展開原有產品屬性
                     quantity: cartProduct.quantity // 設置 quantity
                 });
-                console.log(reactiveProduct.quantity)
+                // console.log(reactiveProduct.quantity)
                 // console.log(JSON.stringify(reactiveProduct, null, 2));
                 // console.log(`有找到購物車商品：${reactiveProduct.productName} , 商品數量:${reactiveProduct.quantity}`);
                 // 保留
-                console.log(`商品名稱: ${reactiveProduct.productName}, 數量: ${reactiveProduct.quantity}`);
+                // console.log(`商品名稱: ${reactiveProduct.productName}, 數量: ${reactiveProduct.quantity}`);
                 return reactiveProduct; // 返回響應式產品
             }else{
                 // 過濾掉不在購物車的商品
@@ -58,7 +79,7 @@
     const totalPrice = computed(()=>{
         // reduce會迭代 cartProducts 陣列，累加到acc
         return cartProducts.value.reduce((acc, product) => {
-            console.log("product.quantity", product.quantity)
+            // console.log("product.quantity", product.quantity)
 
             return acc + (product.price * product.quantity);
         },0);
@@ -70,8 +91,8 @@
     const decQuantity = (product) => {
     if (product.quantity > 1) {
         product.quantity -= 1;  // 減少數量
-        console.log(`目前商品數量選擇:${product.quantity}`);
-        console.log(`目前商品庫存:${product.stock}`);
+        // console.log(`目前商品數量選擇:${product.quantity}`);
+        // console.log(`目前商品庫存:${product.stock}`);
 
         // 同步更新 localStorage
         updateCart(product);
@@ -128,10 +149,10 @@
         // 如果數量大於 0，更新數量；如果為 0 或無效，從購物車中刪除
         if (product.quantity > 0) {
             cart[cartProductIndex].quantity = product.quantity;  // 更新數量
-            console.log("更新localStorage成功")
+            // console.log("更新localStorage成功")
         } else {
             cart.splice(cartProductIndex, 1);  // 刪除該商品
-            console.log("更新localStorage失敗")
+            // console.log("刪除localStorage成功")
         }
     }
     
@@ -174,6 +195,19 @@
     const goToCheckout = () =>{
         router.push({name:'chickout'});
     }
+
+    // ======================================================================================================================
+    // 組件掛載時監聽 localStorage 的變化
+    onMounted(() => {
+    loadProducts(); // 初始加載購物車商品
+    window.addEventListener('storage', loadProducts);
+    });
+
+    // 組件卸載時移除監聽器
+    onBeforeUnmount(() => {
+    window.removeEventListener('storage', loadProducts);
+    });
+
 </script>
 
 <template>
@@ -292,6 +326,8 @@
                     </div>
                 </div>
             </div>
+              <!-- 引入購物車 sidebar -->
+            <SideBarCartComponent />
         </div>
         <!-- Cart Page End -->
 </template>
