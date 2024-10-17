@@ -43,7 +43,12 @@ const fetchRecipes = async () => {
         console.error('There was a problem with the fetch operation:', error);
     }
 };
-
+const dialogVisible = computed({
+    get: () => recipeStore.dialogVisible,
+    set: (value) => {
+        recipeStore.dialogVisible = value;
+    },
+});
 // 在組件加載後獲取數據
 onMounted(() => {
     fetchRecipes();
@@ -56,7 +61,8 @@ const paginatedRecipes = computed(() => {
     const end = start + pageSize.value;
     return recipes.value.slice(start, end);
 });
-
+// 使用計算屬性來取得分頁的食譜
+// const paginatedRecipes = computed(() => recipeStore.paginatedRecipes);
 const changePage = (page) => {
     if (page >= 1 && page <= totalPages.value) {
         currentPage.value = page;
@@ -91,6 +97,16 @@ const pagesAroundCurrent = computed(() => {
 const getRecipeImageUrl = (fileName) => {
     return `${BaseUrlWithoutApi}/images/recipe/${fileName}`;
 };
+const resetActiveStep = ref(false);
+
+// 當打開對話框時，重置子組件中的 activeStep
+const onDialogOpened = () => {
+    resetActiveStep.value = true;
+    // 確保這個重置只發生一次
+    setTimeout(() => {
+        resetActiveStep.value = false;
+    }, 0);
+};
 </script>
 
 <template>
@@ -111,16 +127,13 @@ const getRecipeImageUrl = (fileName) => {
 
     <section class="pt-5">
         <div class="container-fluid">
-            <div
-                class="pt-5 rounded-4"
-                :style="{
-                    width: '100%',
-                    height: '100%',
-                    backgroundImage: `url(${BannerRecipe})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                }"
-            >
+            <div class="pt-5 rounded-4" :style="{
+                width: '100%',
+                height: '100%',
+                backgroundImage: `url(${BannerRecipe})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+            }">
                 <div class="row p-3">
                     <div class="col-md-6 d-flex flex-column align-items-center">
                         <h2 class="mt-3 text-white">左思右想還是不知道煮什麼嗎?</h2>
@@ -550,6 +563,7 @@ const getRecipeImageUrl = (fileName) => {
                                         前往
                                     </button>
                                 </div>
+                                <!-- 分頁導航結束 -->
                             </div>
                         </div>
                     </div>
@@ -559,8 +573,17 @@ const getRecipeImageUrl = (fileName) => {
     </section>
 
     <!-- Recipe Detail Component -->
-    <RecipeDetailComponent v-if="recipeStore.selectedRecipe" :recipe="recipeStore.selectedRecipe">
-    </RecipeDetailComponent>
+    <!-- <RecipeDetailComponent v-if="recipeStore.selectedRecipe" :recipe="recipeStore.selectedRecipe">
+    </RecipeDetailComponent> -->
+    <el-dialog v-model="recipeStore.dialogVisible" title="食譜詳細資訊" width="65%" @close="recipeStore.closeDialog" center
+        @opened="onDialogOpened">
+        <RecipeDetailComponent :recipe="recipeStore.selectedRecipe" :reset-active-step="resetActiveStep"
+            v-if="recipeStore.selectedRecipe">
+        </RecipeDetailComponent>
+        <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
+            <el-button @click="recipeStore.closeDialog" type="danger">關閉</el-button>
+        </span>
+    </el-dialog>
 </template>
 
 <style lang="css" scoped>
