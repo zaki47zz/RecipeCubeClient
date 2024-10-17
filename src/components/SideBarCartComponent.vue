@@ -129,13 +129,13 @@ const totalPrice = computed(()=>{
     };
 
 //=========================================================================================================================
-    // 導航至結帳頁面
+    // 導航至購物車明細頁面
     const router = useRouter();
     const goToCheckout = () =>{
         // 移除禁止滾動的樣式
         document.body.style.overflow = 'auto'; // 恢復滾動
         document.body.classList.remove('modal-open'); // 如果有modal-open類別，則移除
-        router.push({name:'chickout'});
+        router.push({name:'cart'});
     }
 //=========================================================================================================================
 
@@ -210,7 +210,7 @@ const totalPrice = computed(()=>{
             </div>
           
         </div>
-          <button class="w-100 custom-btn btn-lg" @click="goToCheckout" :disabled="getCartlenghtFromLocalStorage() === 0">前往結帳</button>
+          <button class="w-100 custom-btn btn-lg" @click="goToCheckout" :disabled="getCartlenghtFromLocalStorage() === 0">查看我的購物明細並結帳</button>
       </div>
     </div>
 
