@@ -67,11 +67,11 @@
                     ...product, // 展開原有產品屬性
                     quantity: cartProduct.quantity // 設置 quantity
                 });
-                console.log(reactiveProduct.quantity)
+                // console.log(reactiveProduct.quantity)
                 // console.log(JSON.stringify(reactiveProduct, null, 2));
                 // console.log(`有找到購物車商品：${reactiveProduct.productName} , 商品數量:${reactiveProduct.quantity}`);
                 // 保留
-                console.log(`商品名稱: ${reactiveProduct.productName}, 數量: ${reactiveProduct.quantity}`);
+                // console.log(`商品名稱: ${reactiveProduct.productName}, 數量: ${reactiveProduct.quantity}`);
                 return reactiveProduct; // 返回響應式產品
             }else{
                 // 過濾掉不在購物車的商品
@@ -88,10 +88,11 @@
 
     //計算商品總價
     const totalPrice = computed(()=>{
+        // console.log(JSON.stringify(cartProducts.value))
+        
         // reduce會迭代 cartProducts 陣列，累加到acc
-        console.log(cartProducts.value)
         return cartProducts.value.reduce((acc, product) => {
-            console.log("product.quantity", product.quantity)
+            // console.log("product.quantity", product.quantity)
 
             return acc + (product.price * product.quantity);
         },0);
@@ -150,36 +151,79 @@
     });
 
     //結帳創建訂單
-    const addOrder = async()=>{
-        const order ={
-            orderId:generateOrderNumber(),
-            userId:userId,
-            orderTime:dateTimeOrder(),
-            totalAmount:totalPrice.value,
-            status:false,
-            orderAddress:userInput.value.orderAddress,
-            orderPhone:user.value.phoneNumber,
-            orderEmail:user.value.email,
-            orderRemark:userInput.value.orderRemark,
-            orderName:user.value.userName,
-        }
-        console.log('Order before JSON.stringify:', order);
-        try{
-            const orderJson = CircularJSON.stringify(order);
-            const response = await fetch(`${BaseURL}/Orders`,{
-                method:'POST',
-                headers:{
-                    'Content-Type': 'application/json'
-                },
-                body:orderJson,
-            });
-            
-            if(!response.ok){
-                console.log(`訂單創建失敗：${await response.text()}`);
+    const addOrder = async () => {
+        // 顯示確認框
+        Swal.fire({
+            title: "確定要結帳嗎?",
+            text: "請確認訂單資訊是否正確",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "結帳"
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                // 如果確認下單，則執行訂單創建邏輯
+                const OrderNum = generateOrderNumber();
+                const order = {
+                    orderId: OrderNum,
+                    userId: userId || null,
+                    orderTime: dateTimeOrder() ,
+                    totalAmount: totalPrice.value || 0,
+                    status: false,
+                    orderAddress: userInput.value.orderAddress || null,
+                    orderPhone: user.value.phoneNumber || null,
+                    orderEmail: user.value.email || null,
+                    orderRemark: userInput.value.orderRemark || null,
+                    orderName: user.value.userName || null,
+                    orderItemsDTO:cartProducts.value.map(item=>({
+                        orderId:OrderNum || null,
+                        productId:item.productId || 0,
+                        quantity:item.quantity || 0,
+                        price:item.price || 0
+                    }))
+                    
+                };
+
+                // console.log('Order before JSON.stringify:', order);
+                // console.log('orderItemsDTO:',order.orderItemsDTO);
+                try {
+                    const orderJson = JSON.stringify(order);
+                    console.log(orderJson)
+                    const response = await fetch(`${BaseURL}/Orders/PostOrderOrderItem`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: orderJson,
+                    });
+
+                    if (!response.ok) {
+                        console.log(`訂單創建失敗：${await response.text()}`);
+                        // 可以在這裡使用 Swal 顯示失敗訊息
+                        Swal.fire({
+                            title: "訂單創建失敗",
+                            text: "訂單創建失敗，請聯絡系統管理員",
+                            icon: "error"
+                        });
+                    } else {
+                        // 成功創建訂單後的提示
+                        Swal.fire({
+                            title: "訂單已成立",
+                            text: "將繼續前往付款頁面",
+                            icon: "success"
+                        });
+                    }
+                } catch (error) {
+                    console.error("訂單創建失敗(catch)", error);
+                    Swal.fire({
+                            title: "訂單創建失敗",
+                            text: "訂單創建失敗，請聯絡系統管理員",
+                            icon: "error"
+                    });
+                }
             }
-        }catch(error){
-            console.error("訂單創建失敗(catch)",error);
-        }
+        });
     };
 </script>
 
