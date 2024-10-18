@@ -11,6 +11,8 @@ const ApiURL = `${BaseURL}/Inventories`;
 const InventoriesURL = `${ApiURL}/${localStorage.getItem('UserId')}`;
 const inventories = ref([]);
 const totalInventories = ref(0);
+const ingredientCategory = ref(new Set());
+const allSelect = ref(false);
 
 const fetchInventories = async () => {
     try {
@@ -21,6 +23,9 @@ const fetchInventories = async () => {
         const data = await response.json();
         inventories.value = data;
         totalInventories.value = inventories.value.length;
+        for (let inventory of inventories.value) {
+            ingredientCategory.value.add(inventory.category);
+        }
     } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
     }
@@ -52,10 +57,6 @@ const alertClearCheck = () => {
 
 onMounted(() => {
     fetchInventories();
-    document.addEventListener('click', (event) => {
-        console.log('Clicked element:', event.target);
-        debugCounter.value++;
-    });
 });
 
 //卡片點擊
@@ -63,12 +64,25 @@ const activateCard = (event) => {
     event.currentTarget.closest('.card').classList.toggle('active');
     console.log('activate');
 };
-//取消active(避免選到重複的Id)
-const deactivateCard = () => {
+//全選按鈕
+const selectAllCard = () => {
+    const cards = document.querySelectorAll('.card');
+    const selectAllButton = document.querySelector('#selectAllButton');
+    cards.forEach((card) => {
+        const style = window.getComputedStyle(card);
+        if (style.display !== 'none' && !card.classList.contains('active')) {
+            card.classList.add('active');
+        }
+    });
+    allSelect.value = true;
+};
+
+const deselectAllCard = () => {
     const cards = document.querySelectorAll('.card');
     cards.forEach((card) => {
         card.classList.remove('active');
     });
+    allSelect.value = false;
 };
 
 const editCard = () => {
@@ -78,9 +92,6 @@ const editCard = () => {
 const deleteCard = () => {
     console.log('刪除邏輯');
 };
-
-// 用於調試的響應式變數
-const debugCounter = ref(0);
 </script>
 
 <template>
@@ -134,20 +145,30 @@ const debugCounter = ref(0);
             <div class="col-sm-10 offset-sm-2 offset-md-0 col-lg-12 d-none d-lg-block">
                 <div class="row g-3 py-1 px-3 my-3 d-flex bg-primary-subtle rounded-4 shadow justify-content-between">
                     <!-- 分類欄 -->
-                    <div class="col-md-3">
+                    <div class="col-md-2 text-center">
                         <p class="fw-bold">分類 CATEGORY</p>
                     </div>
-                    <div class="col-md-3 mt-2">
+                    <div class="col-md-2 mt-2">
                         <select class="form-select">
                             <option selected>類別</option>
-                            <option value="XX">XX</option>
+                            <option v-for="category in ingredientCategory" :value="category">
+                                {{ category }}
+                            </option>
                         </select>
                     </div>
-                    <div class="col-md-3 mt-2">
+                    <div class="col-md-2 mt-2">
                         <select class="form-select">
-                            <option selected>公開/私有</option>
-                            <option value="0">公開</option>
+                            <option selected>群組/私有</option>
+                            <option value="0">群組</option>
                             <option value="1">私有</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 mt-2">
+                        <select class="form-select">
+                            <option selected>期限</option>
+                            <option value="0">即期</option>
+                            <option value="1">過期</option>
+                            <option value="1">正常</option>
                         </select>
                     </div>
                     <div class="col-md-3 mt-2">
@@ -166,141 +187,56 @@ const debugCounter = ref(0);
                         <div class="tabs-header d-flex justify-content-between">
                             <h3>食材列表</h3>
                             <div>
-                                <button class="btn blur shadow fs-6 me-1 should-gone">歷史編輯紀錄</button>
-                                <button class="btn blur shadow fs-6 me-1 should-gone">全選</button>
+                                <button class="btn blur shadow fs-6 me-1">歷史編輯紀錄</button>
+                                <button v-if="allSelect" class="btn blur shadow fs-6 me-1" @click="deselectAllCard">
+                                    取消全選
+                                </button>
+                                <button v-else class="btn blur shadow fs-6 me-1" @click="selectAllCard">全選</button>
                                 <button class="btn blur shadow fs-6 text-danger me-1">刪除</button>
                             </div>
-                            <nav>
-                                <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                                    <a
-                                        class="nav-link fs-5 fw-bold text-dark active"
-                                        id="nav-all-tab"
-                                        data-bs-toggle="tab"
-                                        data-bs-target="#nav-all"
-                                        @click="deactivateCard"
-                                        >所有食材</a
-                                    >
-                                    <a
-                                        class="nav-link fs-5 fw-bold text-dark"
-                                        id="nav-expire-tab"
-                                        data-bs-toggle="tab"
-                                        data-bs-target="#nav-expire"
-                                        @click="deactivateCard"
-                                        >即期或過期食材</a
-                                    >
-                                </div>
-                            </nav>
                         </div>
-                        <div class="tab-content" id="nav-tabContent">
-                            <!-- All Products Tab -->
-                            <div
-                                class="tab-pane fade show active"
-                                id="nav-all"
-                                role="tabpanel"
-                                aria-labelledby="nav-all-tab"
-                            >
-                                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
-                                    <div class="col" v-for="inventory in inventories" :key="inventory.id">
-                                        <div class="card h-100 p-0 shadow-sm position-relative">
-                                            <SoftBadge
-                                                v-if="inventory.isExpiring"
-                                                variant="gradient"
-                                                color="info"
-                                                class="position-absolute top-2 start-2"
-                                            >
-                                                即將過期
-                                            </SoftBadge>
-                                            <SoftBadge
-                                                v-if="inventory.isExpired"
-                                                variant="gradient"
-                                                color="warning"
-                                                class="position-absolute top-2 start-2"
-                                            >
-                                                已過期
-                                            </SoftBadge>
-                                            <span class="position-absolute top-0 end-0 p-2 z-index-3">
-                                                <button class="card-control" @click="editCard">
-                                                    <i class="fa-solid fa-pencil"></i>
-                                                </button>
-                                                <button class="card-control" @click="deleteCard">
-                                                    <i class="fa-solid fa-trash"></i>
-                                                </button>
-                                            </span>
-                                            <div class="card-body d-flex flex-column" @click="activateCard">
-                                                <div class="image-container mb-3">
-                                                    <img
-                                                        :src="getRecipeImageUrl(inventory.photo)"
-                                                        :alt="inventory.ingredientName"
-                                                        class="product-image"
-                                                    />
-                                                    <span class="amount-badge"
-                                                        >{{ inventory.quantity }}{{ inventory.unit }}</span
-                                                    >
-                                                </div>
-                                                <h5 class="card-title text-center">{{ inventory.ingredientName }}</h5>
-                                                <p class="card-text text-center">{{ inventory.category }}</p>
-                                                <p class="card-text text-center mt-auto">{{ inventory.expiryDate }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div
-                                class="tab-pane fade show"
-                                id="nav-expire"
-                                role="tabpanel"
-                                aria-labelledby="nav-expire-tab"
-                            >
-                                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
-                                    <div
-                                        class="col"
-                                        v-for="inventory in inventories.filter(
-                                            (i) => i.isExpiring == true || i.isExpired == true
-                                        )"
-                                        :key="inventory.id"
+                        <!-- All Products Tab -->
+                        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
+                            <div class="col" v-for="inventory in inventories" :key="inventory.id">
+                                <div class="card h-100 p-0 shadow-sm position-relative">
+                                    <SoftBadge
+                                        v-if="inventory.isExpiring"
+                                        variant="gradient"
+                                        color="info"
+                                        class="position-absolute top-2 start-2"
                                     >
-                                        <div class="card h-100 shadow-sm position-relative">
-                                            <SoftBadge
-                                                v-if="inventory.isExpiring"
-                                                variant="gradient"
-                                                color="info"
-                                                class="position-absolute top-2 start-2"
+                                        即將過期
+                                    </SoftBadge>
+                                    <SoftBadge
+                                        v-if="inventory.isExpired"
+                                        variant="gradient"
+                                        color="warning"
+                                        class="position-absolute top-2 start-2"
+                                    >
+                                        已過期
+                                    </SoftBadge>
+                                    <span class="position-absolute top-0 end-0 p-2 z-index-3">
+                                        <button class="card-control" @click="editCard">
+                                            <i class="fa-solid fa-pencil"></i>
+                                        </button>
+                                        <button class="card-control" @click="deleteCard">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </span>
+                                    <div class="card-body d-flex flex-column" @click="activateCard">
+                                        <div class="image-container mb-3">
+                                            <img
+                                                :src="getRecipeImageUrl(inventory.photo)"
+                                                :alt="inventory.ingredientName"
+                                                class="product-image"
+                                            />
+                                            <span class="amount-badge"
+                                                >{{ inventory.quantity }}{{ inventory.unit }}</span
                                             >
-                                                即將過期
-                                            </SoftBadge>
-                                            <SoftBadge
-                                                v-if="inventory.isExpired"
-                                                variant="gradient"
-                                                color="warning"
-                                                class="position-absolute top-2 start-2"
-                                            >
-                                                已過期
-                                            </SoftBadge>
-                                            <span class="position-absolute top-0 end-0 p-2 z-index-3">
-                                                <button class="card-control" @click="editCard">
-                                                    <i class="fa-solid fa-pencil"></i>
-                                                </button>
-                                                <button class="card-control" @click="deleteCard">
-                                                    <i class="fa-solid fa-trash"></i>
-                                                </button>
-                                            </span>
-                                            <div class="card-body d-flex flex-column" @click="activateCard">
-                                                <div class="image-container mb-3">
-                                                    <img
-                                                        :src="getRecipeImageUrl(inventory.photo)"
-                                                        :alt="inventory.ingredientName"
-                                                        class="product-image"
-                                                    />
-                                                    <span class="amount-badge"
-                                                        >{{ inventory.quantity }}{{ inventory.unit }}</span
-                                                    >
-                                                </div>
-                                                <h5 class="card-title text-center">{{ inventory.ingredientName }}</h5>
-                                                <p class="card-text text-center">{{ inventory.category }}</p>
-                                                <p class="card-text text-center mt-auto">{{ inventory.expiryDate }}</p>
-                                            </div>
                                         </div>
+                                        <h5 class="card-title text-center">{{ inventory.ingredientName }}</h5>
+                                        <p class="card-text text-center">{{ inventory.category }}</p>
+                                        <p class="card-text text-center mt-auto">{{ inventory.expiryDate }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -428,19 +364,6 @@ const debugCounter = ref(0);
     background: url('@/assets/img/ForBackground/ad-bg-pattern.png') no-repeat center / cover;
 }
 
-/* Product Tabs Styles */
-.product-tabs .nav-tabs {
-    justify-content: flex-end;
-    border: none;
-}
-
-.product-tabs .nav-tabs .nav-link.active,
-.product-tabs .nav-tabs .nav-item.show .nav-link {
-    border: none;
-    border-bottom: 3px solid rgb(127, 180, 255);
-    background-color: transparent;
-}
-
 .card {
     height: 100%;
     display: flex;
@@ -529,16 +452,5 @@ const debugCounter = ref(0);
 }
 .driver:hover {
     transform: scale(1.05);
-}
-
-/* Media Queries */
-@media screen and (max-width: 768px) {
-    .should-gone {
-        display: none;
-    }
-    .amount-badge {
-        top: 72%;
-        left: 50%;
-    }
 }
 </style>
