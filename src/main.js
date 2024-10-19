@@ -16,5 +16,6 @@ const app = createApp(App);
 app.use(createPinia());
 app.use(router);
 app.use(SoftUIDashboard);
-app.use(ElementPlus)
+app.use(ElementPlus);
+app.component('EasyDataTable', Vue3EasyDataTable);
 app.mount('#app');

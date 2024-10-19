@@ -170,7 +170,7 @@
                     userId: userId || null,
                     orderTime: dateTimeOrder() ,
                     totalAmount: totalPrice.value || 0,
-                    status: false,
+                    status: 1 || 6, //狀態預設寫 1 未付款,2 已付款，3 訂單確認中，4 已出貨，5 訂單完成 
                     orderAddress: userInput.value.orderAddress || null,
                     orderPhone: user.value.phoneNumber || null,
                     orderEmail: user.value.email || null,
@@ -244,6 +244,8 @@
                 <h4>
                     <RouterLink :to="{ name: 'storeproduct' }" class="floating-icon"><i class="fa-solid fa-shop"></i></RouterLink>
                     <RouterLink :to="{ name: 'cart' }"  class="floating-icon-cart"><i class="fa-solid fa-cart-shopping"></i></RouterLink>
+                    <RouterLink :to="{ name: 'order' }"  class="floating-icon-order"><i class="fa-solid fa-clipboard-list"></i></RouterLink>
+                    <RouterLink :to="{ name: 'order' }"  class="floating-icon-order"><i class="fa-solid fa-clipboard-list"></i></RouterLink>
                 </h4>
             </ol>    
         <!-- RouterLink End -->

@@ -17,6 +17,7 @@ import StoreProductDetailView from '@/views/StoreProductDetailView.vue';
 import GenerateRecipeView from '@/views/GenerateRecipeView.vue';
 
 import { createRouter, createWebHistory } from 'vue-router';
+import OrderView from '@/views/OrderView.vue';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -117,6 +118,11 @@ const router = createRouter({
                     path: '/storeProductDetail/:id',
                     component: StoreProductDetailView,
                     name: 'storeProductDetailById',
+                },
+                {
+                    path:'/order',
+                    component:OrderView,
+                    name:'order',
                 },
             ],
         },
