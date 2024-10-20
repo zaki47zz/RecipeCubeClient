@@ -14,7 +14,7 @@
   "dependencies": {
     "bootstrap": "^5.3.3",
     "circular-json": "^0.5.9",
-    "element-plus": "^2.8.5",
+    "element-plus": "^2.8.6",
     "isotope-layout": "^3.0.6",
     "pinia": "^2.1.7",
     "soft-ui-dashboard": "^1.0.1",

@@ -6,7 +6,7 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
-
+import Vue3EasyDataTable from 'vue3-easy-data-table';
 import App from './App.vue';
 import router from './router';
 import SoftUIDashboard from './soft-ui-dashboard';
