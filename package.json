@@ -13,9 +13,8 @@
   },
   "dependencies": {
     "bootstrap": "^5.3.3",
-    "element-plus": "^2.8.5",
     "circular-json": "^0.5.9",
-    "isotope-layout": "^3.0.6",
+    "element-plus": "^2.8.5",
     "pinia": "^2.1.7",
     "soft-ui-dashboard": "^1.0.1",
     "sweetalert2": "^11.14.3",

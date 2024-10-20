@@ -13,10 +13,10 @@ const isLoaded = ref(false);
 onMounted(() => {
     document.onreadystatechange = () => {
         if (document.readyState === 'complete') {
-            // 稍微延遲一下不然看不到preloaderXD，之後東西多在改用上面那段
+            // 稍微延遲一下不然看不到preloader XD，之後東西多在改用上面那段
             setTimeout(() => {
                 isLoaded.value = true;
-            }, 1500);
+            }, 1000);
         }
     };
 });

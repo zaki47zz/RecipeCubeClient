@@ -1,40 +1,58 @@
 <script setup>
-import Isotope from 'isotope-layout';
 import Swal from 'sweetalert2';
 import SoftBadge from '@/components/SoftBadge.vue';
 import SoftPagination from '@/components/SoftPagination.vue';
 import SoftPaginationItem from '@/components/SoftPaginationItem.vue';
-import { onMounted, ref } from 'vue';
+import InventorySkeleton from '@/components/InventorySkeleton.vue';
+import { onMounted, ref, computed } from 'vue';
+
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL(抓圖片要用的);
 const ApiURL = `${BaseURL}/Inventories`;
-const InventoriesURL = `${ApiURL}/${localStorage.getItem('UserId')}`;
-const inventories = ref([]);
-const totalInventories = ref(0);
-const ingredientCategory = ref(new Set());
-const allSelect = ref(false);
+const InventoriesURL = `${ApiURL}/${localStorage.getItem('UserId')}`; //抓庫存的API
 
+const inventories = ref([]); //庫存放這
+const totalInventories = ref(0); //總共多少項目放這
+const ingredientCategory = ref(new Set()); //分類放這，用Set避免重複
+const selectedInventories = ref([]); //用戶選到的庫存會被加到這
+
+const isLoading = ref(true); //判斷是否還在載入的flag
+const allSelect = ref(false); //判斷全選與否的flag
+
+//當DOM加載完執行fetch
+onMounted(() => {
+    fetchInventories();
+});
+
+//fetch庫存資料，使用非同步方法
 const fetchInventories = async () => {
     try {
+        isLoading.value = true;
         const response = await fetch(InventoriesURL);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        inventories.value = data;
+        inventories.value = data.map((inventory) => ({
+            //因為陣列每項inventory都是物件，要用物件角度思考
+            ...inventory, //...展開式表示把原先物件內容還原
+            synonymArray: inventory.synonym.split(',').map((synonym) => synonym.trim()), //加入新的一項，拆分synonym然後去空白轉陣列
+        }));
         totalInventories.value = inventories.value.length;
-        for (let inventory of inventories.value) {
-            ingredientCategory.value.add(inventory.category);
-        }
+        ingredientCategory.value = new Set(inventories.value.map((i) => i.category)); //利用map回傳陣列存進set再存進ref set
     } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
+    } finally {
+        isLoading.value = false;
     }
 };
 
-const getRecipeImageUrl = (fileName) => {
+//設定庫存圖片路徑
+const getIngredientImageUrl = (fileName) => {
     return `${BaseUrlWithoutApi}/images/ingredient/${fileName}`;
 };
 
+//清空列表按鈕的提醒
 const alertClearCheck = () => {
     Swal.fire({
         title: '您確定嗎?',
@@ -55,42 +73,103 @@ const alertClearCheck = () => {
     });
 };
 
-onMounted(() => {
-    fetchInventories();
+////篩選功能
+//先給定響應式物件存條件資料
+const filters = ref({
+    category: '',
+    visibility: '',
+    expiry: '',
+    searchWord: '',
 });
 
+//利用computed的監測特性來實時更改篩選庫存
+const filteredInventories = computed(() => {
+    return inventories.value.filter((inventory) => {
+        //利用filter逐項遍歷每個inventory項目作篩選，利用4個Boolean來決定項目要不要顯示
+        //分類篩選(用戶沒篩選或篩選符合會回傳true)
+        const categoryMatch = !filters.value.category || inventory.category === filters.value.category;
+        //權限篩選
+        const visibilityMatch =
+            !filters.value.visibility || //沒篩選
+            (filters.value.visibility === 'group' && !inventory.visibility) || //當用戶選群組而我們的項目剛好是群組項目時式true
+            (filters.value.visibility === 'private' && inventory.visibility); //同理
+        //期限篩選
+        const expiryMatch =
+            !filters.value.expiry ||
+            (filters.value.expiry === 'expiring' && inventory.isExpiring) ||
+            (filters.value.expiry === 'expired' && inventory.isExpired) ||
+            (filters.value.expiry === 'normal' && !inventory.isExpiring && !inventory.isExpired);
+        //搜尋篩選
+        const searchMatch =
+            !filters.value.searchWord ||
+            inventory.ingredientName.toLowerCase().includes(filters.value.searchWord.toLowerCase()) || //因為有英文，要lower一下
+            //也要篩一下同義字陣列，因為多一層要再用一個some(檢查是否有item符合條件，就是filter的"只檢查"版本)包起來
+            inventory.synonymArray.some((synonym) =>
+                synonym.toLowerCase().includes(filters.value.searchWord.toLowerCase())
+            );
+
+        //因為filter只會傳回結果是true的項目回陣列，所以可以這樣回傳Boolean來控制
+        return categoryMatch && visibilityMatch && expiryMatch && searchMatch;
+    });
+});
+////篩選功能結束
+
 //卡片點擊
-const activateCard = (event) => {
-    event.currentTarget.closest('.card').classList.toggle('active');
-    console.log('activate');
+const activateCard = (event, inventoryId) => {
+    const selectedCard = event.currentTarget.closest('.card');
+    if (!selectedCard.classList.contains('active')) {
+        selectedCard.classList.add('active');
+        selectedInventories.value.push(inventoryId);
+    } else {
+        selectedCard.classList.remove('active');
+        const deletingIndex = selectedInventories.value.indexOf(inventoryId);
+        if (deletingIndex > -1) {
+            selectedInventories.value.splice(deletingIndex, 1);
+        }
+    }
 };
+
 //全選按鈕
 const selectAllCard = () => {
-    const cards = document.querySelectorAll('.card');
-    const selectAllButton = document.querySelector('#selectAllButton');
-    cards.forEach((card) => {
-        const style = window.getComputedStyle(card);
-        if (style.display !== 'none' && !card.classList.contains('active')) {
+    filteredInventories.value.forEach((inventory) => {
+        const card = document.querySelector(`.card[data-inventoryId="${inventory.inventoryId}"]`);
+        if (card && !card.classList.contains('active')) {
             card.classList.add('active');
+            if (!selectedInventories.value.includes(inventory.inventoryId)) {
+                selectedInventories.value.push(inventory.inventoryId);
+            }
         }
     });
     allSelect.value = true;
 };
 
+//取消全選按鈕
 const deselectAllCard = () => {
-    const cards = document.querySelectorAll('.card');
-    cards.forEach((card) => {
-        card.classList.remove('active');
+    selectedInventories.value.forEach((inventoryId) => {
+        const card = document.querySelector(`.card[data-inventoryId="${inventoryId}"]`);
+        //找到有data-inventoryId="已選擇號碼"的card
+        if (card) {
+            //存在的話，刪掉active
+            card.classList.remove('active');
+        }
     });
+    selectedInventories.value = []; //清掉所選
     allSelect.value = false;
 };
 
+//修改功能
 const editCard = () => {
     console.log('修改邏輯');
 };
 
+//個別刪除功能
 const deleteCard = () => {
     console.log('刪除邏輯');
+};
+
+//群體刪除功能
+const deleteCards = () => {
+    console.log('群體刪除邏輯');
 };
 </script>
 
@@ -144,35 +223,36 @@ const deleteCard = () => {
         <div class="container-fluid">
             <div class="col-sm-10 offset-sm-2 offset-md-0 col-lg-12 d-none d-lg-block">
                 <div class="row g-3 py-1 px-3 my-3 d-flex bg-primary-subtle rounded-4 shadow justify-content-between">
-                    <!-- 分類欄 -->
-                    <div class="col-md-2 text-center">
-                        <p class="fw-bold">分類 CATEGORY</p>
-                    </div>
                     <div class="col-md-2 mt-2">
-                        <select class="form-select">
-                            <option selected>類別</option>
+                        <select class="form-select" v-model="filters.category">
+                            <option value="">類別</option>
                             <option v-for="category in ingredientCategory" :value="category">
                                 {{ category }}
                             </option>
                         </select>
                     </div>
                     <div class="col-md-2 mt-2">
-                        <select class="form-select">
-                            <option selected>群組/私有</option>
-                            <option value="0">群組</option>
-                            <option value="1">私有</option>
+                        <select class="form-select" v-model="filters.visibility">
+                            <option value="">群組/私有</option>
+                            <option value="group">群組</option>
+                            <option value="private">私有</option>
                         </select>
                     </div>
                     <div class="col-md-2 mt-2">
-                        <select class="form-select">
-                            <option selected>期限</option>
-                            <option value="0">即期</option>
-                            <option value="1">過期</option>
-                            <option value="1">正常</option>
+                        <select class="form-select" v-model="filters.expiry">
+                            <option value="">期限</option>
+                            <option value="expiring">即期</option>
+                            <option value="expired">過期</option>
+                            <option value="normal">正常</option>
                         </select>
                     </div>
                     <div class="col-md-3 mt-2">
-                        <input type="text" class="form-control w-100 text-center" placeholder="搜尋" />
+                        <input
+                            type="text"
+                            class="form-control w-100 text-center"
+                            placeholder="搜尋"
+                            v-model="filters.searchWord"
+                        />
                     </div>
                 </div>
             </div>
@@ -183,7 +263,7 @@ const deleteCard = () => {
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="banner-ad bootstrap-tabs product-tabs p-3">
+                    <div class="banner-ad p-3">
                         <div class="tabs-header d-flex justify-content-between">
                             <h3>食材列表</h3>
                             <div>
@@ -192,13 +272,21 @@ const deleteCard = () => {
                                     取消全選
                                 </button>
                                 <button v-else class="btn blur shadow fs-6 me-1" @click="selectAllCard">全選</button>
-                                <button class="btn blur shadow fs-6 text-danger me-1">刪除</button>
+                                <button class="btn blur shadow fs-6 text-danger me-1" @click="deleteCards">刪除</button>
                             </div>
                         </div>
-                        <!-- All Products Tab -->
                         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
-                            <div class="col" v-for="inventory in inventories" :key="inventory.id">
-                                <div class="card h-100 p-0 shadow-sm position-relative">
+                            <div v-if="isLoading" class="col"><InventorySkeleton></InventorySkeleton></div>
+                            <div
+                                v-else
+                                class="col"
+                                v-for="inventory in filteredInventories"
+                                :key="inventory.inventoryId"
+                            >
+                                <div
+                                    class="card h-100 p-0 shadow-sm position-relative"
+                                    :data-inventoryId="inventory.inventoryId"
+                                >
                                     <SoftBadge
                                         v-if="inventory.isExpiring"
                                         variant="gradient"
@@ -216,17 +304,20 @@ const deleteCard = () => {
                                         已過期
                                     </SoftBadge>
                                     <span class="position-absolute top-0 end-0 p-2 z-index-3">
-                                        <button class="card-control" @click="editCard">
+                                        <button class="card-control" @click.stop="editCard(inventory.inventoryId)">
                                             <i class="fa-solid fa-pencil"></i>
                                         </button>
-                                        <button class="card-control" @click="deleteCard">
+                                        <button class="card-control" @click.stop="deleteCard(inventory.inventoryId)">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
                                     </span>
-                                    <div class="card-body d-flex flex-column" @click="activateCard">
+                                    <div
+                                        class="card-body d-flex flex-column"
+                                        @click="activateCard($event, inventory.inventoryId)"
+                                    >
                                         <div class="image-container mb-3">
                                             <img
-                                                :src="getRecipeImageUrl(inventory.photo)"
+                                                :src="getIngredientImageUrl(inventory.photo)"
                                                 :alt="inventory.ingredientName"
                                                 class="product-image"
                                             />
@@ -371,7 +462,7 @@ const deleteCard = () => {
 }
 
 .card.active {
-    border: 3px solid rgb(255, 204, 103);
+    background-color: rgba(253, 255, 164);
     opacity: 80%;
 }
 
