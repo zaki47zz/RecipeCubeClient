@@ -223,6 +223,9 @@ const deleteCards = () => {
         <div class="container-fluid">
             <div class="col-sm-10 offset-sm-2 offset-md-0 col-lg-12 d-none d-lg-block">
                 <div class="row g-3 py-1 px-3 my-3 d-flex bg-primary-subtle rounded-4 shadow justify-content-between">
+                    <div class="col-md-2">
+                        <p class="fw-bold">分類 CATEGORY</p>
+                    </div>
                     <div class="col-md-2 mt-2">
                         <select class="form-select" v-model="filters.category">
                             <option value="">類別</option>
