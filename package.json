@@ -14,14 +14,17 @@
   "dependencies": {
     "bootstrap": "^5.3.3",
     "circular-json": "^0.5.9",
-    "element-plus": "^2.8.5",
+    "element-plus": "^2.8.6",
+    "isotope-layout": "^3.0.6",
     "pinia": "^2.1.7",
     "soft-ui-dashboard": "^1.0.1",
     "sweetalert2": "^11.14.3",
     "swiper": "^11.1.14",
     "tippy.js": "^6.3.7",
     "vue": "^3.5.11",
+    "vue-jwt-decode": "^0.1.0",
     "vue-router": "^4.4.5",
+    "vue3-easy-data-table": "^1.5.47",
     "vue-smooth-scroll": "^1.0.13",
     "vue3-perfect-scrollbar": "^2.0.0",
     "vuex": "^4.1.0"

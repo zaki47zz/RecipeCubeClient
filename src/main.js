@@ -6,7 +6,7 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
-
+import Vue3EasyDataTable from 'vue3-easy-data-table';
 import App from './App.vue';
 import router from './router';
 import SoftUIDashboard from './soft-ui-dashboard';
@@ -23,6 +23,7 @@ app.use(createPinia());
 app.use(router);
 app.use(SoftUIDashboard);
 app.use(ElementPlus);
+app.component('EasyDataTable', Vue3EasyDataTable);;
 app.use(PerfectScrollbarPlugin);
 app.use(vueSmoothScroll);
 app.mount('#app');
