@@ -361,7 +361,7 @@ const deleteCards = () => {
         </div>
     </section>
 
-    <section>
+    <section v-if="false">
         <div
             class="h-screen flex justify-center items-center bg-gradient-to-br from-purple-400 via-pink-500 to-red-500"
         >
