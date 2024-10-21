@@ -13,14 +13,14 @@ const BaseUrlWithoutApi = BaseURL.replace("/api", ""); // 去掉 "/api" 得到�
 
 
 // 讀取localStorage的"UserId"
-// const UserId = localStorage.getItem("UserId");
-// console.log(UserId);
+const UserId = localStorage.getItem("UserId");
+console.log(UserId);
 
 // 測試用userId
-const testUserId = 'e9f150de-3492-47b4-9efe-783a6b9d9319'
-localStorage.setItem("UserId",testUserId);
-const UserId = localStorage.getItem("UserId")
-console.log(UserId);
+// const testUserId = 'e9f150de-3492-47b4-9efe-783a6b9d9319'
+// localStorage.setItem("UserId",testUserId);
+// const UserId = localStorage.getItem("UserId")
+// console.log(UserId);
 
 
 
@@ -218,7 +218,7 @@ const steps = [
         <div>
             <!-- el-descriptions OrderInfo Start -->
           <div class="row">
-            <div v-if="selectedOrder" class="col-8 macaron-orderInfo mx-auto">
+            <div v-if="selectedOrder" class="col-9 macaron-orderInfo mx-auto">
               <el-descriptions
                 title="訂單資訊"
                 direction="vertical"
@@ -229,18 +229,18 @@ const steps = [
                 <el-descriptions-item label="訂單時間">{{selectedOrder.orderTime}}</el-descriptions-item>
                 <el-descriptions-item label="連絡電話" :span="2">{{selectedOrder.orderPhone}}</el-descriptions-item>
                 <el-descriptions-item label="訂單總價">
-                  <el-tag >{{selectedOrder.totalAmount}}</el-tag>
+                  <el-tag >$ {{selectedOrder.totalAmount}}</el-tag>
                 </el-descriptions-item>
                 <el-descriptions-item label="收貨地址">
                   {{selectedOrder.orderAddress}}
                 </el-descriptions-item>
-                <el-descriptions-item label="訂單備註">{{ selectedOrder.orderRemark }}</el-descriptions-item> <!-- 新增的欄位 -->
+                <el-descriptions-item label="訂單備註">{{ selectedOrder.orderRemark }}</el-descriptions-item> 
               </el-descriptions>
             </div>
             <!-- el-descriptions OrderInfo End -->
             
             <!-- Timeline Start -->
-            <div class="col-3 macaron-orderTimeline mx-auto">
+            <div class="col-2 macaron-orderTimeline mx-auto">
               <el-timeline style="max-width: 600px">
                 <el-timeline-item
                   v-for="(step,index) in steps"
