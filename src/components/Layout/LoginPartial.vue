@@ -24,10 +24,12 @@ onMounted(() => {
     }
 })
 function logout() {
-    // localStorage.removeItem('token');
-    // localStorage.removeItem('UserData');
-    // localStorage.removeItem('UserId');
-    localStorage.clear(); //清空localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('UserData');
+    localStorage.removeItem('UserId');
+
+    
+    // localStorage.clear(); //清空localStorage
     location.reload();  // 刷新頁面以更新登入狀態
 }
 </script>
@@ -36,7 +38,7 @@ function logout() {
     <template v-if="!tokenData || isTokenExpired">
         <ul class="navbar-nav ms-auto text-center">
             <li class="nav-item">
-                <RouterLink class="nav-link me-2" to="/user">
+                <RouterLink class="nav-link me-2" :to="{ name: 'SignUp' }">
                     <i class="fa fa-user opacity-6 me-1" aria-hidden="true"
                         :class="isTransparent ? 'text-white' : 'text-dark'" @click="isNavbarShown = false"></i>
                     註冊
