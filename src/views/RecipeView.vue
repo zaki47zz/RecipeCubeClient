@@ -1,33 +1,21 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRecipeStore } from '@/stores/recipeStore';
 import Swal from 'sweetalert2';
-import WineWithBeef from '@/assets/img/ForComponent/WineWithBeef.jpg';
 import BannerRecipe from '@/assets/img/ForBackground/banner-recipe.jpg';
-import SoftPagination from '@/components/SoftPagination.vue';
-import SoftPaginationItem from '@/components/SoftPaginationItem.vue';
+
 import RecipeDetailComponent from '@/components/RecipeDetailComponent.vue';
 
 // 使用 Pinia 的 recipeStore
 const recipeStore = useRecipeStore();
-// 控制列表的顯示與否
-const isRecipeListVisible = ref(true);
+
 const recipes = ref([]);
 let currentPage = ref(1);
 let pageSize = ref(8); // 每頁顯示 8 個食譜
-let totalRecipes = ref(100);
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
 const ApiURL = `${BaseURL}/Recipes`;
-const selectedRecipe = ref(null); // 儲存當前選中的食譜
 
-const showRecipeDetails = (recipe) => {
-    selectedRecipe.value = recipe; // 更新選中的食譜
-    isRecipeListVisible.value = false; // 點擊後隱藏食譜列表
-};
-const hideRecipeDetails = () => {
-    isRecipeListVisible.value = true; // 隱藏詳細內容，重新顯示列表
-};
 // 使用fetch獲取數據
 const fetchRecipes = async () => {
     try {
@@ -38,61 +26,16 @@ const fetchRecipes = async () => {
         const data = await response.json();
         recipes.value = data; // 將獲取到的數據存入 recipes 變量
         totalRecipes.value = recipes.value.length;
+        // console.log(recipes)
     } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
     }
 };
-const dialogVisible = computed({
-    get: () => recipeStore.dialogVisible,
-    set: (value) => {
-        recipeStore.dialogVisible = value;
-    },
-});
+
 // 在組件加載後獲取數據
 onMounted(() => {
     fetchRecipes();
 });
-
-// 分頁控制
-const totalPages = computed(() => Math.ceil(totalRecipes.value / pageSize.value));
-const paginatedRecipes = computed(() => {
-    const start = (currentPage.value - 1) * pageSize.value;
-    const end = start + pageSize.value;
-    return recipes.value.slice(start, end);
-});
-// 使用計算屬性來取得分頁的食譜
-// const paginatedRecipes = computed(() => recipeStore.paginatedRecipes);
-const changePage = (page) => {
-    if (page >= 1 && page <= totalPages.value) {
-        currentPage.value = page;
-    }
-};
-const inputPage = ref(1);
-
-const goToPage = () => {
-    if (inputPage.value >= 1 && inputPage.value <= totalPages.value) {
-        changePage(inputPage.value);
-    } else {
-        // 提示使用者輸入有效的頁碼
-        Swal.fire({
-            title: '頁碼無效',
-            text: `請輸入介於 1 和 ${totalPages.value} 之間的頁碼`,
-            icon: 'warning',
-            confirmButtonText: '確定',
-        });
-    }
-};
-
-const pagesAroundCurrent = computed(() => {
-    let start = Math.max(1, currentPage.value - 2);
-    let end = Math.min(totalPages.value, currentPage.value + 2);
-    let pages = [];
-    for (let i = start; i <= end; i++) {
-        pages.push(i);
-    }
-    return pages;
-});
-
 const getRecipeImageUrl = (fileName) => {
     return `${BaseUrlWithoutApi}/images/recipe/${fileName}`;
 };
@@ -106,9 +49,110 @@ const onDialogOpened = () => {
         resetActiveStep.value = false;
     }, 0);
 };
+
+//搜尋功能
+const filters = ref({
+    category: '',
+    subcategory: '',
+    searchWord: '',
+    searchType: '',
+    restriction: '',
+    style: '',
+});
+
+const categoryOptions = {
+    "主餐": ["麵食", "飯食", "粥", "排餐", "鹹派", "火鍋", "焗烤"],
+    "副餐": ["肉類料理", "青菜料理", "海鮮料理"],
+    "湯品": ["無"],
+    "甜點": ["甜", "鹹"]
+};
+const subcategoryOptions = computed(() => {
+    // console.log(filters.value)
+    if (filters.value.category) {
+        return categoryOptions[filters.value.category] || [];
+    }
+    return [];
+});
+const filteredRecipes = computed(() => {
+    return recipes.value.filter((recipe) => {
+        // 分類篩選
+        const categoryMatch = !filters.value.category || recipe.category === filters.value.category;
+
+        // 細部類別篩選
+        const subcategoryMatch = !filters.value.subcategory || recipe.detailedCategory === filters.value.subcategory;
+
+
+        let searchMatch = true;
+
+        // 如果沒有選擇搜尋類型，預設不篩選
+        if (filters.value.searchType === '') {
+            searchMatch = true; // 沒有選擇類型時，搜尋條件為 true，代表不篩選
+        } else if (filters.value.searchType === 'recipeName') {
+            // 搜尋食譜名稱
+            searchMatch = searchWords.every(word => {
+                return !word || recipe.recipeName.toLowerCase().includes(word);
+            });
+        } else if (filters.value.searchType === 'ingredient') {
+            // 搜尋食材名稱（包括同義字）
+            searchMatch = searchWords.every(word => {
+                return (
+                    !word ||
+                    (recipe.selectedIngredientNames && recipe.selectedIngredientNames.some(ingredient => ingredient.toLowerCase().includes(word))) ||
+                    (recipe.synonyms && recipe.synonyms.some(synonym => synonym.toLowerCase().includes(word)))
+                );
+            });
+        }
+        // 葷素篩選
+        const restrictionMatch = !filters.value.restriction || recipe.restriction === filters.value.restriction;
+
+        // 中西式篩選
+        const styleMatch = !filters.value.style || recipe.westEast === filters.value.style;
+
+        // 必須符合所有條件
+        return categoryMatch && subcategoryMatch && searchMatch && restrictionMatch && styleMatch;
+    });
+});
+//清空子類別
+watch(() => filters.value.category, () => {
+    filters.value.subcategory = '';
+});
+//搜尋功能end
+
+
+//分頁功能 start
+
+// 根據篩選後的結果計算總的食譜數量
+let totalRecipes = computed(() => filteredRecipes.value.length);
+
+// 根據篩選結果計算總頁數
+let totalPages = computed(() => Math.ceil(totalRecipes.value / pageSize.value));
+
+const paginatedRecipes = computed(() => {
+    const start = (currentPage.value - 1) * pageSize.value;
+    const end = start + pageSize.value;
+    return filteredRecipes.value.slice(start, end);
+});
+
+
+const handlePageSizeChange = (newSize) => {
+    pageSize.value = newSize;
+    currentPage.value = 1; // 當每頁顯示的數量改變時，重置到第一頁
+};
+
+const handleCurrentChange = (newPage) => {
+    currentPage.value = newPage;
+};
+
+watch(totalPages, (newTotalPages) => {
+    if (currentPage.value > newTotalPages) {
+        currentPage.value = newTotalPages;
+    }
+});
+//分頁功能 end
 </script>
 
 <template>
+    <!-- 食譜header start -->
     <section class="banner-section">
         <div class="banner-ad bg-warning-subtle block-2">
             <div class="row banner-content pt-5">
@@ -123,19 +167,17 @@ const onDialogOpened = () => {
             </div>
         </div>
     </section>
-
+    <!-- 食譜header end -->
+    <!-- 推薦食譜 start -->
     <section class="pt-5">
         <div class="container-fluid">
-            <div
-                class="pt-5 rounded-4"
-                :style="{
-                    width: '100%',
-                    height: '100%',
-                    backgroundImage: `url(${BannerRecipe})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                }"
-            >
+            <div class="pt-5 rounded-4" :style="{
+                width: '100%',
+                height: '100%',
+                backgroundImage: `url(${BannerRecipe})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+            }">
                 <div class="row p-3">
                     <div class="col-md-6 d-flex flex-column align-items-center">
                         <h2 class="mt-3 text-white">左思右想還是不知道煮什麼嗎?</h2>
@@ -146,9 +188,6 @@ const onDialogOpened = () => {
                 </div>
             </div>
         </div>
-    </section>
-
-    <section>
         <div class="container-fluid mt-5">
             <div class="row">
                 <div class="col-12 text-center">
@@ -158,7 +197,8 @@ const onDialogOpened = () => {
             </div>
         </div>
     </section>
-
+    <!-- 推薦食譜 end -->
+    <!-- 搜尋食譜 start -->
     <section class="pt-3 p-2">
         <div class="container-fluid">
             <div class="col-sm-10 offset-sm-2 offset-md-0 col-lg-12 d-none d-lg-block">
@@ -168,42 +208,56 @@ const onDialogOpened = () => {
                         <p class="fw-bold">分類 CATEGORY</p>
                     </div>
                     <div class="col-md-2 my-auto">
-                        <select class="form-select">
-                            <option selected>葷素</option>
-                            <option value="XX">XX</option>
+                        <select class="form-select" v-model="filters.restriction">
+                            <option value="">選擇葷素食</option>
+                            <option :value="true">葷食</option>
+                            <option :value="false">素食</option>
                         </select>
                     </div>
                     <div class="col-md-2 my-auto">
-                        <select class="form-select">
-                            <option selected>中西式</option>
-                            <option value="XX">XX</option>
+                        <select class="form-select" v-model="filters.style">
+                            <option value="">選擇中西式</option>
+                            <option :value="false">中式</option>
+                            <option :value="true">西式</option>
                         </select>
                     </div>
                     <div class="col-md-3 my-auto">
-                        <select class="form-select">
-                            <option selected>類別</option>
-                            <option value="XX">XX</option>
+                        <select class="form-select" v-model="filters.category">
+                            <option value="">選擇主類別</option>
+                            <option v-for="(subcategories, category) in categoryOptions" :key="category"
+                                :value="category">
+                                {{ category }}
+                            </option>
                         </select>
                     </div>
                     <div class="col-md-3 my-auto">
-                        <select class="form-select">
-                            <option selected>細部類別</option>
-                            <option value="XX">XX</option>
+                        <select class="form-select" v-model="filters.subcategory">
+                            <option value="">選擇細部類別</option>
+                            <option v-for="subcategory in subcategoryOptions" :key="subcategory" :value="subcategory">
+                                {{ subcategory }}
+                            </option>
                         </select>
                     </div>
-                    <div class="col-md-12 mt-0 mb-2">
-                        <input
-                            type="text"
-                            class="form-control w-100 rounded-3"
-                            placeholder="輸入食譜名稱或食材 (一次輸入多種食材請用逗號分隔，例如: 青椒,蘋果)"
-                        />
+
+                    <div class="col-md-3 mx-auto my-3">
+                        <select class="form-select" v-model="filters.searchType">
+                            <option value="">選擇搜尋食譜或食材</option>
+                            <option value="recipeName">搜尋食譜名稱</option>
+                            <option value="ingredient">搜尋食材名稱</option>
+                        </select>
                     </div>
+                    <div class="col-md-9 mx-auto my-3">
+                        <input type="text" v-model="filters.searchWord" class="form-control w-100 rounded-3"
+                            placeholder="輸入食譜名稱或食材 (一次輸入多種請用逗號分隔，例如: 青椒,蘋果)" />
+                    </div>
+
                 </div>
             </div>
         </div>
     </section>
-
-    <section>
+    <!-- 搜尋食譜 end -->
+    <!-- 顯示食譜 start -->
+    <section class="recipe-list">
         <div class="container-fluid mt-3">
             <div class="row">
                 <div class="col-md-12">
@@ -215,311 +269,40 @@ const onDialogOpened = () => {
                             </div>
                             <nav>
                                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                                    <a
-                                        href="#"
-                                        class="nav-link fs-5 fw-bold text-dark active"
-                                        id="nav-all-tab"
-                                        data-bs-toggle="tab"
-                                        data-bs-target="#nav-all"
-                                        >所有食譜</a
-                                    >
-                                    <a
-                                        href="#"
-                                        class="nav-link fs-5 fw-bold text-dark"
-                                        id="nav-group-tab"
-                                        data-bs-toggle="tab"
-                                        data-bs-target="#nav-group"
-                                        >群組食譜</a
-                                    >
-                                    <a
-                                        href="#"
-                                        class="nav-link fs-5 fw-bold text-dark"
-                                        id="nav-user-tab"
-                                        data-bs-toggle="tab"
-                                        data-bs-target="#nav-user"
-                                        >您的食譜</a
-                                    >
+                                    <a href="#" class="nav-link fs-5 fw-bold text-dark active" id="nav-all-tab"
+                                        data-bs-toggle="tab" data-bs-target="#nav-all">所有食譜</a>
+                                    <a href="#" class="nav-link fs-5 fw-bold text-dark" id="nav-group-tab"
+                                        data-bs-toggle="tab" data-bs-target="#nav-group">群組食譜</a>
+                                    <a href="#" class="nav-link fs-5 fw-bold text-dark" id="nav-user-tab"
+                                        data-bs-toggle="tab" data-bs-target="#nav-user">您的食譜</a>
                                 </div>
                             </nav>
                         </div>
                         <div class="tab-content" id="nav-tabContent">
-                            <!-- All Products Tab -->
-                            <div
-                                class="tab-pane fade show active"
-                                id="nav-all"
-                                role="tabpanel"
-                                aria-labelledby="nav-all-tab"
-                            >
+                            <div class="tab-pane fade show active" id="nav-all" role="tabpanel"
+                                aria-labelledby="nav-all-tab">
                                 <div class="row g-3 mt-2">
-                                    <div class="col-12 col-md-6">
-                                        <div
-                                            class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
-                                            style="height: 150px"
-                                        >
-                                            <div
-                                                class="d-flex"
-                                                :style="{
-                                                    width: '50%',
-                                                    height: '100%',
-                                                    backgroundImage: `url(${WineWithBeef})`,
-                                                    backgroundSize: 'cover',
-                                                    backgroundPosition: 'center',
-                                                    borderTopLeftRadius: '0.75rem',
-                                                    borderBottomLeftRadius: '0.75rem',
-                                                }"
-                                            ></div>
+                                    <div class="col-12 col-md-6" v-for="recipe in paginatedRecipes"
+                                        :key="recipe.recipeId">
+                                        <div class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
+                                            style="height: 150px" @click="recipeStore.selectRecipe(recipe)">
+                                            <div class="d-flex" :style="{
+                                                width: '50%',
+                                                height: '100%',
+                                                backgroundImage: `url(${getRecipeImageUrl(recipe.photo) || 'default_image.jpg'})`,
+                                                backgroundSize: 'cover',
+                                                backgroundPosition: 'center',
+                                                borderTopLeftRadius: '0.75rem',
+                                                borderBottomLeftRadius: '0.75rem',
+                                            }"></div>
 
                                             <!-- 右邊文字和標籤區 -->
                                             <div
-                                                class="p-3 w-100 d-flex flex-column justify-content-center align-items-center"
-                                            >
-                                                <h5 class="mb-3">紅酒燉牛肉</h5>
-                                                <div class="d-flex gap-2">
-                                                    <span class="badge bg-secondary">葷</span>
-                                                    <span class="badge bg-secondary">西式</span>
-                                                    <span class="badge bg-secondary">主餐</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-12 col-md-6">
-                                        <div
-                                            class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
-                                            style="height: 150px"
-                                        >
-                                            <div
-                                                class="d-flex"
-                                                :style="{
-                                                    width: '50%',
-                                                    height: '100%',
-                                                    backgroundImage: `url(${WineWithBeef})`,
-                                                    backgroundSize: 'cover',
-                                                    backgroundPosition: 'center',
-                                                    borderTopLeftRadius: '0.75rem',
-                                                    borderBottomLeftRadius: '0.75rem',
-                                                }"
-                                            ></div>
-
-                                            <!-- 右邊文字和標籤區 -->
-                                            <div
-                                                class="p-3 w-100 d-flex flex-column justify-content-center align-items-center"
-                                            >
-                                                <h5 class="mb-3">紅酒燉牛肉</h5>
-                                                <div class="d-flex gap-2">
-                                                    <span class="badge bg-secondary">葷</span>
-                                                    <span class="badge bg-secondary">西式</span>
-                                                    <span class="badge bg-secondary">主餐</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 群組 Tab -->
-                            <div
-                                class="tab-pane fade show"
-                                id="nav-group"
-                                role="tabpanel"
-                                aria-labelledby="nav-group-tab"
-                            >
-                                <div class="row g-3 mt-2">
-                                    <div class="col-12 col-md-6">
-                                        <div
-                                            class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
-                                            style="height: 150px"
-                                        >
-                                            <div
-                                                class="d-flex"
-                                                :style="{
-                                                    width: '50%',
-                                                    height: '100%',
-                                                    backgroundImage: `url(${WineWithBeef})`,
-                                                    backgroundSize: 'cover',
-                                                    backgroundPosition: 'center',
-                                                    borderTopLeftRadius: '0.75rem',
-                                                    borderBottomLeftRadius: '0.75rem',
-                                                }"
-                                            ></div>
-
-                                            <!-- 右邊文字和標籤區 -->
-                                            <div
-                                                class="p-3 w-100 d-flex flex-column justify-content-center align-items-center"
-                                            >
-                                                <h5 class="mb-3">紅酒燉牛肉</h5>
-                                                <div class="d-flex gap-2">
-                                                    <span class="badge bg-secondary">葷</span>
-                                                    <span class="badge bg-secondary">西式</span>
-                                                    <span class="badge bg-secondary">主餐</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-12 col-md-6">
-                                        <div
-                                            class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
-                                            style="height: 150px"
-                                        >
-                                            <div
-                                                class="d-flex"
-                                                :style="{
-                                                    width: '50%',
-                                                    height: '100%',
-                                                    backgroundImage: `url(${WineWithBeef})`,
-                                                    backgroundSize: 'cover',
-                                                    backgroundPosition: 'center',
-                                                    borderTopLeftRadius: '0.75rem',
-                                                    borderBottomLeftRadius: '0.75rem',
-                                                }"
-                                            ></div>
-
-                                            <!-- 右邊文字和標籤區 -->
-                                            <div
-                                                class="p-3 w-100 d-flex flex-column justify-content-center align-items-center"
-                                            >
-                                                <h5 class="mb-3">紅酒燉牛肉</h5>
-                                                <div class="d-flex gap-2">
-                                                    <span class="badge bg-secondary">葷</span>
-                                                    <span class="badge bg-secondary">西式</span>
-                                                    <span class="badge bg-secondary">主餐</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- 自己 tab -->
-                            <div
-                                class="tab-pane fade show"
-                                id="nav-user"
-                                role="tabpanel"
-                                aria-labelledby="nav-user-tab"
-                            >
-                                <div class="row g-3 mt-2">
-                                    <div class="col-12 col-md-6">
-                                        <div
-                                            class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
-                                            style="height: 150px"
-                                        >
-                                            <div
-                                                class="d-flex"
-                                                :style="{
-                                                    width: '50%',
-                                                    height: '100%',
-                                                    backgroundImage: `url(${WineWithBeef})`,
-                                                    backgroundSize: 'cover',
-                                                    backgroundPosition: 'center',
-                                                    borderTopLeftRadius: '0.75rem',
-                                                    borderBottomLeftRadius: '0.75rem',
-                                                }"
-                                            ></div>
-
-                                            <!-- 右邊文字和標籤區 -->
-                                            <div
-                                                class="p-3 w-100 d-flex flex-column justify-content-center align-items-center"
-                                            >
-                                                <h5 class="mb-3">紅酒燉牛肉</h5>
-                                                <div class="d-flex gap-2">
-                                                    <span class="badge bg-secondary">葷</span>
-                                                    <span class="badge bg-secondary">西式</span>
-                                                    <span class="badge bg-secondary">主餐</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-12 col-md-6">
-                                        <div
-                                            class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
-                                            style="height: 150px"
-                                        >
-                                            <div
-                                                class="d-flex"
-                                                :style="{
-                                                    width: '50%',
-                                                    height: '100%',
-                                                    backgroundImage: `url(${WineWithBeef})`,
-                                                    backgroundSize: 'cover',
-                                                    backgroundPosition: 'center',
-                                                    borderTopLeftRadius: '0.75rem',
-                                                    borderBottomLeftRadius: '0.75rem',
-                                                }"
-                                            ></div>
-
-                                            <!-- 右邊文字和標籤區 -->
-                                            <div
-                                                class="p-3 w-100 d-flex flex-column justify-content-center align-items-center"
-                                            >
-                                                <h5 class="mb-3">紅酒燉牛肉</h5>
-                                                <div class="d-flex gap-2">
-                                                    <span class="badge bg-secondary">葷</span>
-                                                    <span class="badge bg-secondary">西式</span>
-                                                    <span class="badge bg-secondary">主餐</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="recipe-list">
-        <div class="container-fluid mt-3">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="banner-ad bootstrap-tabs product-tabs p-3">
-                        <div class="tabs-header d-flex justify-content-between">
-                            <h3>食譜列表</h3>
-                            <div>
-                                <button class="btn blur shadow fs-6 text-danger me-1">刪除</button>
-                            </div>
-                        </div>
-                        <div class="tab-content" id="nav-tabContent">
-                            <div
-                                class="tab-pane fade show active"
-                                id="nav-all"
-                                role="tabpanel"
-                                aria-labelledby="nav-all-tab"
-                            >
-                                <div class="row g-3 mt-2">
-                                    <div
-                                        class="col-12 col-md-6"
-                                        v-for="recipe in paginatedRecipes"
-                                        :key="recipe.recipeId"
-                                    >
-                                        <div
-                                            class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
-                                            style="height: 150px"
-                                            @click="recipeStore.selectRecipe(recipe)"
-                                        >
-                                            <div
-                                                class="d-flex"
-                                                :style="{
-                                                    width: '50%',
-                                                    height: '100%',
-                                                    backgroundImage: `url(${getRecipeImageUrl(recipe.photo) || 'default_image.jpg'})`,
-                                                    backgroundSize: 'cover',
-                                                    backgroundPosition: 'center',
-                                                    borderTopLeftRadius: '0.75rem',
-                                                    borderBottomLeftRadius: '0.75rem',
-                                                }"
-                                            ></div>
-
-                                            <!-- 右邊文字和標籤區 -->
-                                            <div
-                                                class="p-3 w-100 d-flex flex-column justify-content-center align-items-center"
-                                            >
+                                                class="p-3 w-100 d-flex flex-column justify-content-center align-items-center">
                                                 <h5 class="mb-3">{{ recipe.recipeName }}</h5>
                                                 <div class="d-flex gap-2">
-                                                    <span class="badge bg-secondary" v-if="recipe.restriction">葷</span>
-                                                    <span class="badge bg-secondary" v-else>素</span>
+                                                    <span class="badge bg-secondary" v-if="recipe.restriction">素食</span>
+                                                    <span class="badge bg-secondary" v-else>葷食</span>
                                                     <span class="badge bg-secondary" v-if="recipe.westEast">西式</span>
                                                     <span class="badge bg-secondary" v-else>中式</span>
                                                     <span class="badge bg-secondary">{{ recipe.category }}</span>
@@ -530,41 +313,12 @@ const onDialogOpened = () => {
                                 </div>
 
                                 <!-- 分頁導航 -->
-
-                                <div
-                                    class="pagination-container mt-4 d-flex justify-content-end align-items-center gap-2"
-                                >
-                                    <soft-pagination color="warning" class="d-flex align-items-center gap-2 m-0">
-                                        <soft-pagination-item
-                                            prev
-                                            @click="changePage(currentPage - 1)"
-                                            :disabled="currentPage === 1"
-                                        />
-                                        <soft-pagination-item
-                                            v-for="page in pagesAroundCurrent"
-                                            :key="page"
-                                            :label="String(page)"
-                                            :active="page === currentPage"
-                                            @click="changePage(page)"
-                                        />
-                                        <soft-pagination-item
-                                            next
-                                            @click="changePage(currentPage + 1)"
-                                            :disabled="currentPage === totalPages"
-                                        />
-                                    </soft-pagination>
-                                    <input
-                                        type="number"
-                                        class="form-control shadow-sm border-warning w-5"
-                                        min="1"
-                                        :max="totalPages"
-                                        v-model.number="inputPage"
-                                        placeholder="輸入頁碼"
-                                    />
-                                    <button class="btn bg-gradient-warning shadow-sm m-0" @click="goToPage">
-                                        前往
-                                    </button>
-                                </div>
+                                <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize"
+                                    :total="totalRecipes" background layout="prev, pager, next, ->, sizes, total"
+                                    :page-sizes="[8, 12, 16, 20]" @size-change="handlePageSizeChange"
+                                    @current-change="handleCurrentChange"
+                                    class="mt-4 d-flex justify-content-end align-items-center gap-2">
+                                </el-pagination>
                                 <!-- 分頁導航結束 -->
                             </div>
                         </div>
@@ -573,23 +327,14 @@ const onDialogOpened = () => {
             </div>
         </div>
     </section>
-
+    <!-- 顯示食譜end -->
     <!-- Recipe Detail Component -->
     <!-- <RecipeDetailComponent v-if="recipeStore.selectedRecipe" :recipe="recipeStore.selectedRecipe">
     </RecipeDetailComponent> -->
-    <el-dialog
-        v-model="recipeStore.dialogVisible"
-        title="食譜詳細資訊"
-        width="65%"
-        @close="recipeStore.closeDialog"
-        center
-        @opened="onDialogOpened"
-    >
-        <RecipeDetailComponent
-            :recipe="recipeStore.selectedRecipe"
-            :reset-active-step="resetActiveStep"
-            v-if="recipeStore.selectedRecipe"
-        >
+    <el-dialog v-model="recipeStore.dialogVisible" title="食譜詳細資訊" width="80%" @close="recipeStore.closeDialog" center
+        @opened="onDialogOpened">
+        <RecipeDetailComponent :recipe="recipeStore.selectedRecipe" :reset-active-step="resetActiveStep"
+            v-if="recipeStore.selectedRecipe">
         </RecipeDetailComponent>
         <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
             <el-button @click="recipeStore.closeDialog" type="danger">關閉</el-button>

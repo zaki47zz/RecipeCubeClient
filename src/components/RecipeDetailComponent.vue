@@ -7,7 +7,7 @@
             <el-descriptions title="" :column="2" border>
                 <el-descriptions-item label="用戶名稱">{{ userIdDisplay }}</el-descriptions-item>
                 <!-- <el-descriptions-item label="是否自定義">{{ recipe.isCustom ? '是' : '否' }}</el-descriptions-item> -->
-                <el-descriptions-item label="葷素限制">{{ recipe.restriction ? '葷' : '素' }}</el-descriptions-item>
+                <el-descriptions-item label="葷素限制">{{ recipe.restriction ? '素' : '葷' }}</el-descriptions-item>
                 <el-descriptions-item label="中/西式">{{ recipe.westEast ? '西式' : '中式' }}</el-descriptions-item>
                 <el-descriptions-item label="類別">{{ recipe.category }}</el-descriptions-item>
                 <el-descriptions-item label="細部類別">{{ recipe.detailedCategory }}</el-descriptions-item>
