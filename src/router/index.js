@@ -84,10 +84,10 @@ const router = createRouter({
         {
             //http://localhost:5175/store
             path: '/store',
-            component:StoreView,
-            redirect:'/storeproduct',
+            component: StoreView,
+            redirect: '/storeproduct',
             name: 'store',
-            children:[
+            children: [
                 {
                     //http://localhost:5175/storeproduct
                     path: '/storeproduct',
