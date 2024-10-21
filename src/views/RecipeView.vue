@@ -74,7 +74,9 @@ const subcategoryOptions = computed(() => {
     }
     return [];
 });
+
 const filteredRecipes = computed(() => {
+    const searchWords = filters.value.searchWord.split(',').map(word => word.trim().toLowerCase());
     return recipes.value.filter((recipe) => {
         // 分類篩選
         const categoryMatch = !filters.value.category || recipe.category === filters.value.category;
@@ -103,11 +105,14 @@ const filteredRecipes = computed(() => {
                 );
             });
         }
+
         // 葷素篩選
-        const restrictionMatch = !filters.value.restriction || recipe.restriction === filters.value.restriction;
+        const restrictionMatch =
+            filters.value.restriction === '' || recipe.restriction === filters.value.restriction;
+
 
         // 中西式篩選
-        const styleMatch = !filters.value.style || recipe.westEast === filters.value.style;
+        const styleMatch = filters.value.style === '' || recipe.westEast === filters.value.style;
 
         // 必須符合所有條件
         return categoryMatch && subcategoryMatch && searchMatch && restrictionMatch && styleMatch;
@@ -119,6 +124,7 @@ watch(() => filters.value.category, () => {
 });
 watch(filters, () => {
     currentPage.value = 1; // 重置為第一頁
+    console.log(filters.value)
 }, { deep: true });
 //搜尋功能end
 
@@ -215,8 +221,8 @@ watch(totalPages, (newTotalPages) => {
                     <div class="col-md-2 my-auto">
                         <select class="form-select" v-model="filters.restriction">
                             <option value="">選擇葷素食</option>
-                            <option :value="true">葷食</option>
-                            <option :value="false">素食</option>
+                            <option :value="true">素食</option>
+                            <option :value="false">葷食</option>
                         </select>
                     </div>
                     <div class="col-md-2 my-auto">
