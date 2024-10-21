@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import { ref , watch ,onMounted} from 'vue';
 import 'vue3-easy-data-table/dist/style.css';
 import type { Header, Item } from "vue3-easy-data-table";
+import { CircleCheck, InfoFilled,List,Postcard, Van } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus';
 
 // @ts-ignore
@@ -114,12 +115,26 @@ const handleRowClick = (row) =>{
   const order = orders.value.find(order => order.orderId === orderNum);
   console.log("Selected Order:", order); // 檢查找到的訂單是否正確
   openModal(order);
-  console.log("isModalVisible:", isModalVisible.value); //  Modal 可见性
+  //console.log("isModalVisible:", isModalVisible.value); //  Modal 可見性
 };
+
+// 格式化時間 給訂單詳細使用
+const formatTime = (orderTime) =>{
+  const date = new Date(orderTime);
+  const formatDate = date.toISOString().split("T")[0]; //日期
+  const formatTime = date.toTimeString().split(" ")[0]; //時間
+  return `${formatDate} ${formatTime}`;
+}
 
 // 開啟Modal
 const openModal = (order) =>{
   selectedOrder.value = order;
+  
+  // 格式化時間
+  selectedOrder.value.orderTime = formatTime(order.orderTime);
+
+  // console.log(selectedOrder.value.orderTime)
+
   isModalVisible.value = true;
 }
 
@@ -129,13 +144,47 @@ const closeModal = () =>{
   selectedOrder.value = null;
 }
 
-watch(isModalVisible, (newVal) => {
-  console.log("Modal visibility changed:", newVal);
-});
 
-onMounted(() => {
-    console.log("Modal visibility on mounted:", isModalVisible.value);
-});
+
+
+// Timeline
+
+const activities = [
+  {
+    content: '未付款',
+    size: 'large',
+    type: 'primary',
+    icon: InfoFilled,
+  },
+  {
+    content: '已付款',
+    size: 'large',
+    color: '#0bbd87',
+    icon: Postcard,
+  },
+  {
+    content: '訂單確認中',
+    size: 'large',
+    icon: List,
+  },
+  {
+    content: '已出貨',
+    size: 'large',
+    type: 'primary',
+    hollow: true,
+    icon: Van,
+  },
+  {
+    content: '訂單完成',
+    size: 'large',
+    icon: CircleCheck,
+  },
+]
+
+const currentStatus = ref(1);
+const getStatusType = (index) =>{
+  return index <= currentStatus.value ? 'success' : 'info';
+}
 </script>
 
 
@@ -158,6 +207,7 @@ onMounted(() => {
       <SideBarCartComponent />
     </div>
     <div>
+      <!-- EasyDataTable Start -->
       <div>
         <EasyDataTable
         :headers="headers"
@@ -171,34 +221,95 @@ onMounted(() => {
         @click-row="handleRowClick"
         />
       </div>
+      <!-- EasyDataTable End -->
       <div>
             <!-- 訂單詳情的 Modal Start-->
         <el-dialog
           title="訂單詳細資訊"
-          :visible.sync="isModalVisible"
-          width="600px"
+          v-model="isModalVisible"
+          width="80%"
           @close="closeModal"
         >
-          <div v-if="selectedOrder">
-            <p><strong>訂單編號:</strong> {{ selectedOrder.orderId }}</p>
-            <p><strong>訂單時間:</strong> {{ selectedOrder.orderTime }}</p>
-            <p><strong>訂單總價:</strong> {{ selectedOrder.totalAmount }}</p>
-            <p><strong>收件地址:</strong> {{ selectedOrder.orderAddress }}</p>
-            <p><strong>聯絡電話:</strong> {{ selectedOrder.orderPhone }}</p>
-            <p><strong>訂單備註:</strong> {{ selectedOrder.orderRemark }}</p>
-
-            <!-- 商品列表 -->
-            <h4>商品清單</h4>
-            <ul>
-              <li v-for="(item, index) in selectedOrder.getOrderItemProductUnit" :key="index">
-                <p>商品名稱: {{ item.productName }}</p>
-                <p>數量: {{ item.quantity }}</p>
-                <p>單價: {{ item.price }}</p>
-                <p>單位: {{ item.unit }}</p>
-                <!-- <img :src="item.photo" alt="Product Image" style="width: 100px; height: 100px;"> -->
-              </li>
-            </ul>
+        <div>
+            <!-- el-descriptions OrderInfo Start -->
+          <div class="row">
+            <div v-if="selectedOrder" class="col-8 macaron-orderInfo mx-auto">
+              <el-descriptions
+                title="訂單資訊"
+                direction="vertical"
+                :column="3"
+                border
+              >
+                <el-descriptions-item label="訂單編號">{{selectedOrder.orderId}}</el-descriptions-item>
+                <el-descriptions-item label="訂單時間">{{selectedOrder.orderTime}}</el-descriptions-item>
+                <el-descriptions-item label="連絡電話" :span="2">{{selectedOrder.orderPhone}}</el-descriptions-item>
+                <el-descriptions-item label="訂單總價">
+                  <el-tag >{{selectedOrder.totalAmount}}</el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="收貨地址">
+                  {{selectedOrder.orderAddress}}
+                </el-descriptions-item>
+                <el-descriptions-item label="訂單備註">{{ selectedOrder.orderRemark }}</el-descriptions-item> <!-- 新增的欄位 -->
+              </el-descriptions>
+            </div>
+            <!-- el-descriptions OrderInfo End -->
+            
+            <!-- Timeline Start -->
+            <div class="col-3 macaron-orderTimeline mx-auto">
+              <el-timeline style="max-width: 600px">
+                <el-timeline-item
+                  v-for="(activity, index) in activities"
+                  :key="index"
+                  :icon="activity.icon"
+                  :type="activity.type"
+                  :color="activity.color"
+                  :size="activity.size"
+                  :hollow="activity.hollow"
+                >
+                  {{ activity.content }}
+                </el-timeline-item>
+              </el-timeline>
+            </div>
+            <!-- Timeline End -->
           </div>
+          <div>
+            <!-- 商品列表 -->
+            <h4 class="macaron-title mt-3">商品清單</h4>
+            <div v-for="(item, index) in selectedOrder.getOrderItemProductUnit" :key="index">
+              <el-descriptions
+                title=""
+                direction="vertical"
+                border
+                class="macaron-bg no-border"
+              >
+                <el-descriptions-item
+                  :rowspan="2"
+                  :width="140"
+                  label="商品圖"
+                  align="center"
+                >
+                  <el-image
+                    style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;"
+                    :src="`${BaseUrlWithoutApi}/images/ingredient/${item.photo}?t=${Date.now()}`"
+                  />
+                </el-descriptions-item>
+                <el-descriptions-item label="商品名稱">{{item.productName}}</el-descriptions-item>
+                <el-descriptions-item label="購買數量">{{item.quantity}}</el-descriptions-item>
+                <el-descriptions-item label="單價">{{ item.price }}</el-descriptions-item>
+                <el-descriptions-item label="單位量">{{item.unitQuantity}} {{ item.unit }}</el-descriptions-item>
+                <el-descriptions-item label="小計">
+                <el-tag class="macaron-tag">
+                  $ {{item.price*item.quantity}}  
+                </el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="總數量">
+                  {{item.unitQuantity*item.quantity}} {{ item.unit }}
+                </el-descriptions-item>
+              </el-descriptions>
+              <!-- el-descriptions-item ProductDetail End -->
+            </div>
+          </div>
+        </div> 
         </el-dialog>
         <!-- 訂單詳情的 Modal End-->
       </div>
@@ -217,7 +328,7 @@ onMounted(() => {
 
   --easy-table-header-font-size: 14px;
   --easy-table-header-height: 50px;
-  --easy-table-header-font-color: #333333; /* 深灰色，讓字體保持清晰 */
+  --easy-table-header-font-color: #333333; /* 深灰色 */
   --easy-table-header-background-color: #ffb6c1; /* 亮粉紅 */
 
   --easy-table-header-item-padding: 10px 15px;
@@ -253,6 +364,52 @@ onMounted(() => {
   --easy-table-loading-mask-background-color: #ffb6c1; /* 亮粉紅 */
 }
 
+.el-timeline{
+  font-size: 16px;
+}
+
+
+.macaron-bg {
+    background-color: #f9f0f0; /* 浅粉色背景 */
+    border: 1px solid #e6b2b2; /* 边框颜色 */
+    border-radius: 8px; /* 圆角 */
+    padding: 16px; /* 内边距 */
+    margin-top: 20px;
+  }
+  
+  .macaron-title {
+    font-weight: bold;
+    font-size: 18px;
+    color: #303133; /* 标题颜色 */
+  }
+  
+  .macaron-item {
+    background-color: #fff3f3; /* 商品项背景色 */
+    border: 1px solid #f2c6c6; /* 商品项边框颜色 */
+    border-radius: 8px; /* 商品项圆角 */
+    padding: 10px; /* 商品项内边距 */
+    margin-bottom: 10px; /* 商品项间距 */
+  }
+  
+  .macaron-tag {
+    background-color: #ffb3b3; /* Tag背景色 */
+    color: #fff; /* Tag文字颜色 */
+  }
+
+
+  .macaron-orderInfo {
+    background-color: #fef8d6; /* 背景色 */
+    border: 1px solid #e6b2b2; /* 边框颜色 */
+    border-radius: 8px; /* 圆角 */
+    padding: 12px; /* 内边距 */
+  }
+
+  .macaron-orderTimeline{
+    background-color: #e8fdbb; /* 背景色 */
+    border: 1px solid #e6b2b2; /* 边框颜色 */
+    border-radius: 8px; /* 圆角 */
+    padding: 30px 30px 1px; /* 内边距 */
+  }
 </style>
 
 
