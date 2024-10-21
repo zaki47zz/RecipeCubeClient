@@ -1,6 +1,5 @@
 <script setup>
 import Swal from 'sweetalert2';
-import SoftAlert from '@/components/SoftAlert.vue';
 import SoftBadge from '@/components/SoftBadge.vue';
 import SoftPagination from '@/components/SoftPagination.vue';
 import SoftPaginationItem from '@/components/SoftPaginationItem.vue';
@@ -20,7 +19,7 @@ const selectedInventories = ref([]); //用戶選到的庫存會被加到這
 
 const isLoading = ref(true); //判斷是否還在載入的flag
 const allSelect = ref(false); //判斷全選與否的flag
-const isWarning = ref(false); //判斷有無錯誤訊息的flag
+const isModalVisible = ref(false);
 const warningMessage = ref('');
 
 //當DOM加載完執行fetch
@@ -163,10 +162,23 @@ const deselectAllCard = () => {
     allSelect.value = false;
 };
 
-//修改功能
-const editCard = () => {
-    console.log('修改邏輯');
+////修改功能
+//先設置響應式物件存資料
+const editInventory = ref({
+    userId: '',
+    userName: '',
+    ingredientName: '',
+    quantity: 0,
+    expiryDate: '',
+    visibility: true,
+});
+//將傳入的inventory值存進響應式物件
+const editCard = (inventory) => {
+    editInventory.value = { ...inventory };
+    isModalVisible.value = true;
+    console.log(editInventory.value);
 };
+////修改功能結束
 
 //個別刪除功能
 const deleteCard = async (inventoryId) => {
@@ -174,6 +186,7 @@ const deleteCard = async (inventoryId) => {
         isLoading.value = true;
         const deleteURL = `${ApiURL}/${inventoryId}`;
         const response = await fetch(deleteURL, { method: 'DELETE' });
+        //要記得納入pantry修改紀錄功能
         if (!response.ok) {
             warningMessage.value = '刪除失敗，網路連線有異常';
         }
@@ -327,7 +340,7 @@ const deleteCards = () => {
                                         已過期
                                     </SoftBadge>
                                     <span class="position-absolute top-0 end-0 p-2 z-index-3">
-                                        <button class="card-control" @click.stop="editCard(inventory.inventoryId)">
+                                        <button class="card-control" @click.stop="editCard(inventory)">
                                             <i class="fa-solid fa-pencil"></i>
                                         </button>
                                         <button class="card-control" @click.stop="deleteCard(inventory.inventoryId)">
@@ -362,80 +375,72 @@ const deleteCards = () => {
     </section>
 
     <section>
-        <div
-            class="h-screen flex justify-center items-center bg-gradient-to-br from-purple-400 via-pink-500 to-red-500"
-        >
-            <div class="p-8 rounded-lg shadow-lg bg-white w-96">
-                <div class="mb-4 text-center">
-                    <img
-                        src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png"
-                        alt="Instagram Logo"
-                        class="h-12"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Inventory ID"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Group ID"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="User ID"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Ingredient ID"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Quantity"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Expiry Date"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Is Expiring"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Visibility"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="text-center">
-                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
-                        Submit
-                    </button>
+        <el-dialog v-model="isModalVisible" title="修改庫存內容" width="50%" center class="bg-primary-subtle">
+            <div class="d-flex justify-content-center align-items-center bg-white rounded-4">
+                <div class="p-3 w-90">
+                    <div class="mb-4">
+                        <label for="userId" class="m-0 p-0 fs-6">庫存所有者</label>
+                        <input
+                            v-model="editInventory.userName"
+                            name="userId"
+                            type="text"
+                            class="form-control w-100 text-center"
+                            disabled
+                        />
+                    </div>
+                    <div class="mb-4">
+                        <label for="ingredientName" class="m-0 p-0 fs-6">食材名稱</label>
+                        <input
+                            v-model="editInventory.ingredientName"
+                            name="ingredientName"
+                            type="text"
+                            placeholder="食材名稱"
+                            class="form-control w-100 text-center"
+                            disabled
+                        />
+                    </div>
+                    <div class="mb-4">
+                        <label for="quantity" class="m-0 p-0 fs-6">數量</label>
+                        <div class="d-flex justify-content-between align-items-center gap-3">
+                            <input
+                                v-model="editInventory.quantity"
+                                name="quantity"
+                                type="text"
+                                placeholder="數量"
+                                class="form-control w-100 text-center"
+                            />
+                            <span>克</span>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="expiryDate" class="m-0 p-0 fs-6">到期日</label>
+                        <input
+                            v-model="editInventory.expiryDate"
+                            name="expiryDate"
+                            type="text"
+                            placeholder="到期日"
+                            class="form-control w-100 text-center"
+                        />
+                    </div>
+                    <div class="mb-4">
+                        <label for="visibility" class="m-0 p-0 fs-6">權限</label>
+                        <select
+                            v-model="editInventory.visibility"
+                            name="visibility"
+                            class="form-control w-100 text-center"
+                            :disabled="userId !== editInventory.userId"
+                        >
+                            <option :value="true">私有</option>
+                            <option :value="false">群組</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-        </div>
+            <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
+                <el-button type="info" @click="saveEditedInventory">儲存</el-button>
+                <el-button type="danger" @click="isModalVisible = false">關閉</el-button>
+            </span>
+        </el-dialog>
     </section>
 
     <section class="banner-ad d-flex justify-content-center">
