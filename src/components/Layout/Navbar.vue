@@ -7,8 +7,9 @@
 <template>
     <!-- Navbar -->
     <nav
-        class="w-100 top-0 navbar navbar-expand-lg position-fixed z-index-3"
+        class="w-100 top-0 navbar navbar-expand-lg position-fixed"
         :class="isTransparent ? 'shadow-none my-2 navbar-transparent' : 'blur rounded-3 shadow'"
+        style="z-index: 100"
     >
         <div class="container">
             <!-- Logo -->
