@@ -5,8 +5,8 @@ import VueJwtDecode from 'vue-jwt-decode' // 引入 jwt-decode 函式庫
 const router = useRouter(); // 創建 router 實例
 const API_URL = `${import.meta.env.VITE_API_BASEURL}/Users/SignIn`
 const user = ref({
-    "email": "",
-    "password": ""
+    "email": "user18@example.com",
+    "password": "Password123!"
 })
 const send = async () => {
     const response = await fetch(API_URL, {
@@ -65,7 +65,7 @@ const handleLoginClick = async () => {
   const loginSuccess = await send(); // 先發送請求
   if (loginSuccess) {
     // 只有在登入成功時才刷新頁面並跳轉到 "/"
-    // location.assign('/'); // 刷新頁面並跳轉到 "/"
+    location.assign('/'); // 刷新頁面並跳轉到 "/"
   }
 };
 </script>

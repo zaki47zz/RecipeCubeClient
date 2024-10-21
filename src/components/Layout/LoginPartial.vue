@@ -27,6 +27,8 @@ function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('UserData');
     localStorage.removeItem('UserId');
+
+    
     // localStorage.clear(); //清空localStorage
     location.reload();  // 刷新頁面以更新登入狀態
 }
