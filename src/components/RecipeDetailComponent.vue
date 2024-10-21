@@ -204,13 +204,13 @@ const seasoningList = computed(() => {
 }
 
 /* 使用 ::v-deep 來覆蓋 Element Plus 默認的樣式，使步驟文字變為黑色 */
-::v-deep .el-step__title {
+:v-deep .el-step__title {
     color: #606266 !important;
     font-weight: bold;
 
 }
 
-::v-deep .el-step__description {
+:v-deep .el-step__description {
     color: #606266 !important;
 
 }
