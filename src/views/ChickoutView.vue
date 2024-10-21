@@ -219,8 +219,20 @@
                                 headers:{
                                     'Content-Type':'application/json'
                                 },
-                                body:JSON.stringify({orderId:OrderNum})
+                                body:JSON.stringify(order)
                             });
+                            if (paymentResponse.ok) {
+                            const paymentHtml = await paymentResponse.text();
+                            // 在這裡處理支付 HTML，例如在新窗口打開
+                            const paymentWindow = window.open('', '_blank');
+                            paymentWindow.document.write(paymentHtml);
+                            } else {
+                                Swal.fire({
+                                    title: "支付失敗",
+                                    text: "無法進入支付頁面，請稍後再試",
+                                    icon: "error"
+                                });
+                            };
                         });
                     }
                 } catch (error) {
@@ -234,6 +246,11 @@
             }
         });
     };
+
+    // ==============================================================================================================
+
+    
+    // ==============================================================================================================
 </script>
 
 <template>
