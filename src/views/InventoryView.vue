@@ -6,9 +6,11 @@ import { onMounted, ref, computed } from 'vue';
 
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL(抓圖片要用的);
-const ApiURL = `${BaseURL}/Inventories`;
+const inventoryApiURL = `${BaseURL}/Inventories`;
+const pantryApiURL = `${BaseURL}/PantryManagements`;
 const userId = localStorage.getItem('UserId');
-const InventoriesURL = `${ApiURL}/${userId}`; //抓庫存的API
+const InventoriesURL = `${inventoryApiURL}/${userId}`; //抓庫存的API
+const pantriesURL = `${pantryApiURL}/${userId}`; //抓紀錄的API
 
 const inventories = ref([]); //庫存放這
 const totalInventories = ref(0); //總共多少項目放這
@@ -17,7 +19,8 @@ const selectedInventories = ref([]); //用戶選到的庫存會被加到這
 
 const isLoading = ref(true); //判斷是否還在載入的flag
 const allSelect = ref(false); //判斷全選與否的flag
-const isModalVisible = ref(false);
+const isInventoryModalVisible = ref(false);
+const isPantryModalVisible = ref(false);
 const warningMessage = ref('');
 
 //當DOM加載完執行fetch
@@ -45,6 +48,19 @@ const fetchInventories = async () => {
         warningMessage.value = `API操作出現錯誤: ${error}`;
     } finally {
         isLoading.value = false;
+    }
+};
+
+//fetch庫存資料，使用非同步方法
+const fetchPantries = async () => {
+    try {
+        const response = await fetch(pantriesURL);
+        if (!response.ok) {
+            warningMessage.value = '網路連線有異常';
+        }
+        const data = await response.json();
+    } catch (error) {
+        warningMessage.value = `API操作出現錯誤: ${error}`;
     }
 };
 
@@ -163,6 +179,7 @@ const deselectAllCard = () => {
 ////修改功能
 //先設置響應式物件存資料
 const editInventory = ref({
+    inventoryId: '',
     userId: '',
     userName: '',
     ingredientName: '',
@@ -171,11 +188,88 @@ const editInventory = ref({
     expiryDate: '',
     visibility: true,
 });
+//用一個變數存原本數量
+let previousQuantity = 0;
+
 //將傳入的inventory值存進響應式物件
 const editCard = (inventory) => {
     editInventory.value = { ...inventory };
-    isModalVisible.value = true;
-    console.log(editInventory.value);
+    previousQuantity = editInventory.value.quantity;
+    isInventoryModalVisible.value = true;
+};
+const saveEditedInventory = async () => {
+    try {
+        isLoading.value = true;
+        // 如果新數量與原數量相同，則無需進行任何操作
+        if (editInventory.value.quantity === previousQuantity) {
+            isInventoryModalVisible.value = false;
+            fetchInventories();
+            isLoading.value = false;
+            return;
+        }
+
+        // 如果新數量為 0，則刪除
+        if (editInventory.value.quantity === 0) {
+            const deleteURL = `${inventoryApiURL}/${editInventory.value.inventoryId}`;
+            const response_delete = await fetch(deleteURL, { method: 'DELETE' });
+            if (!response_delete.ok) {
+                warningMessage.value = '刪除失敗，網路連線有異常';
+            }
+        } else {
+            // 修改
+            const editURL = `${inventoryApiURL}/${editInventory.value.inventoryId}`;
+            const response_edit = await fetch(editURL, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    InventoryId: editInventory.value.inventoryId,
+                    UserId: editInventory.value.userId,
+                    GroupId: editInventory.value.groupId,
+                    IngredientId: editInventory.value.ingredientId,
+                    Quantity: editInventory.value.quantity,
+                    ExpiryDate: editInventory.value.expiryDate,
+                    IsExpiring: editInventory.value.isExpiring,
+                    Visibility: editInventory.value.visibility,
+                }),
+            });
+            if (!response_edit.ok) {
+                warningMessage.value = '修改失敗，網路連線有異常';
+            }
+        }
+
+        // 紀錄
+        const change = editInventory.value.quantity - previousQuantity;
+        if (change !== 0) {
+            const action = change > 0 ? '增加' : '減少'; //判斷action
+            const response_pantry = await fetch(pantryApiURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    PantryId: 0,
+                    UserId: editInventory.value.userId,
+                    GroupId: editInventory.value.groupId,
+                    IngredientId: editInventory.value.ingredientId,
+                    Quantity: Math.abs(change),
+                    action: action,
+                    time: new Date(),
+                }),
+            });
+            if (!response_pantry.ok) {
+                warningMessage.value = '紀錄失敗，網路連線有異常';
+            }
+        }
+    } catch (error) {
+        warningMessage.value = `API操作出現錯誤: ${error}`;
+    } finally {
+        console.log(warningMessage.value);
+        isInventoryModalVisible.value = false;
+        fetchInventories();
+        isLoading.value = false;
+    }
 };
 ////修改功能結束
 
@@ -183,7 +277,7 @@ const editCard = (inventory) => {
 const deleteCard = async (inventoryId) => {
     try {
         isLoading.value = true;
-        const deleteURL = `${ApiURL}/${inventoryId}`;
+        const deleteURL = `${inventoryApiURL}/${inventoryId}`;
         const response = await fetch(deleteURL, { method: 'DELETE' });
         //要記得納入pantry修改紀錄功能
         if (!response.ok) {
@@ -302,7 +396,7 @@ const deleteCards = () => {
                         <div class="tabs-header d-flex justify-content-between">
                             <h3>食材列表</h3>
                             <div>
-                                <button class="btn blur shadow fs-6 me-1">歷史編輯紀錄</button>
+                                <button class="btn blur shadow fs-6 me-1" @click="fetchPantries">歷史編輯紀錄</button>
                                 <button v-if="allSelect" class="btn blur shadow fs-6 me-1" @click="deselectAllCard">
                                     取消全選
                                 </button>
@@ -374,7 +468,7 @@ const deleteCards = () => {
     </section>
 
     <section>
-        <el-dialog v-model="isModalVisible" title="修改庫存內容" width="50%" center class="bg-primary-subtle">
+        <el-dialog v-model="isInventoryModalVisible" title="修改庫存內容" width="50%" center class="bg-primary-subtle">
             <div class="d-flex justify-content-center align-items-center bg-white rounded-4">
                 <div class="p-3 w-90">
                     <div class="mb-4">
@@ -437,7 +531,7 @@ const deleteCards = () => {
             </div>
             <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
                 <el-button type="info" @click="saveEditedInventory">儲存</el-button>
-                <el-button type="danger" @click="isModalVisible = false">關閉</el-button>
+                <el-button type="danger" @click="isInventoryModalVisible = false">關閉</el-button>
             </span>
         </el-dialog>
     </section>
