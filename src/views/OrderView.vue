@@ -152,7 +152,7 @@ const closeModal = () =>{
 const getStatusType = (stepStatus: number, currentStatus: number) => {
   if (stepStatus < currentStatus) {
     // 當前狀態之前的步驟
-    return { color: 'green', text: '已完成' };
+    return { color: '#81c408', text: '已完成' };
   } else if (stepStatus === currentStatus) {
     // 當前狀態
     return { color: 'pink', text: '當前步驟' };
@@ -169,6 +169,7 @@ const steps = [
   { status: 4, content: '已出貨' },
   { status: 5, content: '訂單完成' },
 ];
+
 </script>
 
 
@@ -387,7 +388,7 @@ const steps = [
   }
 
   .macaron-orderTimeline{
-    background-color: #e8fdbb; /* 背景色 */
+    background-color: #f2fdec; /* 背景色 */
     border: 1px solid #e6b2b2; /* 边框颜色 */
     border-radius: 8px; /* 圆角 */
     padding: 30px 30px 1px; /* 内边距 */
