@@ -149,42 +149,26 @@ const closeModal = () =>{
 
 // Timeline
 
-const activities = [
-  {
-    content: '未付款',
-    size: 'large',
-    type: 'primary',
-    icon: InfoFilled,
-  },
-  {
-    content: '已付款',
-    size: 'large',
-    color: '#0bbd87',
-    icon: Postcard,
-  },
-  {
-    content: '訂單確認中',
-    size: 'large',
-    icon: List,
-  },
-  {
-    content: '已出貨',
-    size: 'large',
-    type: 'primary',
-    hollow: true,
-    icon: Van,
-  },
-  {
-    content: '訂單完成',
-    size: 'large',
-    icon: CircleCheck,
-  },
-]
+const getStatusType = (stepStatus: number, currentStatus: number) => {
+  if (stepStatus < currentStatus) {
+    // 當前狀態之前的步驟
+    return { color: 'green', text: '已完成' };
+  } else if (stepStatus === currentStatus) {
+    // 當前狀態
+    return { color: 'pink', text: '當前步驟' };
+  } else {
+    // 當前狀態之後的步驟
+    return { color: 'gray', text: '未完成' };
+  }
+};
 
-const currentStatus = ref(1);
-const getStatusType = (index) =>{
-  return index <= currentStatus.value ? 'success' : 'info';
-}
+const steps = [
+  { status: 1, content: '未付款' },
+  { status: 2, content: '已付款' },
+  { status: 3, content: '訂單確認中' },
+  { status: 4, content: '已出貨' },
+  { status: 5, content: '訂單完成' },
+];
 </script>
 
 
@@ -258,15 +242,13 @@ const getStatusType = (index) =>{
             <div class="col-3 macaron-orderTimeline mx-auto">
               <el-timeline style="max-width: 600px">
                 <el-timeline-item
-                  v-for="(activity, index) in activities"
+                  v-for="(step,index) in steps"
                   :key="index"
-                  :icon="activity.icon"
-                  :type="activity.type"
-                  :color="activity.color"
-                  :size="activity.size"
-                  :hollow="activity.hollow"
+                  :color="getStatusType(step.status, selectedOrder.status).color"
+                  :hollow="step.status > selectedOrder.status"
+                  siza="large"
                 >
-                  {{ activity.content }}
+                  {{ step.content }}
                 </el-timeline-item>
               </el-timeline>
             </div>
