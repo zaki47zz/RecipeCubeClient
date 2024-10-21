@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed, watch, nextTick } from 'vue';
 import { useRecipeStore } from '@/stores/recipeStore';
 import Swal from 'sweetalert2';
 import BannerRecipe from '@/assets/img/ForBackground/banner-recipe.jpg';
@@ -10,8 +10,8 @@ import RecipeDetailComponent from '@/components/RecipeDetailComponent.vue';
 const recipeStore = useRecipeStore();
 
 const recipes = ref([]);
-let currentPage = ref(1);
-let pageSize = ref(8); // 每頁顯示 8 個食譜
+const currentPage = ref(1);
+const pageSize = ref(8);
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
 const ApiURL = `${BaseURL}/Recipes`;
@@ -25,7 +25,7 @@ const fetchRecipes = async () => {
         }
         const data = await response.json();
         recipes.value = data; // 將獲取到的數據存入 recipes 變量
-        totalRecipes.value = recipes.value.length;
+        // totalRecipes.value = recipes.value.length;
         // console.log(recipes)
     } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
@@ -35,6 +35,7 @@ const fetchRecipes = async () => {
 // 在組件加載後獲取數據
 onMounted(() => {
     fetchRecipes();
+
 });
 const getRecipeImageUrl = (fileName) => {
     return `${BaseUrlWithoutApi}/images/recipe/${fileName}`;
@@ -116,17 +117,19 @@ const filteredRecipes = computed(() => {
 watch(() => filters.value.category, () => {
     filters.value.subcategory = '';
 });
+watch(filters, () => {
+    currentPage.value = 1; // 重置為第一頁
+}, { deep: true });
 //搜尋功能end
 
 
 //分頁功能 start
 
-// 根據篩選後的結果計算總的食譜數量
-let totalRecipes = computed(() => filteredRecipes.value.length);
+// all-data
+const totalRecipes = computed(() => filteredRecipes.value.length);
+const totalPages = computed(() => Math.ceil(totalRecipes.value / pageSize.value));
 
-// 根據篩選結果計算總頁數
-let totalPages = computed(() => Math.ceil(totalRecipes.value / pageSize.value));
-
+//該分頁所顯示的data
 const paginatedRecipes = computed(() => {
     const start = (currentPage.value - 1) * pageSize.value;
     const end = start + pageSize.value;
@@ -141,6 +144,7 @@ const handlePageSizeChange = (newSize) => {
 
 const handleCurrentChange = (newPage) => {
     currentPage.value = newPage;
+
 };
 
 watch(totalPages, (newTotalPages) => {
@@ -149,6 +153,7 @@ watch(totalPages, (newTotalPages) => {
     }
 });
 //分頁功能 end
+
 </script>
 
 <template>
@@ -256,6 +261,7 @@ watch(totalPages, (newTotalPages) => {
         </div>
     </section>
     <!-- 搜尋食譜 end -->
+
     <!-- 顯示食譜 start -->
     <section class="recipe-list">
         <div class="container-fluid mt-3">
@@ -264,19 +270,19 @@ watch(totalPages, (newTotalPages) => {
                     <div class="banner-ad bootstrap-tabs product-tabs p-3">
                         <div class="tabs-header d-flex justify-content-between">
                             <h3>食譜列表</h3>
-                            <div>
-                                <button class="btn blur shadow fs-6 text-danger me-1">刪除</button>
-                            </div>
-                            <nav>
-                                <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                                    <a href="#" class="nav-link fs-5 fw-bold text-dark active" id="nav-all-tab"
-                                        data-bs-toggle="tab" data-bs-target="#nav-all">所有食譜</a>
-                                    <a href="#" class="nav-link fs-5 fw-bold text-dark" id="nav-group-tab"
-                                        data-bs-toggle="tab" data-bs-target="#nav-group">群組食譜</a>
-                                    <a href="#" class="nav-link fs-5 fw-bold text-dark" id="nav-user-tab"
-                                        data-bs-toggle="tab" data-bs-target="#nav-user">您的食譜</a>
-                                </div>
-                            </nav>
+
+                        </div>
+                        <div>
+                            <!-- 分頁導航 -->
+
+                            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize"
+                                :total="totalRecipes" background layout="sizes, total, ->,prev, pager, next, jumper "
+                                :page-sizes="[8, 12, 16, 20]" @size-change="handlePageSizeChange"
+                                @current-change="handleCurrentChange"
+                                class="mt-4 d-flex justify-content-end align-items-center gap-2">
+                            </el-pagination>
+
+                            <!-- 分頁導航結束 -->
                         </div>
                         <div class="tab-content" id="nav-tabContent">
                             <div class="tab-pane fade show active" id="nav-all" role="tabpanel"
@@ -311,15 +317,6 @@ watch(totalPages, (newTotalPages) => {
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- 分頁導航 -->
-                                <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize"
-                                    :total="totalRecipes" background layout="prev, pager, next, ->, sizes, total"
-                                    :page-sizes="[8, 12, 16, 20]" @size-change="handlePageSizeChange"
-                                    @current-change="handleCurrentChange"
-                                    class="mt-4 d-flex justify-content-end align-items-center gap-2">
-                                </el-pagination>
-                                <!-- 分頁導航結束 -->
                             </div>
                         </div>
                     </div>
