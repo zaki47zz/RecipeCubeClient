@@ -42,23 +42,28 @@ const send = async () => {
                     // console.log("UserId:", UserId);
                 } else {
                     console.error('找不到 certserialnumber');
+                    return true; // 表示登入成功
                 }
             } catch (error) {
                 console.error("解碼 JWT 失敗", error);
             }
             alert(datas.message);
+            return true; // 表示登入成功
         }
     }
     else {
         alert("登入失敗");
+        return false; // 表示登入失敗
     }
 }
 
 const handleLoginClick = async () => {
-    await send(); // 先發送請求
-    // 刷新後跳轉到目標頁面
+  const loginSuccess = await send(); // 先發送請求
+  if (loginSuccess) {
+    // 只有在登入成功時才刷新頁面並跳轉到 "/"
     location.assign('/'); // 刷新頁面並跳轉到 "/"
-}
+  }
+};
 </script>
 
 <template>
