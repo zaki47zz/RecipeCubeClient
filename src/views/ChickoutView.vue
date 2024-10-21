@@ -212,6 +212,15 @@
                             title: "訂單已成立",
                             text: "將繼續前往付款頁面",
                             icon: "success"
+                        }).then(async () =>{
+                            // 呼叫支付api
+                            const paymentResponse = await fetch(`${BaseURL}/Orders/StartPayment`,{
+                                method:'POST',
+                                headers:{
+                                    'Content-Type':'application/json'
+                                },
+                                body:JSON.stringify({orderId:OrderNum})
+                            });
                         });
                     }
                 } catch (error) {
