@@ -1,5 +1,6 @@
 <script setup>
 import Swal from 'sweetalert2';
+import SoftAlert from '@/components/SoftAlert.vue';
 import SoftBadge from '@/components/SoftBadge.vue';
 import SoftPagination from '@/components/SoftPagination.vue';
 import SoftPaginationItem from '@/components/SoftPaginationItem.vue';
@@ -9,7 +10,8 @@ import { onMounted, ref, computed } from 'vue';
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL(抓圖片要用的);
 const ApiURL = `${BaseURL}/Inventories`;
-const InventoriesURL = `${ApiURL}/${localStorage.getItem('UserId')}`; //抓庫存的API
+const userId = localStorage.getItem('UserId');
+const InventoriesURL = `${ApiURL}/${userId}`; //抓庫存的API
 
 const inventories = ref([]); //庫存放這
 const totalInventories = ref(0); //總共多少項目放這
@@ -18,6 +20,8 @@ const selectedInventories = ref([]); //用戶選到的庫存會被加到這
 
 const isLoading = ref(true); //判斷是否還在載入的flag
 const allSelect = ref(false); //判斷全選與否的flag
+const isWarning = ref(false); //判斷有無錯誤訊息的flag
+const warningMessage = ref('');
 
 //當DOM加載完執行fetch
 onMounted(() => {
@@ -30,7 +34,7 @@ const fetchInventories = async () => {
         isLoading.value = true;
         const response = await fetch(InventoriesURL);
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            warningMessage.value = '網路連線有異常';
         }
         const data = await response.json();
         inventories.value = data.map((inventory) => ({
@@ -41,7 +45,7 @@ const fetchInventories = async () => {
         totalInventories.value = inventories.value.length;
         ingredientCategory.value = new Set(inventories.value.map((i) => i.category)); //利用map回傳陣列存進set再存進ref set
     } catch (error) {
-        console.error('There was a problem with the fetch operation:', error);
+        warningMessage.value = `API操作出現錯誤: ${error}`;
     } finally {
         isLoading.value = false;
     }
@@ -85,13 +89,15 @@ const filters = ref({
 //利用computed的監測特性來實時更改篩選庫存
 const filteredInventories = computed(() => {
     return inventories.value.filter((inventory) => {
-        //利用filter逐項遍歷每個inventory項目作篩選，利用4個Boolean來決定項目要不要顯示
+        //利用filter逐項遍歷每個inventory項目作篩選，利用5個Boolean來決定項目要不要顯示
+        //個人項目篩選(只能看到屬於自己或群組公開的食材)
+        const userMatch = inventory.userId === userId || (!inventory.visibility && inventory.userId != userId);
         //分類篩選(用戶沒篩選或篩選符合會回傳true)
         const categoryMatch = !filters.value.category || inventory.category === filters.value.category;
         //權限篩選
         const visibilityMatch =
             !filters.value.visibility || //沒篩選
-            (filters.value.visibility === 'group' && !inventory.visibility) || //當用戶選群組而我們的項目剛好是群組項目時式true
+            (filters.value.visibility === 'group' && !inventory.visibility) || //當用戶選群組而我們的項目剛好是群組項目時true
             (filters.value.visibility === 'private' && inventory.visibility); //同理
         //期限篩選
         const expiryMatch =
@@ -109,7 +115,7 @@ const filteredInventories = computed(() => {
             );
 
         //因為filter只會傳回結果是true的項目回陣列，所以可以這樣回傳Boolean來控制
-        return categoryMatch && visibilityMatch && expiryMatch && searchMatch;
+        return userMatch && categoryMatch && visibilityMatch && expiryMatch && searchMatch;
     });
 });
 ////篩選功能結束
@@ -163,13 +169,27 @@ const editCard = () => {
 };
 
 //個別刪除功能
-const deleteCard = () => {
-    console.log('刪除邏輯');
+const deleteCard = async (inventoryId) => {
+    try {
+        isLoading.value = true;
+        const deleteURL = `${ApiURL}/${inventoryId}`;
+        const response = await fetch(deleteURL, { method: 'DELETE' });
+        if (!response.ok) {
+            warningMessage.value = '刪除失敗，網路連線有異常';
+        }
+    } catch (error) {
+        warningMessage.value = `API操作出現錯誤: ${error}`;
+    } finally {
+        fetchInventories();
+        isLoading.value = false;
+    }
 };
 
 //群體刪除功能
 const deleteCards = () => {
-    console.log('群體刪除邏輯');
+    for (let inventory of selectedInventories.value) {
+        deleteCard(inventory);
+    }
 };
 </script>
 
@@ -336,6 +356,83 @@ const deleteCards = () => {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div
+            class="h-screen flex justify-center items-center bg-gradient-to-br from-purple-400 via-pink-500 to-red-500"
+        >
+            <div class="p-8 rounded-lg shadow-lg bg-white w-96">
+                <div class="mb-4 text-center">
+                    <img
+                        src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png"
+                        alt="Instagram Logo"
+                        class="h-12"
+                    />
+                </div>
+                <div class="mb-4">
+                    <input
+                        type="text"
+                        placeholder="Inventory ID"
+                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
+                    />
+                </div>
+                <div class="mb-4">
+                    <input
+                        type="text"
+                        placeholder="Group ID"
+                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
+                    />
+                </div>
+                <div class="mb-4">
+                    <input
+                        type="text"
+                        placeholder="User ID"
+                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
+                    />
+                </div>
+                <div class="mb-4">
+                    <input
+                        type="text"
+                        placeholder="Ingredient ID"
+                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
+                    />
+                </div>
+                <div class="mb-4">
+                    <input
+                        type="text"
+                        placeholder="Quantity"
+                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
+                    />
+                </div>
+                <div class="mb-4">
+                    <input
+                        type="text"
+                        placeholder="Expiry Date"
+                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
+                    />
+                </div>
+                <div class="mb-4">
+                    <input
+                        type="text"
+                        placeholder="Is Expiring"
+                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
+                    />
+                </div>
+                <div class="mb-4">
+                    <input
+                        type="text"
+                        placeholder="Visibility"
+                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
+                    />
+                </div>
+                <div class="text-center">
+                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
+                        Submit
+                    </button>
                 </div>
             </div>
         </div>
