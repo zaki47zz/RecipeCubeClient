@@ -7,7 +7,7 @@
             <el-descriptions title="" :column="2" border>
                 <el-descriptions-item label="用戶名稱">{{ userIdDisplay }}</el-descriptions-item>
                 <!-- <el-descriptions-item label="是否自定義">{{ recipe.isCustom ? '是' : '否' }}</el-descriptions-item> -->
-                <el-descriptions-item label="葷素限制">{{ recipe.restriction ? '葷' : '素' }}</el-descriptions-item>
+                <el-descriptions-item label="葷素限制">{{ recipe.restriction ? '素' : '葷' }}</el-descriptions-item>
                 <el-descriptions-item label="中/西式">{{ recipe.westEast ? '西式' : '中式' }}</el-descriptions-item>
                 <el-descriptions-item label="類別">{{ recipe.category }}</el-descriptions-item>
                 <el-descriptions-item label="細部類別">{{ recipe.detailedCategory }}</el-descriptions-item>
@@ -204,13 +204,13 @@ const seasoningList = computed(() => {
 }
 
 /* 使用 ::v-deep 來覆蓋 Element Plus 默認的樣式，使步驟文字變為黑色 */
-::v-deep .el-step__title {
+:v-deep .el-step__title {
     color: #606266 !important;
     font-weight: bold;
 
 }
 
-::v-deep .el-step__description {
+:v-deep .el-step__description {
     color: #606266 !important;
 
 }
