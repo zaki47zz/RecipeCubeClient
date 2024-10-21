@@ -1,8 +1,6 @@
 <script setup>
 import Swal from 'sweetalert2';
 import SoftBadge from '@/components/SoftBadge.vue';
-import SoftPagination from '@/components/SoftPagination.vue';
-import SoftPaginationItem from '@/components/SoftPaginationItem.vue';
 import InventorySkeleton from '@/components/InventorySkeleton.vue';
 import { onMounted, ref, computed } from 'vue';
 
@@ -169,6 +167,7 @@ const editInventory = ref({
     userName: '',
     ingredientName: '',
     quantity: 0,
+    unit: '',
     expiryDate: '',
     visibility: true,
 });
@@ -374,80 +373,6 @@ const deleteCards = () => {
         </div>
     </section>
 
-<<<<<<< HEAD
-    <section v-if="false">
-        <div
-            class="h-screen flex justify-center items-center bg-gradient-to-br from-purple-400 via-pink-500 to-red-500"
-        >
-            <div class="p-8 rounded-lg shadow-lg bg-white w-96">
-                <div class="mb-4 text-center">
-                    <img
-                        src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png"
-                        alt="Instagram Logo"
-                        class="h-12"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Inventory ID"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Group ID"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="User ID"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Ingredient ID"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Quantity"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Expiry Date"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Is Expiring"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Visibility"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="text-center">
-                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
-                        Submit
-                    </button>
-=======
     <section>
         <el-dialog v-model="isModalVisible" title="修改庫存內容" width="50%" center class="bg-primary-subtle">
             <div class="d-flex justify-content-center align-items-center bg-white rounded-4">
@@ -483,7 +408,7 @@ const deleteCards = () => {
                                 placeholder="數量"
                                 class="form-control w-100 text-center"
                             />
-                            <span>克</span>
+                            <span>{{ editInventory.unit }}</span>
                         </div>
                     </div>
                     <div class="mb-4">
@@ -508,7 +433,6 @@ const deleteCards = () => {
                             <option :value="false">群組</option>
                         </select>
                     </div>
->>>>>>> feature/ingredient_v2.3
                 </div>
             </div>
             <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
@@ -516,19 +440,6 @@ const deleteCards = () => {
                 <el-button type="danger" @click="isModalVisible = false">關閉</el-button>
             </span>
         </el-dialog>
-    </section>
-
-    <section class="banner-ad d-flex justify-content-center">
-        <div class="row banner-content p-3">
-            <div class="content-wrapper text-center col-md-12"></div>
-            <soft-pagination color="info" class="p-0 m-0">
-                <soft-pagination-item prev />
-                <soft-pagination-item label="1" active />
-                <soft-pagination-item label="2" />
-                <soft-pagination-item label="3" />
-                <soft-pagination-item next />
-            </soft-pagination>
-        </div>
     </section>
 
     <section>
