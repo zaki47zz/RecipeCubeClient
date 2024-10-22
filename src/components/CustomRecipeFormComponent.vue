@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed, watchEffect } from 'vue';
-
+import { ref, computed, watchEffect, onMounted } from 'vue';
+import Multiselect from 'vue-multiselect';
+import 'vue-multiselect/dist/vue-multiselect.min.css';
 const recipeData = ref({
     photo: null,
     recipeName: '',
@@ -12,6 +13,77 @@ const recipeData = ref({
     ingredients: [],
     steps: '',
     seasonings: ''
+});
+const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
+const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
+
+const getIngredientsApi = `${BaseURL}/Ingredients`
+const ingredients = ref([]);
+const selectedIngredients = ref([]);
+const groupedIngredients = ref([]);
+// 使用fetch獲取數據 (這段寫在recipeStore了)
+
+const groupIngredientsByCategory = (data) => {
+    const grouped = data.reduce((acc, ingredient) => {
+        // 如果該分類不存在，先創建一個分類
+        let category = acc.find(group => group.category === ingredient.category);
+        if (!category) {
+            category = { category: ingredient.category, ingredients: [] };
+            acc.push(category);
+        }
+        // 將食材加入對應分類
+        category.ingredients.push(ingredient);
+        return acc;
+    }, []);
+
+    groupedIngredients.value = grouped;
+};
+const fetchIngredients = async () => {
+    try {
+        const response = await fetch(getIngredientsApi);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+        }
+        const data = await response.json();  // 只需要調用一次 .json()
+        ingredients.value = data;
+        groupIngredientsByCategory(data);  // 將數據分組
+        console.log("食材data:", data);  // 打印出來檢查
+        // console.log("分組後的食材:", groupedIngredients.value);  // 檢查分組結果 
+    } catch (error) {
+        console.error("Fetch Fail", error);
+    }
+}
+onMounted(() => {
+
+    // fetchRecipes();
+    fetchIngredients();
+});
+function customLabel(option) {
+    // 合併名稱和同義字來讓它們參與過濾
+    const label = option.ingredientName || '';
+    const synonym = option.synonym ? ` (${option.synonym})` : '';
+
+    // 返回顯示的名稱和同義字
+    return `${label}${synonym}`;
+}
+
+const ingredientQuantities = ref({});
+
+// 使用 watchEffect 自動追蹤 selectedIngredients 的變化
+watchEffect(() => {
+    // 清空沒有選中的食材數量
+    Object.keys(ingredientQuantities.value).forEach((id) => {
+        if (!selectedIngredients.value.some(ingredient => ingredient.ingredientId === parseInt(id))) {
+            delete ingredientQuantities.value[id];
+        }
+    });
+
+    // 對於每個新的選中的食材，如果它不在 ingredientQuantities 中，就添加它
+    selectedIngredients.value.forEach((ingredient) => {
+        if (!ingredientQuantities.value[ingredient.ingredientId]) {
+            ingredientQuantities.value[ingredient.ingredientId] = '';
+        }
+    });
 });
 // 處理圖片上傳
 const handlePhotoUpload = (event) => {
@@ -144,12 +216,20 @@ const saveRecipe = () => {
 
             <h5 class="mb-0">所需食材</h5>
             <div class="my-auto p-3 h-100" style="background-color: rgba(255, 255, 255, 0.5); border-radius: 8px">
-                <select class="form-select fs-6">
-                    <option>用Select2</option>
-                </select>
+
+                <multiselect v-model="selectedIngredients" :options="groupedIngredients" placeholder="搜尋或選擇食材 (可以多選)"
+                    :multiple="true" :close-on-select="false" group-label="category" group-values="ingredients"
+                    :group-select="false" track-by="ingredientId" :custom-label="customLabel">
+                    <span slot="noResult">找不到該食材</span>
+
+                </multiselect>
                 <div class="selected-ingredients mt-3">
-                    <!-- 這裡可以添加已選擇的食材列表 -->
-                    AAA
+                    <div v-for="ingredient in selectedIngredients" :key="ingredient.ingredientId" class="mb-2">
+                        <label>{{ ingredient.ingredientName }} 數量：</label>
+                        <input type="text" v-model="ingredientQuantities[ingredient.ingredientId]"
+                            class="form-control w-50" placeholder="請輸入數量" />
+                        <label>{{ ingredient.unit }}</label>
+                    </div>
                 </div>
             </div>
         </div>
