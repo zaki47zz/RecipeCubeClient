@@ -9,8 +9,6 @@ body {
     z-index: 0;
 }
 
-
-
 html,
 body,
 #app {

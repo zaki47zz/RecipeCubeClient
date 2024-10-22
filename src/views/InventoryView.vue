@@ -1,6 +1,7 @@
 <script setup>
 import Swal from 'sweetalert2';
 import SoftBadge from '@/components/SoftBadge.vue';
+import { useIngredientStore } from '@/stores/ingredientStore';
 import InventorySkeleton from '@/components/InventorySkeleton.vue';
 import { onMounted, ref, computed } from 'vue';
 
@@ -13,9 +14,11 @@ const InventoriesURL = `${inventoryApiURL}/${userId}`; //抓庫存的API
 const pantriesURL = `${pantryApiURL}/${userId}`; //抓紀錄的API
 
 const inventories = ref([]); //庫存放這
+const pantries = ref([]); //紀錄放這
 const totalInventories = ref(0); //總共多少項目放這
 const ingredientCategory = ref(new Set()); //分類放這，用Set避免重複
 const selectedInventories = ref([]); //用戶選到的庫存會被加到這
+const ingredientStore = useIngredientStore(); //用於產生食譜的庫存會被加到這
 
 const isLoading = ref(true); //判斷是否還在載入的flag
 const allSelect = ref(false); //判斷全選與否的flag
@@ -28,7 +31,7 @@ onMounted(() => {
     fetchInventories();
 });
 
-//fetch庫存資料，使用非同步方法
+//fetch庫存資料
 const fetchInventories = async () => {
     try {
         isLoading.value = true;
@@ -51,7 +54,7 @@ const fetchInventories = async () => {
     }
 };
 
-//fetch庫存資料，使用非同步方法
+//fetch紀錄資料
 const fetchPantries = async () => {
     try {
         const response = await fetch(pantriesURL);
@@ -59,6 +62,7 @@ const fetchPantries = async () => {
             warningMessage.value = '網路連線有異常';
         }
         const data = await response.json();
+        pantries.value = data;
     } catch (error) {
         warningMessage.value = `API操作出現錯誤: ${error}`;
     }
@@ -69,6 +73,7 @@ const getIngredientImageUrl = (fileName) => {
     return `${BaseUrlWithoutApi}/images/ingredient/${fileName}`;
 };
 
+////提醒開始
 //清空列表按鈕的提醒
 const alertClearCheck = () => {
     Swal.fire({
@@ -90,6 +95,52 @@ const alertClearCheck = () => {
         }
     });
 };
+//個別刪除的提醒
+const alertDeleteCheck = (inventory) => {
+    Swal.fire({
+        title: '您確定嗎?',
+        text: '即將刪除所選食材',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: '刪除',
+        cancelButtonText: '取消',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            deleteCard(inventory);
+            Swal.fire({
+                title: '已刪除!',
+                icon: 'success',
+            });
+        }
+    });
+};
+//群體刪除的提醒
+const alertDeleteAllCheck = () => {
+    if (!selectedInventories.value.length) {
+        return;
+    }
+    Swal.fire({
+        title: '您確定嗎?',
+        text: '即將刪除所選的所有食材',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: '刪除',
+        cancelButtonText: '取消',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            deleteCards();
+            Swal.fire({
+                title: '已刪除!',
+                icon: 'success',
+            });
+        }
+    });
+};
+////提醒結束
 
 ////篩選功能
 //先給定響應式物件存條件資料
@@ -99,7 +150,6 @@ const filters = ref({
     expiry: '',
     searchWord: '',
 });
-
 //利用computed的監測特性來實時更改篩選庫存
 const filteredInventories = computed(() => {
     return inventories.value.filter((inventory) => {
@@ -191,13 +241,13 @@ const editInventory = ref({
 });
 //用一個變數存原本數量
 let previousQuantity = 0;
-
 //將傳入的inventory值存進響應式物件
 const editCard = (inventory) => {
     editInventory.value = { ...inventory };
     previousQuantity = editInventory.value.quantity;
     isInventoryModalVisible.value = true;
 };
+//按鈕行為
 const saveEditedInventory = async () => {
     try {
         isLoading.value = true;
@@ -270,6 +320,7 @@ const saveEditedInventory = async () => {
 };
 ////修改功能結束
 
+////刪除功能
 //個別刪除功能
 const deleteCard = async (inventory) => {
     try {
@@ -306,38 +357,52 @@ const deleteCard = async (inventory) => {
         isLoading.value = false;
     }
 };
-
 //群體刪除功能
 const deleteCards = () => {
     for (let inventory of selectedInventories.value) {
         deleteCard(inventory);
     }
 };
+////刪除功能結束
 
 ////歷史紀錄功能
-//表格
-const columns = ref([
-    { field: 'userName', key: 'a', title: '擁有者名稱', align: 'center' },
-    { field: 'ingredientName', key: 'b', title: '食材名稱', align: 'center' },
-    { field: 'quantity', key: 'c', title: '數量', align: 'center' },
-    { field: 'action', key: 'd', title: '動作', align: 'center' },
-    { field: 'time', key: 'e', title: '編輯時間', align: 'center' },
-    { field: 'redo', key: 'f', title: '再次執行', align: 'center' },
-]);
-const tableData = ref([
-    {
-        userName: 'John',
-        ingredientName: '1900-05-20',
-        quantity: 'coding and coding repeat',
-        action: 'No.1 Century Avenue, Shanghai',
-        time: '1:00:00',
-        redo: '↻',
-    },
-]);
-//
-const showPantryDialog = () => {
-    fetchPantry();
-    isPantryDialogVisible.value = true;
+//表頭
+const headers = [
+    { text: '擁有者名稱', value: 'userName', sortable: true },
+    { text: '食材名稱', value: 'ingredientName', sortable: true },
+    { text: '數量', value: 'quantity' },
+    { text: '動作', value: 'action' },
+    { text: '編輯時間', value: 'time' },
+];
+//內容，利用computed動態監測pantries改變並同步匯入tableData
+const tableData = computed(() => {
+    return pantries.value
+        .map((pantry) => ({
+            userName: pantry.userName,
+            ingredientName: pantry.ingredientName,
+            quantity: pantry.quantity,
+            action: pantry.action,
+            time: new Date(new Date(pantry.time).getTime() + 8 * 60 * 60 * 1000).toLocaleString(),
+            //new Date(pantry.time)是資料庫時間，getTime()取毫秒(故要*這麼多)，外面再用new Date接毫秒轉型為時間
+            //最後使用toLocaleString轉乘本地時間格式
+        }))
+        .reverse(); //反轉陣列讓新內容在前面
+});
+//按鈕行為
+const showPantryDialog = async () => {
+    try {
+        await fetchPantries();
+        isPantryModalVisible.value = true;
+    } catch (error) {
+        warningMessage.value = '紀錄讀取失敗';
+    }
+};
+////紀錄功能結束
+
+//將所選庫存送至產生食譜介面
+const exportInventories = () => {
+    ingredientStore.cookingInventories = selectedInventories.value;
+    console.log(ingredientStore.cookingInventories);
 };
 </script>
 
@@ -445,7 +510,9 @@ const showPantryDialog = () => {
                                     取消全選
                                 </button>
                                 <button v-else class="btn blur shadow fs-6 me-1" @click="selectAllCard">全選</button>
-                                <button class="btn blur shadow fs-6 text-danger me-1" @click="deleteCards">刪除</button>
+                                <button class="btn blur shadow fs-6 text-danger me-1" @click="alertDeleteAllCheck">
+                                    刪除
+                                </button>
                             </div>
                         </div>
                         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
@@ -480,7 +547,7 @@ const showPantryDialog = () => {
                                         <button class="card-control" @click.stop="editCard(inventory)">
                                             <i class="fa-solid fa-pencil"></i>
                                         </button>
-                                        <button class="card-control" @click.stop="deleteCard(inventory)">
+                                        <button class="card-control" @click.stop="alertDeleteCheck(inventory)">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
                                     </span>
@@ -510,27 +577,32 @@ const showPantryDialog = () => {
 
     <section>
         <el-dialog v-model="isPantryModalVisible" title="歷史編輯紀錄" width="70%" center class="bg-primary-subtle">
-            <div class="d-flex justify-content-center align-items-center bg-white rounded-4">
-                <EasyDataTable
-                    :headers="headers"
-                    :items="items"
-                    theme-color="#f48225"
-                    :items-selected="itemsSelected"
-                    buttons-pagination
-                    loading
-                />
-            </div>
-            <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
+            <EasyDataTable
+                :headers="headers"
+                :items="tableData"
+                :rows-per-page="10"
+                table-class="customize-table"
+                header-text-direction="center"
+                body-text-direction="center"
+                class="w-100"
+            >
+                <template #empty-message>
+                    <div class="empty-state">
+                        <p>沒有歷史紀錄</p>
+                    </div>
+                </template>
+            </EasyDataTable>
+            <span slot="footer" class="dialog-footer d-flex justify-content-center mt-2">
                 <el-button type="danger" @click="isPantryModalVisible = false">關閉</el-button>
             </span>
         </el-dialog>
     </section>
 
     <section>
-        <el-dialog v-model="isInventoryModalVisible" title="修改庫存內容" width="50%" center class="bg-primary-subtle">
+        <el-dialog v-model="isInventoryModalVisible" title="修改庫存內容" width="40%" center class="bg-primary-subtle">
             <div class="d-flex justify-content-center align-items-center bg-white rounded-4">
                 <div class="p-3 w-90">
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label for="userId" class="m-0 p-0 fs-6">庫存所有者</label>
                         <input
                             v-model="editInventory.userName"
@@ -540,7 +612,7 @@ const showPantryDialog = () => {
                             disabled
                         />
                     </div>
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label for="ingredientName" class="m-0 p-0 fs-6">食材名稱</label>
                         <input
                             v-model="editInventory.ingredientName"
@@ -551,7 +623,7 @@ const showPantryDialog = () => {
                             disabled
                         />
                     </div>
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label for="quantity" class="m-0 p-0 fs-6">數量</label>
                         <div class="d-flex justify-content-between align-items-center gap-3">
                             <input
@@ -564,7 +636,7 @@ const showPantryDialog = () => {
                             <span>{{ editInventory.unit }}</span>
                         </div>
                     </div>
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label for="expiryDate" class="m-0 p-0 fs-6">到期日</label>
                         <input
                             v-model="editInventory.expiryDate"
@@ -574,7 +646,7 @@ const showPantryDialog = () => {
                             class="form-control w-100 text-center"
                         />
                     </div>
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label for="visibility" class="m-0 p-0 fs-6">權限</label>
                         <select
                             v-model="editInventory.visibility"
@@ -589,7 +661,7 @@ const showPantryDialog = () => {
                     </div>
                 </div>
             </div>
-            <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
+            <span slot="footer" class="dialog-footer d-flex justify-content-center mt-3">
                 <el-button type="info" @click="saveEditedInventory">儲存</el-button>
                 <el-button type="danger" @click="isInventoryModalVisible = false">關閉</el-button>
             </span>
@@ -649,6 +721,7 @@ const showPantryDialog = () => {
                 <div class="col-lg-3">
                     <RouterLink
                         class="btn bg-primary-subtle text-dark shadow fs-5 w-100"
+                        @click="exportInventories"
                         :to="{ name: 'GenerateRecipe' }"
                         >產生食譜</RouterLink
                     >

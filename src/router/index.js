@@ -120,9 +120,9 @@ const router = createRouter({
                     name: 'storeProductDetailById',
                 },
                 {
-                    path:'/order',
-                    component:OrderView,
-                    name:'order',
+                    path: '/order',
+                    component: OrderView,
+                    name: 'order',
                 },
             ],
         },
@@ -132,6 +132,10 @@ const router = createRouter({
             component: GenerateRecipeView,
         },
     ],
+    scrollBehavior(to, from, savedPosition) {
+        // always scroll to top
+        return { top: 0 };
+    },
 });
 
 export default router;

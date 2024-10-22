@@ -1,5 +1,9 @@
 <script setup>
 import WineWithBeef from '@/assets/img/ForComponent/WineWithBeef.jpg';
+import { onMounted } from 'vue';
+onMounted(() => {
+    window.scrollTo(0, 0);
+});
 </script>
 
 <template>
