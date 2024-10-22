@@ -411,12 +411,7 @@ const exportInventories = () => {
         <div class="banner-ad bg-primary-subtle block-2">
             <div class="row banner-content pt-5">
                 <div class="content-wrapper text-center col-md-12">
-                    <h1>庫存 Inventory</h1>
-                    <header>
-                        <div class="container-fluid">
-                            <div class="row py-3"></div>
-                        </div>
-                    </header>
+                    <h1 class="pb-5">庫存 Inventory</h1>
                 </div>
             </div>
         </div>

@@ -17,7 +17,7 @@ const pageSize = ref(8);
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
 
-const getIngredientsApi = `${BaseURL}/Ingredients`
+const getIngredientsApi = `${BaseURL}/Ingredients`;
 const ingredients = ref([]);
 const selectedIngredients = ref([]);
 const groupedIngredients = ref([]);
@@ -26,7 +26,7 @@ const groupedIngredients = ref([]);
 const groupIngredientsByCategory = (data) => {
     const grouped = data.reduce((acc, ingredient) => {
         // 如果該分類不存在，先創建一個分類
-        let category = acc.find(group => group.category === ingredient.category);
+        let category = acc.find((group) => group.category === ingredient.category);
         if (!category) {
             category = { category: ingredient.category, ingredients: [] };
             acc.push(category);
@@ -44,15 +44,15 @@ const fetchIngredients = async () => {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
         }
-        const data = await response.json();  // 只需要調用一次 .json()
+        const data = await response.json(); // 只需要調用一次 .json()
         ingredients.value = data;
-        groupIngredientsByCategory(data);  // 將數據分組
+        groupIngredientsByCategory(data); // 將數據分組
         // console.log("食材data:", data);  // 打印出來檢查
-        // console.log("分組後的食材:", groupedIngredients.value);  // 檢查分組結果 
+        // console.log("分組後的食材:", groupedIngredients.value);  // 檢查分組結果
     } catch (error) {
-        console.error("Fetch Fail", error);
+        console.error('Fetch Fail', error);
     }
-}
+};
 // 在組件加載後獲取數據
 onMounted(() => {
     recipeStore.fetchRecipes();
@@ -100,10 +100,10 @@ const filters = ref({
 });
 
 const categoryOptions = {
-    "主餐": ["麵食", "飯食", "粥", "排餐", "鹹派", "火鍋", "焗烤"],
-    "副餐": ["肉類料理", "青菜料理", "海鮮料理"],
-    "湯品": ["無"],
-    "甜點": ["甜", "鹹"]
+    主餐: ['麵食', '飯食', '粥', '排餐', '鹹派', '火鍋', '焗烤'],
+    副餐: ['肉類料理', '青菜料理', '海鮮料理'],
+    湯品: ['無'],
+    甜點: ['甜', '鹹'],
 };
 const subcategoryOptions = computed(() => {
     // console.log(filters.value)
@@ -115,9 +115,9 @@ const subcategoryOptions = computed(() => {
 
 const filteredRecipes = computed(() => {
     // 取得選擇的食材ID列表
-    const selectedIngredientIds = selectedIngredients.value.map(ingredient => ingredient.ingredientId);
+    const selectedIngredientIds = selectedIngredients.value.map((ingredient) => ingredient.ingredientId);
     // console.log(selectedIngredientIds)
-    const searchWords = filters.value.searchWord.split(',').map(word => word.trim().toLowerCase());
+    const searchWords = filters.value.searchWord.split(',').map((word) => word.trim().toLowerCase());
     return recipes.value.filter((recipe) => {
         // console.log("正在篩選的食譜:", recipe.recipeName);
         // console.log("該食譜的食材 IDs:", recipe.selectedIngredients); // 打印出食譜的食材 ID 列表
@@ -127,7 +127,6 @@ const filteredRecipes = computed(() => {
         // 細部類別篩選
         const subcategoryMatch = !filters.value.subcategory || recipe.detailedCategory === filters.value.subcategory;
 
-
         let searchMatch = true;
 
         // 如果沒有選擇搜尋類型，預設不篩選
@@ -135,13 +134,14 @@ const filteredRecipes = computed(() => {
             searchMatch = true; // 沒有選擇類型時，搜尋條件為 true，代表不篩選
         } else if (filters.value.searchType === 'recipeName') {
             // 搜尋食譜名稱
-            searchMatch = searchWords.every(word => {
+            searchMatch = searchWords.every((word) => {
                 return !word || recipe.recipeName.toLowerCase().includes(word);
             });
         } else if (filters.value.searchType === 'ingredient') {
             // 確認 `recipe.selectedIngredients` 是否為數字 ID 的數組，並進行匹配
-            searchMatch = selectedIngredientIds.length === 0 ||
-                recipe.selectedIngredients.some(ingredient => {
+            searchMatch =
+                selectedIngredientIds.length === 0 ||
+                recipe.selectedIngredients.some((ingredient) => {
                     // console.log("正在檢查的食材 ID:", ingredient); // 檢查每個食材 ID
                     return selectedIngredientIds.includes(ingredient);
                 });
@@ -149,9 +149,7 @@ const filteredRecipes = computed(() => {
         // console.log(`該食譜 (${recipe.recipeName}) 是否匹配:`, searchMatch);
         // return searchMatch;
         // 葷素篩選
-        const restrictionMatch =
-            filters.value.restriction === '' || recipe.restriction === filters.value.restriction;
-
+        const restrictionMatch = filters.value.restriction === '' || recipe.restriction === filters.value.restriction;
 
         // 中西式篩選
         const styleMatch = filters.value.style === '' || recipe.westEast === filters.value.style;
@@ -161,17 +159,22 @@ const filteredRecipes = computed(() => {
     });
 });
 //清空子類別
-watch(() => filters.value.category, () => {
-    filters.value.subcategory = '';
-});
-watch(filters, () => {
-    currentPage.value = 1; // 重置為第一頁
-    // console.log(filters.value)
-}, { deep: true });
-
+watch(
+    () => filters.value.category,
+    () => {
+        filters.value.subcategory = '';
+    }
+);
+watch(
+    filters,
+    () => {
+        currentPage.value = 1; // 重置為第一頁
+        // console.log(filters.value)
+    },
+    { deep: true }
+);
 
 //#endregion 搜尋功能end
-
 
 //#region 分頁功能 start
 
@@ -186,7 +189,6 @@ const paginatedRecipes = computed(() => {
     return filteredRecipes.value.slice(start, end);
 });
 
-
 const handlePageSizeChange = (newSize) => {
     pageSize.value = newSize;
     currentPage.value = 1; // 當每頁顯示的數量改變時，重置到第一頁
@@ -194,7 +196,6 @@ const handlePageSizeChange = (newSize) => {
 
 const handleCurrentChange = (newPage) => {
     currentPage.value = newPage;
-
 };
 
 watch(totalPages, (newTotalPages) => {
@@ -203,8 +204,6 @@ watch(totalPages, (newTotalPages) => {
     }
 });
 //#endregion 分頁功能 end
-
-
 </script>
 
 <template>
@@ -227,13 +226,16 @@ watch(totalPages, (newTotalPages) => {
     <!-- 推薦食譜 start -->
     <section class="pt-5">
         <div class="container-fluid">
-            <div class="pt-5 rounded-4" :style="{
-                width: '100%',
-                height: '100%',
-                backgroundImage: `url(${BannerRecipe})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-            }">
+            <div
+                class="pt-5 rounded-4"
+                :style="{
+                    width: '100%',
+                    height: '100%',
+                    backgroundImage: `url(${BannerRecipe})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                }"
+            >
                 <div class="row p-3">
                     <div class="col-md-6 d-flex flex-column align-items-center">
                         <h2 class="mt-3 text-white">左思右想還是不知道煮什麼嗎?</h2>
@@ -280,8 +282,11 @@ watch(totalPages, (newTotalPages) => {
                     <div class="col-md-3 my-auto">
                         <select class="form-select" v-model="filters.category">
                             <option value="">選擇主類別</option>
-                            <option v-for="(subcategories, category) in categoryOptions" :key="category"
-                                :value="category">
+                            <option
+                                v-for="(subcategories, category) in categoryOptions"
+                                :key="category"
+                                :value="category"
+                            >
                                 {{ category }}
                             </option>
                         </select>
@@ -305,20 +310,31 @@ watch(totalPages, (newTotalPages) => {
 
                     <div class="col-md-9 mx-auto my-3">
                         <!-- 當選擇 "recipeName" 時顯示 input -->
-                        <input v-if="filters.searchType === 'recipeName'" type="text" v-model="filters.searchWord"
-                            class="form-control w-100 rounded-3" placeholder="輸入食譜名稱" />
+                        <input
+                            v-if="filters.searchType === 'recipeName'"
+                            type="text"
+                            v-model="filters.searchWord"
+                            class="form-control w-100 rounded-3"
+                            placeholder="輸入食譜名稱"
+                        />
 
                         <!-- 當選擇 "ingredient" 時顯示 multiselect -->
-                        <multiselect v-if="filters.searchType === 'ingredient'" v-model="selectedIngredients"
-                            :options="groupedIngredients" placeholder="搜尋或選擇食材 (可以多選)" :multiple="true"
-                            :close-on-select="false" group-label="category" group-values="ingredients"
-                            :group-select="false" track-by="ingredientId" :custom-label="customLabel">
+                        <multiselect
+                            v-if="filters.searchType === 'ingredient'"
+                            v-model="selectedIngredients"
+                            :options="groupedIngredients"
+                            placeholder="搜尋或選擇食材 (可以多選)"
+                            :multiple="true"
+                            :close-on-select="false"
+                            group-label="category"
+                            group-values="ingredients"
+                            :group-select="false"
+                            track-by="ingredientId"
+                            :custom-label="customLabel"
+                        >
                             <span slot="noResult">找不到該食材</span>
-
                         </multiselect>
-
                     </div>
-
                 </div>
             </div>
         </div>
@@ -333,44 +349,67 @@ watch(totalPages, (newTotalPages) => {
                     <div class="banner-ad bootstrap-tabs product-tabs p-3">
                         <div class="tabs-header d-flex justify-content-between">
                             <h3>食譜列表</h3>
-
                         </div>
                         <div>
                             <!-- 分頁導航 -->
 
-                            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize"
-                                :total="totalRecipes" background layout="sizes, total, ->,prev, pager, next, jumper "
-                                :page-sizes="[8, 12, 16, 20]" @size-change="handlePageSizeChange"
+                            <el-pagination
+                                v-model:current-page="currentPage"
+                                v-model:page-size="pageSize"
+                                :total="totalRecipes"
+                                background
+                                layout="sizes, total, ->,prev, pager, next, jumper "
+                                :page-sizes="[8, 12, 16, 20]"
+                                @size-change="handlePageSizeChange"
                                 @current-change="handleCurrentChange"
-                                class="mt-4 d-flex justify-content-end align-items-center gap-2">
+                                class="mt-4 d-flex justify-content-end align-items-center gap-2"
+                            >
                             </el-pagination>
 
                             <!-- 分頁導航結束 -->
                         </div>
                         <div class="tab-content" id="nav-tabContent">
-                            <div class="tab-pane fade show active" id="nav-all" role="tabpanel"
-                                aria-labelledby="nav-all-tab">
+                            <div
+                                class="tab-pane fade show active"
+                                id="nav-all"
+                                role="tabpanel"
+                                aria-labelledby="nav-all-tab"
+                            >
                                 <div class="row g-3 mt-2">
-                                    <div class="col-12 col-md-6" v-for="recipe in paginatedRecipes"
-                                        :key="recipe.recipeId">
-                                        <div class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
-                                            style="height: 150px" @click="recipeStore.selectRecipe(recipe)">
-                                            <div class="d-flex" :style="{
-                                                width: '50%',
-                                                height: '100%',
-                                                backgroundImage: `url(${getRecipeImageUrl(recipe.photo) || 'default_image.jpg'})`,
-                                                backgroundSize: 'cover',
-                                                backgroundPosition: 'center',
-                                                borderTopLeftRadius: '0.75rem',
-                                                borderBottomLeftRadius: '0.75rem',
-                                            }"></div>
+                                    <div
+                                        class="col-12 col-md-6"
+                                        v-for="recipe in paginatedRecipes"
+                                        :key="recipe.recipeId"
+                                    >
+                                        <div
+                                            class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
+                                            style="height: 150px"
+                                            @click="recipeStore.selectRecipe(recipe)"
+                                        >
+                                            <div
+                                                class="d-flex"
+                                                :style="{
+                                                    width: '50%',
+                                                    height: '100%',
+                                                    backgroundImage: `url(${
+                                                        getRecipeImageUrl(recipe.photo) || 'default_image.jpg'
+                                                    })`,
+                                                    backgroundSize: 'cover',
+                                                    backgroundPosition: 'center',
+                                                    borderTopLeftRadius: '0.75rem',
+                                                    borderBottomLeftRadius: '0.75rem',
+                                                }"
+                                            ></div>
 
                                             <!-- 右邊文字和標籤區 -->
                                             <div
-                                                class="p-3 w-100 d-flex flex-column justify-content-center align-items-center">
+                                                class="p-3 w-100 d-flex flex-column justify-content-center align-items-center"
+                                            >
                                                 <h5 class="mb-3">{{ recipe.recipeName }}</h5>
                                                 <div class="d-flex gap-2">
-                                                    <span class="badge bg-secondary" v-if="recipe.restriction">素食</span>
+                                                    <span class="badge bg-secondary" v-if="recipe.restriction"
+                                                        >素食</span
+                                                    >
                                                     <span class="badge bg-secondary" v-else>葷食</span>
                                                     <span class="badge bg-secondary" v-if="recipe.westEast">西式</span>
                                                     <span class="badge bg-secondary" v-else>中式</span>
@@ -391,13 +430,21 @@ watch(totalPages, (newTotalPages) => {
     <!-- Recipe Detail Component -->
     <!-- <RecipeDetailComponent v-if="recipeStore.selectedRecipe" :recipe="recipeStore.selectedRecipe">
     </RecipeDetailComponent> -->
-    <el-dialog v-model="recipeStore.dialogVisible" title="食譜詳細資訊" width="75%" @close="recipeStore.closeDialog" center
-        @opened="onDialogOpened">
-
+    <el-dialog
+        v-model="recipeStore.dialogVisible"
+        title="食譜詳細資訊"
+        width="75%"
+        @close="recipeStore.closeDialog"
+        center
+        @opened="onDialogOpened"
+    >
         <PerfectScrollbar ref="scrollContainer" class="custom-scroll-container">
             <div class="dialog-content">
-                <RecipeDetailComponent :recipe="recipeStore.selectedRecipe" :reset-active-step="resetActiveStep"
-                    v-if="recipeStore.selectedRecipe" />
+                <RecipeDetailComponent
+                    :recipe="recipeStore.selectedRecipe"
+                    :reset-active-step="resetActiveStep"
+                    v-if="recipeStore.selectedRecipe"
+                />
             </div>
         </PerfectScrollbar>
         <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
