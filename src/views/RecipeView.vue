@@ -11,31 +11,18 @@ import 'vue-multiselect/dist/vue-multiselect.min.css';
 // 使用 Pinia 的 recipeStore
 const recipeStore = useRecipeStore();
 
-const recipes = ref([]);
+const recipes = computed(() => recipeStore.recipes);
 const currentPage = ref(1);
 const pageSize = ref(8);
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
-const ApiURL = `${BaseURL}/Recipes`;
+
 const getIngredientsApi = `${BaseURL}/Ingredients`
 const ingredients = ref([]);
 const selectedIngredients = ref([]);
 const groupedIngredients = ref([]);
-// 使用fetch獲取數據
-const fetchRecipes = async () => {
-    try {
-        const response = await fetch(ApiURL);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        recipes.value = data; // 將獲取到的數據存入 recipes 變量
-        // totalRecipes.value = recipes.value.length;
-        // console.log(recipes.value)
-    } catch (error) {
-        console.error('There was a problem with the fetch operation:', error);
-    }
-};
+// 使用fetch獲取數據 (這段寫在recipeStore了)
+
 const groupIngredientsByCategory = (data) => {
     const grouped = data.reduce((acc, ingredient) => {
         // 如果該分類不存在，先創建一個分類
@@ -68,7 +55,8 @@ const fetchIngredients = async () => {
 }
 // 在組件加載後獲取數據
 onMounted(() => {
-    fetchRecipes();
+    recipeStore.fetchRecipes();
+    // fetchRecipes();
     fetchIngredients();
 });
 
@@ -128,7 +116,7 @@ const subcategoryOptions = computed(() => {
 const filteredRecipes = computed(() => {
     // 取得選擇的食材ID列表
     const selectedIngredientIds = selectedIngredients.value.map(ingredient => ingredient.ingredientId);
-    console.log(selectedIngredientIds)
+    // console.log(selectedIngredientIds)
     const searchWords = filters.value.searchWord.split(',').map(word => word.trim().toLowerCase());
     return recipes.value.filter((recipe) => {
         // console.log("正在篩選的食譜:", recipe.recipeName);
