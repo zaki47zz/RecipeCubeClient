@@ -5,45 +5,83 @@ import Swal from 'sweetalert2';
 import BannerRecipe from '@/assets/img/ForBackground/banner-recipe.jpg';
 
 import RecipeDetailComponent from '@/components/RecipeDetailComponent.vue';
+import Multiselect from 'vue-multiselect';
+import 'vue-multiselect/dist/vue-multiselect.min.css';
 
 // 使用 Pinia 的 recipeStore
 const recipeStore = useRecipeStore();
 
-const recipes = ref([]);
+const recipes = computed(() => recipeStore.recipes);
 const currentPage = ref(1);
 const pageSize = ref(8);
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
-const ApiURL = `${BaseURL}/Recipes`;
 
-// 使用fetch獲取數據
-const fetchRecipes = async () => {
-    try {
-        const response = await fetch(ApiURL); // 替換為你的 API URL
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+const getIngredientsApi = `${BaseURL}/Ingredients`
+const ingredients = ref([]);
+const selectedIngredients = ref([]);
+const groupedIngredients = ref([]);
+// 使用fetch獲取數據 (這段寫在recipeStore了)
+
+const groupIngredientsByCategory = (data) => {
+    const grouped = data.reduce((acc, ingredient) => {
+        // 如果該分類不存在，先創建一個分類
+        let category = acc.find(group => group.category === ingredient.category);
+        if (!category) {
+            category = { category: ingredient.category, ingredients: [] };
+            acc.push(category);
         }
-        const data = await response.json();
-        recipes.value = data; // 將獲取到的數據存入 recipes 變量
-        // totalRecipes.value = recipes.value.length;
-        // console.log(recipes)
-    } catch (error) {
-        console.error('There was a problem with the fetch operation:', error);
-    }
-};
+        // 將食材加入對應分類
+        category.ingredients.push(ingredient);
+        return acc;
+    }, []);
 
+    groupedIngredients.value = grouped;
+};
+const fetchIngredients = async () => {
+    try {
+        const response = await fetch(getIngredientsApi);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+        }
+        const data = await response.json();  // 只需要調用一次 .json()
+        ingredients.value = data;
+        groupIngredientsByCategory(data);  // 將數據分組
+        // console.log("食材data:", data);  // 打印出來檢查
+        // console.log("分組後的食材:", groupedIngredients.value);  // 檢查分組結果 
+    } catch (error) {
+        console.error("Fetch Fail", error);
+    }
+}
 // 在組件加載後獲取數據
 onMounted(() => {
-    fetchRecipes();
-
+    recipeStore.fetchRecipes();
+    // fetchRecipes();
+    fetchIngredients();
 });
+
+function customLabel(option) {
+    // 合併名稱和同義字來讓它們參與過濾
+    const label = option.ingredientName || '';
+    const synonym = option.synonym ? ` (${option.synonym})` : '';
+
+    // 返回顯示的名稱和同義字
+    return `${label}${synonym}`;
+}
+
 const getRecipeImageUrl = (fileName) => {
     return `${BaseUrlWithoutApi}/images/recipe/${fileName}`;
 };
 const resetActiveStep = ref(false);
+// Create a ref for the scrollable container
+const scrollContainer = ref(null);
 
 // 當打開對話框時，重置子組件中的 activeStep
 const onDialogOpened = () => {
+    if (scrollContainer.value) {
+        const psInstance = scrollContainer.value.$el; // Get the underlying DOM element of PerfectScrollbar
+        psInstance.scrollTop = 0; // Reset the scroll position to top
+    }
     resetActiveStep.value = true;
     // 確保這個重置只發生一次
     setTimeout(() => {
@@ -51,7 +89,7 @@ const onDialogOpened = () => {
     }, 0);
 };
 
-//搜尋功能
+//#region 搜尋功能
 const filters = ref({
     category: '',
     subcategory: '',
@@ -74,8 +112,15 @@ const subcategoryOptions = computed(() => {
     }
     return [];
 });
+
 const filteredRecipes = computed(() => {
+    // 取得選擇的食材ID列表
+    const selectedIngredientIds = selectedIngredients.value.map(ingredient => ingredient.ingredientId);
+    // console.log(selectedIngredientIds)
+    const searchWords = filters.value.searchWord.split(',').map(word => word.trim().toLowerCase());
     return recipes.value.filter((recipe) => {
+        // console.log("正在篩選的食譜:", recipe.recipeName);
+        // console.log("該食譜的食材 IDs:", recipe.selectedIngredients); // 打印出食譜的食材 ID 列表
         // 分類篩選
         const categoryMatch = !filters.value.category || recipe.category === filters.value.category;
 
@@ -94,20 +139,22 @@ const filteredRecipes = computed(() => {
                 return !word || recipe.recipeName.toLowerCase().includes(word);
             });
         } else if (filters.value.searchType === 'ingredient') {
-            // 搜尋食材名稱（包括同義字）
-            searchMatch = searchWords.every(word => {
-                return (
-                    !word ||
-                    (recipe.selectedIngredientNames && recipe.selectedIngredientNames.some(ingredient => ingredient.toLowerCase().includes(word))) ||
-                    (recipe.synonyms && recipe.synonyms.some(synonym => synonym.toLowerCase().includes(word)))
-                );
-            });
+            // 確認 `recipe.selectedIngredients` 是否為數字 ID 的數組，並進行匹配
+            searchMatch = selectedIngredientIds.length === 0 ||
+                recipe.selectedIngredients.some(ingredient => {
+                    // console.log("正在檢查的食材 ID:", ingredient); // 檢查每個食材 ID
+                    return selectedIngredientIds.includes(ingredient);
+                });
         }
+        // console.log(`該食譜 (${recipe.recipeName}) 是否匹配:`, searchMatch);
+        // return searchMatch;
         // 葷素篩選
-        const restrictionMatch = !filters.value.restriction || recipe.restriction === filters.value.restriction;
+        const restrictionMatch =
+            filters.value.restriction === '' || recipe.restriction === filters.value.restriction;
+
 
         // 中西式篩選
-        const styleMatch = !filters.value.style || recipe.westEast === filters.value.style;
+        const styleMatch = filters.value.style === '' || recipe.westEast === filters.value.style;
 
         // 必須符合所有條件
         return categoryMatch && subcategoryMatch && searchMatch && restrictionMatch && styleMatch;
@@ -119,11 +166,14 @@ watch(() => filters.value.category, () => {
 });
 watch(filters, () => {
     currentPage.value = 1; // 重置為第一頁
+    // console.log(filters.value)
 }, { deep: true });
-//搜尋功能end
 
 
-//分頁功能 start
+//#endregion 搜尋功能end
+
+
+//#region 分頁功能 start
 
 // all-data
 const totalRecipes = computed(() => filteredRecipes.value.length);
@@ -152,7 +202,8 @@ watch(totalPages, (newTotalPages) => {
         currentPage.value = newTotalPages;
     }
 });
-//分頁功能 end
+//#endregion 分頁功能 end
+
 
 </script>
 
@@ -215,8 +266,8 @@ watch(totalPages, (newTotalPages) => {
                     <div class="col-md-2 my-auto">
                         <select class="form-select" v-model="filters.restriction">
                             <option value="">選擇葷素食</option>
-                            <option :value="true">葷食</option>
-                            <option :value="false">素食</option>
+                            <option :value="true">素食</option>
+                            <option :value="false">葷食</option>
                         </select>
                     </div>
                     <div class="col-md-2 my-auto">
@@ -251,9 +302,21 @@ watch(totalPages, (newTotalPages) => {
                             <option value="ingredient">搜尋食材名稱</option>
                         </select>
                     </div>
+
                     <div class="col-md-9 mx-auto my-3">
-                        <input type="text" v-model="filters.searchWord" class="form-control w-100 rounded-3"
-                            placeholder="輸入食譜名稱或食材 (一次輸入多種請用逗號分隔，例如: 青椒,蘋果)" />
+                        <!-- 當選擇 "recipeName" 時顯示 input -->
+                        <input v-if="filters.searchType === 'recipeName'" type="text" v-model="filters.searchWord"
+                            class="form-control w-100 rounded-3" placeholder="輸入食譜名稱" />
+
+                        <!-- 當選擇 "ingredient" 時顯示 multiselect -->
+                        <multiselect v-if="filters.searchType === 'ingredient'" v-model="selectedIngredients"
+                            :options="groupedIngredients" placeholder="搜尋或選擇食材 (可以多選)" :multiple="true"
+                            :close-on-select="false" group-label="category" group-values="ingredients"
+                            :group-select="false" track-by="ingredientId" :custom-label="customLabel">
+                            <span slot="noResult">找不到該食材</span>
+
+                        </multiselect>
+
                     </div>
 
                 </div>
@@ -328,11 +391,15 @@ watch(totalPages, (newTotalPages) => {
     <!-- Recipe Detail Component -->
     <!-- <RecipeDetailComponent v-if="recipeStore.selectedRecipe" :recipe="recipeStore.selectedRecipe">
     </RecipeDetailComponent> -->
-    <el-dialog v-model="recipeStore.dialogVisible" title="食譜詳細資訊" width="80%" @close="recipeStore.closeDialog" center
+    <el-dialog v-model="recipeStore.dialogVisible" title="食譜詳細資訊" width="75%" @close="recipeStore.closeDialog" center
         @opened="onDialogOpened">
-        <RecipeDetailComponent :recipe="recipeStore.selectedRecipe" :reset-active-step="resetActiveStep"
-            v-if="recipeStore.selectedRecipe">
-        </RecipeDetailComponent>
+
+        <PerfectScrollbar ref="scrollContainer" class="custom-scroll-container">
+            <div class="dialog-content">
+                <RecipeDetailComponent :recipe="recipeStore.selectedRecipe" :reset-active-step="resetActiveStep"
+                    v-if="recipeStore.selectedRecipe" />
+            </div>
+        </PerfectScrollbar>
         <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
             <el-button @click="recipeStore.closeDialog" type="danger">關閉</el-button>
         </span>
@@ -371,5 +438,16 @@ watch(totalPages, (newTotalPages) => {
     border: none;
     border-bottom: 3px solid rgb(127, 180, 255);
     background-color: transparent;
+}
+
+.custom-scroll-container {
+    max-height: 300px;
+    overflow: hidden;
+}
+
+.dialog-content {
+    max-height: 100%;
+    padding-right: 15px;
+    /* Adjust as needed to avoid content overflow */
 }
 </style>

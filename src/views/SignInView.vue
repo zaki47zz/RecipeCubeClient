@@ -3,10 +3,11 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import VueJwtDecode from 'vue-jwt-decode' // 引入 jwt-decode 函式庫
 const router = useRouter(); // 創建 router 實例
-const API_URL = `${import.meta.env.VITE_API_BASEURL}/Users/login`
+const API_URL = `${import.meta.env.VITE_API_BASEURL}/Users/SignIn`
 const user = ref({
-    "email": "",
-    "password": ""
+    // 後續記得帳號功能，可以在按下記住密碼button後，將帳號密碼寫入localStorage，登入時讀取localStorage帳密，在tokin到期時一起清除
+    "email": "user18@example.com",
+    "password": "Password123!"
 })
 const send = async () => {
     const response = await fetch(API_URL, {
@@ -17,6 +18,9 @@ const send = async () => {
     if (response.ok) {
         const datas = await response.json()
         const originaltoken = datas.token; //原始JWT
+        console.log("原始jwt",originaltoken);
+        const decoded = VueJwtDecode.decode(originaltoken);
+        console.log("解碼後jwt",decoded);
         if (originaltoken) {
             localStorage.setItem('token', originaltoken); // 儲存 JWT
             /*  解析JWT 取得並將UserId寫入localStorage.getItem('UserId')
@@ -24,6 +28,7 @@ const send = async () => {
             */
             try {
                 const decoded = VueJwtDecode.decode(originaltoken);  // 使用 VueJwtDecode 解碼 JWT
+                console.log(decoded);
                 if (decoded.certserialnumber) {
                     // console.log(decoded.unique_name);
                     // localStorage.setItem('UserId', decoded.certserialnumber);  // 存入登入用戶的 ID
@@ -77,21 +82,22 @@ const handleLoginClick = async () => {
                 <form @submit.prevent="handleLoginClick"> <!-- 修改事件綁定為 handleLoginClick -->
                     <div class="text-danger" role="alert"></div>
                     <div class="form-floating mb-3">
-                        <input type="email" class="form-control" name="email" v-model="user.email" id="email"
+                        <input type="email" class="form-control" name="email" v-model.trim="user.email" id="email"
                             placeholder="Email" required />
                         <label for="email" class="form-label">Email</label>
                         <span class="text-danger"></span>
                     </div>
                     <div class="form-floating mb-3">
-                        <input type="password" class="form-control" name="password" v-model="user.password"
+                        <input type="password" class="form-control" name="password" v-model.trim="user.password"
                             id="password" value="" placeholder="密碼" required />
                         <label for="password" class="form-label">密碼</label>
                         <span class="text-danger"></span>
                     </div>
-                    <div class="form-check form-switch">
+                    <!-- <div class="form-check form-switch">
                         <input class="form-check-input" />
                         <label class="form-check-label">記住密碼</label>
-                    </div>
+                    </div> -->
+                    <!-- 好像不存在同設備頻繁登出登入的需求，後續再考慮實作此功能 -->
                     <div class="text-center">
                         <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">登入</button> <!-- 按下按鈕後執行 handleLoginClick -->
                     </div>
