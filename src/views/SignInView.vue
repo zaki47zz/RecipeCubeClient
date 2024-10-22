@@ -5,6 +5,7 @@ import VueJwtDecode from 'vue-jwt-decode' // 引入 jwt-decode 函式庫
 const router = useRouter(); // 創建 router 實例
 const API_URL = `${import.meta.env.VITE_API_BASEURL}/Users/SignIn`
 const user = ref({
+    // 後續記得帳號功能，可以在按下記住密碼button後，將帳號密碼寫入localStorage，登入時讀取localStorage帳密，在tokin到期時一起清除
     "email": "user18@example.com",
     "password": "Password123!"
 })
