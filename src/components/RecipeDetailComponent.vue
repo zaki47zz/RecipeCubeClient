@@ -1,60 +1,64 @@
 <template>
-    <div v-if="recipe" class="recipe-detail-container">
-        <h2 class="recipe-title">{{ recipe.recipeName }}</h2>
-        <img :src="getRecipeImageUrl(recipe.photo)" :alt="recipe.recipeName" class="recipe-image" />
+    <PerfectScrollbar>
+        <div v-if="recipe" class="recipe-detail-container">
+            <h2 class="recipe-title">{{ recipe.recipeName }}</h2>
+            <!-- <img :src="getRecipeImageUrl(recipe.photo)" :alt="recipe.recipeName" class="recipe-image" /> -->
 
-        <div class="recipe-info">
-            <el-descriptions title="" :column="2" border>
-                <el-descriptions-item label="用戶名稱">{{ userIdDisplay }}</el-descriptions-item>
-                <!-- <el-descriptions-item label="是否自定義">{{ recipe.isCustom ? '是' : '否' }}</el-descriptions-item> -->
-                <el-descriptions-item label="葷素限制">{{ recipe.restriction ? '素' : '葷' }}</el-descriptions-item>
-                <el-descriptions-item label="中/西式">{{ recipe.westEast ? '西式' : '中式' }}</el-descriptions-item>
-                <el-descriptions-item label="類別">{{ recipe.category }}</el-descriptions-item>
-                <el-descriptions-item label="細部類別">{{ recipe.detailedCategory }}</el-descriptions-item>
-                <el-descriptions-item label="可見性">{{ recipe.visibility ? '公開' : '私人' }}</el-descriptions-item>
-            </el-descriptions>
-            <!-- <p><strong>描述:</strong> {{ recipe.steps }}</p> -->
+            <div class="recipe-info">
+                <el-descriptions title="" :column="2" border>
+                    <el-descriptions-item label="用戶名稱">{{ userIdDisplay }}</el-descriptions-item>
+                    <!-- <el-descriptions-item label="是否自定義">{{ recipe.isCustom ? '是' : '否' }}</el-descriptions-item> -->
+                    <el-descriptions-item label="葷素限制">{{ recipe.restriction ? '素' : '葷' }}</el-descriptions-item>
+                    <el-descriptions-item label="中/西式">{{ recipe.westEast ? '西式' : '中式' }}</el-descriptions-item>
+                    <el-descriptions-item label="類別">{{ recipe.category }}</el-descriptions-item>
+                    <el-descriptions-item label="細部類別">{{ recipe.detailedCategory }}</el-descriptions-item>
+                    <el-descriptions-item label="可見性">{{ recipe.visibility ? '公開' : '私人' }}</el-descriptions-item>
+                </el-descriptions>
+                <!-- <p><strong>描述:</strong> {{ recipe.steps }}</p> -->
 
-            <!-- <p class="mt-5"><strong>調味料:</strong> {{ recipe.seasoning }}</p> -->
-            <!-- <p><strong>狀態:</strong> {{ recipe.status ? '啟用' : '禁用' }}</p> -->
-            <div class="ingredients-section mt-4">
-                <h5>食材列表</h5>
-                <div class="ingredients-container">
-                    <el-card v-for="(ingredientId, index) in recipeStore.selectedRecipe.selectedIngredients"
-                        :key="ingredientId" shadow="hover" class="ingredient-card">
-                        <div class="d-flex align-items-center">
-                            <!-- <img :src="getIngredientImage(ingredientId)" alt="食材圖片" class="ingredient-image" /> -->
-                            <div class="ingredient-info ms-3">
-                                <h5>{{ recipeStore.selectedRecipe.selectedIngredientNames[index] }}</h5>
-                                <p>
-                                    <strong>數量:</strong> {{
-                                        recipeStore.selectedRecipe.ingredientQuantities[ingredientId] }}
-                                    {{ recipeStore.selectedRecipe.ingredientUnits[ingredientId] || '' }}
-                                </p>
+                <!-- <p class="mt-5"><strong>調味料:</strong> {{ recipe.seasoning }}</p> -->
+                <!-- <p><strong>狀態:</strong> {{ recipe.status ? '啟用' : '禁用' }}</p> -->
+                <div class="ingredients-section mt-4">
+                    <h5>食材列表</h5>
+                    <div class="ingredients-container">
+                        <el-card v-for="(ingredientId, index) in recipeStore.selectedRecipe.selectedIngredients"
+                            :key="ingredientId" shadow="hover" class="ingredient-card">
+                            <div class="d-flex align-items-center">
+                                <!-- <img :src="getIngredientImage(ingredientId)" alt="食材圖片" class="ingredient-image" /> -->
+                                <div class="ingredient-info ms-3">
+                                    <h5>{{ recipeStore.selectedRecipe.selectedIngredientNames[index] }}</h5>
+                                    <p>
+                                        <strong>數量:</strong> {{
+                                            recipeStore.selectedRecipe.ingredientQuantities[ingredientId] }}
+                                        {{ recipeStore.selectedRecipe.ingredientUnits[ingredientId] || '' }}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    </el-card>
+                        </el-card>
+                    </div>
                 </div>
-            </div>
-            <div class="seasoning-section mt-5">
-                <h4><strong>調味料:</strong></h4>
-                <div class="seasoning-tags">
-                    <el-tag v-for="(seasoning, index) in seasoningList" :key="index" type="success" effect="light"
-                        class="mb-2 me-3">
-                        {{ seasoning }}
-                    </el-tag>
+                <div class="seasoning-section mt-5">
+                    <h4><strong>調味料:</strong></h4>
+                    <div class="seasoning-tags">
+                        <el-tag v-for="(seasoning, index) in seasoningList" :key="index" type="success" effect="light"
+                            class="mb-2 me-3">
+                            {{ seasoning }}
+                        </el-tag>
+                    </div>
                 </div>
-            </div>
-            <div class="recipe-steps my-4 wide-steps-container" :style="{ height: dynamicHeight, maxWidth: '600px' }">
-                <!-- 使用 el-steps 顯示步驟 -->
-                <h5>烹飪步驟</h5>
-                <el-steps :active="activeStep" direction="vertical">
-                    <el-step v-for="(step, index) in recipeSteps" :key="index" :title="step"
-                        @click="incrementStep(index)"></el-step>
-                </el-steps>
+                <div class="recipe-steps my-4 wide-steps-container"
+                    :style="{ height: dynamicHeight, maxWidth: '600px' }">
+                    <!-- 使用 el-steps 顯示步驟 -->
+                    <h5>烹飪步驟</h5>
+                    <el-steps :active="activeStep" direction="vertical">
+                        <el-step v-for="(step, index) in recipeSteps" :key="index" :title="step"
+                            @click="incrementStep(index)"></el-step>
+                    </el-steps>
+                </div>
             </div>
         </div>
-    </div>
+    </PerfectScrollbar>
+
 
 </template>
 
