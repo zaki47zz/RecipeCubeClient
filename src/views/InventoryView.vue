@@ -1,17 +1,16 @@
 <script setup>
 import Swal from 'sweetalert2';
-import SoftAlert from '@/components/SoftAlert.vue';
 import SoftBadge from '@/components/SoftBadge.vue';
-import SoftPagination from '@/components/SoftPagination.vue';
-import SoftPaginationItem from '@/components/SoftPaginationItem.vue';
 import InventorySkeleton from '@/components/InventorySkeleton.vue';
 import { onMounted, ref, computed } from 'vue';
 
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL(抓圖片要用的);
-const ApiURL = `${BaseURL}/Inventories`;
+const inventoryApiURL = `${BaseURL}/Inventories`;
+const pantryApiURL = `${BaseURL}/PantryManagements`;
 const userId = localStorage.getItem('UserId');
-const InventoriesURL = `${ApiURL}/${userId}`; //抓庫存的API
+const InventoriesURL = `${inventoryApiURL}/${userId}`; //抓庫存的API
+const pantriesURL = `${pantryApiURL}/${userId}`; //抓紀錄的API
 
 const inventories = ref([]); //庫存放這
 const totalInventories = ref(0); //總共多少項目放這
@@ -20,7 +19,8 @@ const selectedInventories = ref([]); //用戶選到的庫存會被加到這
 
 const isLoading = ref(true); //判斷是否還在載入的flag
 const allSelect = ref(false); //判斷全選與否的flag
-const isWarning = ref(false); //判斷有無錯誤訊息的flag
+const isInventoryModalVisible = ref(false);
+const isPantryModalVisible = ref(false);
 const warningMessage = ref('');
 
 //當DOM加載完執行fetch
@@ -51,6 +51,19 @@ const fetchInventories = async () => {
     }
 };
 
+//fetch庫存資料，使用非同步方法
+const fetchPantries = async () => {
+    try {
+        const response = await fetch(pantriesURL);
+        if (!response.ok) {
+            warningMessage.value = '網路連線有異常';
+        }
+        const data = await response.json();
+    } catch (error) {
+        warningMessage.value = `API操作出現錯誤: ${error}`;
+    }
+};
+
 //設定庫存圖片路徑
 const getIngredientImageUrl = (fileName) => {
     return `${BaseUrlWithoutApi}/images/ingredient/${fileName}`;
@@ -69,6 +82,7 @@ const alertClearCheck = () => {
         cancelButtonText: '取消',
     }).then((result) => {
         if (result.isConfirmed) {
+            deselectAllCard();
             Swal.fire({
                 title: '清空了!',
                 icon: 'success',
@@ -121,14 +135,14 @@ const filteredInventories = computed(() => {
 ////篩選功能結束
 
 //卡片點擊
-const activateCard = (event, inventoryId) => {
+const activateCard = (event, inventory) => {
     const selectedCard = event.currentTarget.closest('.card');
     if (!selectedCard.classList.contains('active')) {
         selectedCard.classList.add('active');
-        selectedInventories.value.push(inventoryId);
+        selectedInventories.value.push(inventory);
     } else {
         selectedCard.classList.remove('active');
-        const deletingIndex = selectedInventories.value.indexOf(inventoryId);
+        const deletingIndex = selectedInventories.value.indexOf(inventory);
         if (deletingIndex > -1) {
             selectedInventories.value.splice(deletingIndex, 1);
         }
@@ -141,8 +155,8 @@ const selectAllCard = () => {
         const card = document.querySelector(`.card[data-inventoryId="${inventory.inventoryId}"]`);
         if (card && !card.classList.contains('active')) {
             card.classList.add('active');
-            if (!selectedInventories.value.includes(inventory.inventoryId)) {
-                selectedInventories.value.push(inventory.inventoryId);
+            if (!selectedInventories.value.includes(inventory)) {
+                selectedInventories.value.push(inventory);
             }
         }
     });
@@ -151,8 +165,8 @@ const selectAllCard = () => {
 
 //取消全選按鈕
 const deselectAllCard = () => {
-    selectedInventories.value.forEach((inventoryId) => {
-        const card = document.querySelector(`.card[data-inventoryId="${inventoryId}"]`);
+    selectedInventories.value.forEach((inventory) => {
+        const card = document.querySelector(`.card[data-inventoryId="${inventory.inventoryId}"]`);
         //找到有data-inventoryId="已選擇號碼"的card
         if (card) {
             //存在的話，刪掉active
@@ -163,19 +177,127 @@ const deselectAllCard = () => {
     allSelect.value = false;
 };
 
-//修改功能
-const editCard = () => {
-    console.log('修改邏輯');
-};
+////修改功能
+//先設置響應式物件存資料
+const editInventory = ref({
+    inventoryId: '',
+    userId: '',
+    userName: '',
+    ingredientName: '',
+    quantity: 0,
+    unit: '',
+    expiryDate: new Date(),
+    visibility: true,
+});
+//用一個變數存原本數量
+let previousQuantity = 0;
 
-//個別刪除功能
-const deleteCard = async (inventoryId) => {
+//將傳入的inventory值存進響應式物件
+const editCard = (inventory) => {
+    editInventory.value = { ...inventory };
+    previousQuantity = editInventory.value.quantity;
+    isInventoryModalVisible.value = true;
+};
+const saveEditedInventory = async () => {
     try {
         isLoading.value = true;
-        const deleteURL = `${ApiURL}/${inventoryId}`;
+        // 如果新數量為 0，則刪除
+        if (editInventory.value.quantity === 0) {
+            const deleteURL = `${inventoryApiURL}/${editInventory.value.inventoryId}`;
+            const response_delete = await fetch(deleteURL, { method: 'DELETE' });
+            if (!response_delete.ok) {
+                warningMessage.value = '刪除失敗，網路連線有異常';
+            }
+        } else {
+            // 修改
+            const editURL = `${inventoryApiURL}/${editInventory.value.inventoryId}`;
+            console.log(editInventory.value);
+            const response_edit = await fetch(editURL, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    InventoryId: editInventory.value.inventoryId,
+                    UserId: editInventory.value.userId,
+                    GroupId: editInventory.value.groupId,
+                    IngredientId: editInventory.value.ingredientId,
+                    Quantity: editInventory.value.quantity,
+                    ExpiryDate: editInventory.value.expiryDate,
+                    IsExpiring: editInventory.value.isExpiring,
+                    Visibility: editInventory.value.visibility,
+                }),
+            });
+            if (!response_edit.ok) {
+                warningMessage.value = '修改失敗，網路連線有異常';
+            }
+        }
+        // 如果新數量與原數量相同，則無需紀錄
+        if (editInventory.value.quantity === previousQuantity) {
+            return;
+        }
+        // 紀錄
+        const change = editInventory.value.quantity - previousQuantity;
+        if (change !== 0) {
+            const action = change > 0 ? '增加' : '減少'; //判斷action
+            const response_pantry = await fetch(pantryApiURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    PantryId: 0,
+                    UserId: editInventory.value.userId,
+                    GroupId: editInventory.value.groupId,
+                    IngredientId: editInventory.value.ingredientId,
+                    Quantity: Math.abs(change),
+                    action: action,
+                    time: new Date(),
+                }),
+            });
+            if (!response_pantry.ok) {
+                warningMessage.value = '紀錄失敗，網路連線有異常';
+            }
+        }
+    } catch (error) {
+        warningMessage.value = `API操作出現錯誤: ${error}`;
+    } finally {
+        console.log(warningMessage.value);
+        isInventoryModalVisible.value = false;
+        fetchInventories();
+        isLoading.value = false;
+    }
+};
+////修改功能結束
+
+//個別刪除功能
+const deleteCard = async (inventory) => {
+    try {
+        isLoading.value = true;
+        const deleteURL = `${inventoryApiURL}/${inventory.inventoryId}`;
+        const quantity = inventory.quantity;
         const response = await fetch(deleteURL, { method: 'DELETE' });
         if (!response.ok) {
             warningMessage.value = '刪除失敗，網路連線有異常';
+        }
+        const action = '減少';
+        const response_pantry = await fetch(pantryApiURL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                PantryId: 0,
+                UserId: inventory.userId,
+                GroupId: inventory.groupId,
+                IngredientId: inventory.ingredientId,
+                Quantity: quantity,
+                action: action,
+                time: new Date(),
+            }),
+        });
+        if (!response_pantry.ok) {
+            warningMessage.value = '紀錄失敗，網路連線有異常';
         }
     } catch (error) {
         warningMessage.value = `API操作出現錯誤: ${error}`;
@@ -190,6 +312,32 @@ const deleteCards = () => {
     for (let inventory of selectedInventories.value) {
         deleteCard(inventory);
     }
+};
+
+////歷史紀錄功能
+//表格
+const columns = ref([
+    { field: 'userName', key: 'a', title: '擁有者名稱', align: 'center' },
+    { field: 'ingredientName', key: 'b', title: '食材名稱', align: 'center' },
+    { field: 'quantity', key: 'c', title: '數量', align: 'center' },
+    { field: 'action', key: 'd', title: '動作', align: 'center' },
+    { field: 'time', key: 'e', title: '編輯時間', align: 'center' },
+    { field: 'redo', key: 'f', title: '再次執行', align: 'center' },
+]);
+const tableData = ref([
+    {
+        userName: 'John',
+        ingredientName: '1900-05-20',
+        quantity: 'coding and coding repeat',
+        action: 'No.1 Century Avenue, Shanghai',
+        time: '1:00:00',
+        redo: '↻',
+    },
+]);
+//
+const showPantryDialog = () => {
+    fetchPantry();
+    isPantryDialogVisible.value = true;
 };
 </script>
 
@@ -290,7 +438,9 @@ const deleteCards = () => {
                         <div class="tabs-header d-flex justify-content-between">
                             <h3>食材列表</h3>
                             <div>
-                                <button class="btn blur shadow fs-6 me-1">歷史編輯紀錄</button>
+                                <button class="btn blur shadow fs-6 me-1" @click="showPantryDialog">
+                                    歷史編輯紀錄
+                                </button>
                                 <button v-if="allSelect" class="btn blur shadow fs-6 me-1" @click="deselectAllCard">
                                     取消全選
                                 </button>
@@ -327,17 +477,14 @@ const deleteCards = () => {
                                         已過期
                                     </SoftBadge>
                                     <span class="position-absolute top-0 end-0 p-2 z-index-3">
-                                        <button class="card-control" @click.stop="editCard(inventory.inventoryId)">
+                                        <button class="card-control" @click.stop="editCard(inventory)">
                                             <i class="fa-solid fa-pencil"></i>
                                         </button>
-                                        <button class="card-control" @click.stop="deleteCard(inventory.inventoryId)">
+                                        <button class="card-control" @click.stop="deleteCard(inventory)">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
                                     </span>
-                                    <div
-                                        class="card-body d-flex flex-column"
-                                        @click="activateCard($event, inventory.inventoryId)"
-                                    >
+                                    <div class="card-body d-flex flex-column" @click="activateCard($event, inventory)">
                                         <div class="image-container mb-3">
                                             <img
                                                 :src="getIngredientImageUrl(inventory.photo)"
@@ -362,93 +509,91 @@ const deleteCards = () => {
     </section>
 
     <section>
-        <div
-            class="h-screen flex justify-center items-center bg-gradient-to-br from-purple-400 via-pink-500 to-red-500"
-        >
-            <div class="p-8 rounded-lg shadow-lg bg-white w-96">
-                <div class="mb-4 text-center">
-                    <img
-                        src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png"
-                        alt="Instagram Logo"
-                        class="h-12"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Inventory ID"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Group ID"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="User ID"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Ingredient ID"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Quantity"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Expiry Date"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Is Expiring"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Visibility"
-                        class="w-full py-2 px-3 rounded-lg border border-gray-300"
-                    />
-                </div>
-                <div class="text-center">
-                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
-                        Submit
-                    </button>
-                </div>
+        <el-dialog v-model="isPantryModalVisible" title="歷史編輯紀錄" width="70%" center class="bg-primary-subtle">
+            <div class="d-flex justify-content-center align-items-center bg-white rounded-4">
+                <EasyDataTable
+                    :headers="headers"
+                    :items="items"
+                    theme-color="#f48225"
+                    :items-selected="itemsSelected"
+                    buttons-pagination
+                    loading
+                />
             </div>
-        </div>
+            <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
+                <el-button type="danger" @click="isPantryModalVisible = false">關閉</el-button>
+            </span>
+        </el-dialog>
     </section>
 
-    <section class="banner-ad d-flex justify-content-center">
-        <div class="row banner-content p-3">
-            <div class="content-wrapper text-center col-md-12"></div>
-            <soft-pagination color="info" class="p-0 m-0">
-                <soft-pagination-item prev />
-                <soft-pagination-item label="1" active />
-                <soft-pagination-item label="2" />
-                <soft-pagination-item label="3" />
-                <soft-pagination-item next />
-            </soft-pagination>
-        </div>
+    <section>
+        <el-dialog v-model="isInventoryModalVisible" title="修改庫存內容" width="50%" center class="bg-primary-subtle">
+            <div class="d-flex justify-content-center align-items-center bg-white rounded-4">
+                <div class="p-3 w-90">
+                    <div class="mb-4">
+                        <label for="userId" class="m-0 p-0 fs-6">庫存所有者</label>
+                        <input
+                            v-model="editInventory.userName"
+                            name="userId"
+                            type="text"
+                            class="form-control w-100 text-center"
+                            disabled
+                        />
+                    </div>
+                    <div class="mb-4">
+                        <label for="ingredientName" class="m-0 p-0 fs-6">食材名稱</label>
+                        <input
+                            v-model="editInventory.ingredientName"
+                            name="ingredientName"
+                            type="text"
+                            placeholder="食材名稱"
+                            class="form-control w-100 text-center"
+                            disabled
+                        />
+                    </div>
+                    <div class="mb-4">
+                        <label for="quantity" class="m-0 p-0 fs-6">數量</label>
+                        <div class="d-flex justify-content-between align-items-center gap-3">
+                            <input
+                                v-model="editInventory.quantity"
+                                name="quantity"
+                                type="text"
+                                placeholder="數量"
+                                class="form-control w-100 text-center"
+                            />
+                            <span>{{ editInventory.unit }}</span>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="expiryDate" class="m-0 p-0 fs-6">到期日</label>
+                        <input
+                            v-model="editInventory.expiryDate"
+                            name="expiryDate"
+                            type="date"
+                            placeholder="到期日"
+                            class="form-control w-100 text-center"
+                        />
+                    </div>
+                    <div class="mb-4">
+                        <label for="visibility" class="m-0 p-0 fs-6">權限</label>
+                        <select
+                            v-model="editInventory.visibility"
+                            :placeholder="editInventory.visibility"
+                            name="visibility"
+                            class="form-control w-100 text-center"
+                            :disabled="userId !== editInventory.userId"
+                        >
+                            <option :value="true">私有</option>
+                            <option :value="false">群組</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
+                <el-button type="info" @click="saveEditedInventory">儲存</el-button>
+                <el-button type="danger" @click="isInventoryModalVisible = false">關閉</el-button>
+            </span>
+        </el-dialog>
     </section>
 
     <section>
@@ -471,29 +616,19 @@ const deleteCards = () => {
                 <div class="order-md-last">
                     <h4 class="d-flex justify-content-between align-items-center mb-3">
                         <span class="text-dark">您所選的食材</span>
-                        <span class="badge bg-dark rounded-pill">3</span>
+                        <span class="badge bg-dark rounded-pill">{{ selectedInventories.length }}</span>
                     </h4>
                     <ul class="list-group mb-3">
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
+                        <li
+                            v-for="inventory in selectedInventories"
+                            :key="inventory.inventoryId"
+                            class="list-group-item d-flex justify-content-between lh-sm"
+                        >
                             <div>
-                                <h6 class="my-0">青椒</h6>
-                                <small class="text-body-secondary">蔬菜類</small>
+                                <h6 class="my-0">{{ inventory.ingredientName }}</h6>
+                                <small class="text-body-secondary">{{ inventory.category }}</small>
                             </div>
-                            <span class="text-body-secondary">到期日: 2024/10/13</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
-                            <div>
-                                <h6 class="my-0">青椒</h6>
-                                <small class="text-body-secondary">蔬菜類</small>
-                            </div>
-                            <span class="text-body-secondary">到期日: 2024/10/13</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
-                            <div>
-                                <h6 class="my-0">青椒</h6>
-                                <small class="text-body-secondary">蔬菜類</small>
-                            </div>
-                            <span class="text-body-secondary">到期日: 2024/10/13</span>
+                            <span class="text-body-secondary">到期日: {{ inventory.expiryDate }}</span>
                         </li>
                     </ul>
 
@@ -636,9 +771,7 @@ const deleteCards = () => {
 }
 
 .driver {
-    box-shadow:
-        rgba(0, 0, 0, 0.16) 0px 10px 36px 0px,
-        rgba(0, 0, 0, 0.06) 0px 0px 0px 1px !important;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px !important;
     cursor: pointer;
 }
 .driver:hover {
