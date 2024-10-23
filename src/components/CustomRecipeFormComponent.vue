@@ -3,20 +3,26 @@ import { ref, computed, watchEffect, onMounted } from 'vue';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.min.css';
 const recipeData = ref({
-    photo: null,
+    photo: '',
     recipeName: '',
-    restriction: '',
+    restriction: null,
     category: '',
-    subcategory: '',
-    visibility: '',
-    cookingTime: '',
-    ingredients: [],
+    detailedCategory: '',
+    visibility: null,
+    // time: '',
+    selectedIngredients: [],
+    ingredientQuantities: [],
     steps: '',
-    seasonings: ''
+    seasoning: '',
+    userId: '0',
+    isCustom: true,
+    status: true,
+    westEast: null,
+    previewUrl: '',
 });
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
-
+const POSTAPI = `${BaseURL}/Recipes`
 const getIngredientsApi = `${BaseURL}/Ingredients`
 const ingredients = ref([]);
 const selectedIngredients = ref([]);
@@ -54,7 +60,12 @@ const fetchIngredients = async () => {
     }
 }
 onMounted(() => {
-
+    const storedUserId = localStorage.getItem('UserId');
+    if (storedUserId) {
+        recipeData.value.userId = storedUserId;
+        // console.log("userId", recipeData.value.userId)
+    }
+    // console.log("store:", storedUserId)
     // fetchRecipes();
     fetchIngredients();
 });
@@ -84,11 +95,22 @@ watchEffect(() => {
             ingredientQuantities.value[ingredient.ingredientId] = '';
         }
     });
+    console.log(ingredientQuantities.value)
 });
+const fileName = ref('');
 // 處理圖片上傳
 const handlePhotoUpload = (event) => {
     const file = event.target.files[0];
-    recipeData.value.photo = file;
+    if (file) {
+        recipeData.value.photo = file; // 保留原始 file
+        console.log("圖片:", recipeData.value.photo);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            // 這裡是用於顯示圖片預覽的 URL
+            recipeData.value.previewUrl = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
 };
 const categoryOptions = {
     "主餐": ["麵食", "飯食", "粥", "排餐", "鹹派", "火鍋", "焗烤"],
@@ -107,7 +129,7 @@ watchEffect(() => {
         subcategoryOptions.value = [];
     }
     // 清空選擇的細部類別
-    recipeData.value.subcategory = '';
+    recipeData.value.detailedCategory = '';
 });
 
 const stepsList = ref([{ description: '' }]);
@@ -133,11 +155,63 @@ const removeSeasoning = (index) => {
     seasoningsList.value.splice(index, 1);
 };
 // 保存食譜
-const saveRecipe = () => {
+const saveRecipe = async () => {
     recipeData.value.steps = stepsList.value.map(step => step.description).join('。');
-    recipeData.value.seasonings = seasoningsList.value.map(seasoning => seasoning.description).join(', ');
+    recipeData.value.seasoning = seasoningsList.value.map(seasoning => seasoning.description).join(', ');
+    recipeData.value.selectedIngredients = selectedIngredients.value.map(ingredient => parseInt(ingredient.ingredientId));
+
+    // 儲存食材和對應數量
+    // 只儲存每個食材對應的數量
+    recipeData.value.ingredientQuantities = Object.fromEntries(
+        Object.entries(ingredientQuantities.value).map(([key, value]) => [parseInt(key), parseFloat(value)])
+    );
+    console.log("")
     console.log("保存食譜資料:", recipeData.value);
-    // 在這裡可以調用 API 來提交食譜資料
+    const formData = new FormData();
+    // 添加圖片
+    if (recipeData.value.photo) {
+        formData.append('photo', recipeData.value.photo);
+    }
+    formData.append('recipeName', recipeData.value.recipeName);
+    formData.append('restriction', recipeData.value.restriction);
+    formData.append('category', recipeData.value.category);
+    formData.append('detailedCategory', recipeData.value.detailedCategory);
+    formData.append('visibility', recipeData.value.visibility);
+
+    // 添加 selectedIngredients
+    recipeData.value.selectedIngredients.forEach((ingredientId, index) => {
+        formData.append(`selectedIngredients[${index}]`, ingredientId);
+    });
+    // formData.append('ingredientQuantities', JSON.stringify(recipeData.value.ingredientQuantities));
+    Object.entries(recipeData.value.ingredientQuantities).forEach(([ingredientId, quantity], index) => {
+        formData.append(`ingredientQuantities[${ingredientId}]`, quantity);
+    });
+    formData.append('steps', recipeData.value.steps);
+    formData.append('seasoning', recipeData.value.seasoning);
+    formData.append('userId', recipeData.value.userId);
+    formData.append('isCustom', recipeData.value.isCustom);
+    formData.append('status', recipeData.value.status);
+    formData.append('westEast', recipeData.value.westEast);
+    // 在這裡可以調用 API 來提交食譜資料4
+    for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+    }
+    try {
+        const response = await fetch(POSTAPI, {
+            method: 'POST',
+            body: formData,
+        });
+        if (!response.ok) {
+            // throw new Error('儲存食譜失敗')
+            const errorData = await response.json();
+            console.error('Error details:', errorData);
+            throw new Error('儲存食譜失敗');
+        }
+        const data = await response.json();
+        console.log('Recipe saved successfully:', data);
+    } catch (error) {
+        console.error("error saving recipe:", error)
+    }
 };
 </script>
 
@@ -158,34 +232,37 @@ const saveRecipe = () => {
                                             align-items: center;
                                             cursor: pointer;
                                         ">
-                            <div class="text-center">
+                            <div v-if="!recipeData.previewUrl" class="text-center">
                                 <i class="fas fa-cloud-upload-alt mb-2" style="font-size: 48px; color: #6c757d"></i>
                                 <p class="mb-0 fs-6" style="color: #6c757d">點擊或拖曳上傳食譜照片</p>
                             </div>
+                            <img v-else :src="recipeData.previewUrl" alt="食譜預覽"
+                                style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" />
                             <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
-                                accept="image/*" />
+                                accept="image/*" @change="handlePhotoUpload" />
                         </div>
                     </div>
                 </div>
                 <div class="mb-4">
-                    <input type="text" class="form-control w-100 fs-4 text-center" placeholder="輸入料理名稱" />
+                    <input type="text" v-model="recipeData.recipeName" class="form-control w-100 fs-4 text-center"
+                        placeholder="輸入料理名稱" />
                 </div>
 
                 <div class="mb-2">
                     <h5 class="mb-2">食譜設定</h5>
                     <div class="row g-2">
                         <div class="col-6">
-                            <select class="form-select fs-6 text-center">
-                                <option>葷素</option>
-                                <option>葷</option>
-                                <option>素</option>
+                            <select class="form-select fs-6 text-center" v-model="recipeData.restriction">
+                                <option :value="null">葷素</option>
+                                <option :value="false">葷</option>
+                                <option :value="true">素</option>
                             </select>
                         </div>
                         <div class="col-6">
-                            <select class="form-select fs-6 text-center">
-                                <option>權限</option>
-                                <option>群組</option>
-                                <option>私有</option>
+                            <select class="form-select fs-6 text-center" v-model="recipeData.visibility">
+                                <option :value="null">權限</option>
+                                <option :value="true">群組</option>
+                                <option :value="false">私有</option>
                             </select>
                         </div>
                         <div class="col-6">
@@ -198,7 +275,7 @@ const saveRecipe = () => {
                             </select>
                         </div>
                         <div class="col-6">
-                            <select v-model="recipeData.subcategory" class="form-select fs-6 text-center">
+                            <select v-model="recipeData.detailedCategory" class="form-select fs-6 text-center">
                                 <option value="">選擇細部類別</option>
                                 <option v-for="subcategory in subcategoryOptions" :key="subcategory"
                                     :value="subcategory">
@@ -206,9 +283,16 @@ const saveRecipe = () => {
                                 </option>
                             </select>
                         </div>
-
-                        <div class="col-12">
-                            <input type="text" class="form-control fs-6 text-center" placeholder="輸入料理所需時間，例如: 30分鐘" />
+                        <div class="col-6">
+                            <select class="form-select fs-6 text-center" v-model="recipeData.westEast">
+                                <option :value="null">中式/西式</option>
+                                <option :value="true">西式</option>
+                                <option :value="false">中式</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <input type="text" v-model="recipeData.time" class="form-control fs-6 text-center"
+                                placeholder="輸入料理所需時間，例如: 30分鐘" />
                         </div>
                     </div>
                 </div>
@@ -226,7 +310,7 @@ const saveRecipe = () => {
                 <div class="selected-ingredients mt-3">
                     <div v-for="ingredient in selectedIngredients" :key="ingredient.ingredientId" class="mb-2">
                         <label>{{ ingredient.ingredientName }} 數量：</label>
-                        <input type="text" v-model="ingredientQuantities[ingredient.ingredientId]"
+                        <input type="number" v-model="ingredientQuantities[ingredient.ingredientId]"
                             class="form-control w-50" placeholder="請輸入數量" />
                         <label>{{ ingredient.unit }}</label>
                     </div>

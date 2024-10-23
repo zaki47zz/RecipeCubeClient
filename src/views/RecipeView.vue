@@ -358,7 +358,7 @@ watch(totalPages, (newTotalPages) => {
                                             <div class="d-flex" :style="{
                                                 width: '50%',
                                                 height: '100%',
-                                                backgroundImage: `url(${getRecipeImageUrl(recipe.photo) || 'default_image.jpg'})`,
+                                                backgroundImage: `url(${getRecipeImageUrl(recipe.photoName) || 'default_image.jpg'})`,
                                                 backgroundSize: 'cover',
                                                 backgroundPosition: 'center',
                                                 borderTopLeftRadius: '0.75rem',
