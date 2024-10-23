@@ -16,7 +16,7 @@ const inventoryStore = useInventoryStore();
 const { inventories, ingredientCategory } = storeToRefs(inventoryStore); //解構inventories並轉換成響應式物件
 const { fetchInventories, deleteInventory, putInventory } = inventoryStore;
 const selectedInventories = ref([]); //用戶選到的庫存會被加到這
-const cookingStore = useCookingStore(); //用於產生食譜的庫存要被加到這
+const cookingStore = useCookingStore();
 const { cookingInventories, isShowingString } = storeToRefs(cookingStore);
 const { resetCookingInventories } = cookingStore;
 const pantryStore = usePantryStore(); //用來操作紀錄功能
@@ -267,16 +267,12 @@ const showPantryDialog = async () => {
 
 //將所選食材送至產生食譜介面
 const exportInventories = () => {
+    console.log(selectedInventories.value);
     if (!selectedInventories.value.length) {
         return;
     }
     isShowingString.value = false;
     cookingInventories.value = [...selectedInventories.value];
-    console.log('Store values:', {
-        cookingInventories: cookingInventories.value,
-        isShowingString: isShowingString.value,
-        isUsingInventory: isUsingInventory.value,
-    });
 };
 </script>
 
@@ -577,7 +573,7 @@ const exportInventories = () => {
                         class="w-100 btn shadow fs-5"
                         :class="selectedInventories.length ? 'bg-gradient-info' : 'bg-secondary disabled-link'"
                         :to="selectedInventories.length ? { name: 'GenerateRecipe' } : ''"
-                        @click="selectedInventories.length ? exportInventories : $event.preventDefault()"
+                        @click="exportInventories"
                         >產生食譜</RouterLink
                     >
                     <button class="w-100 btn blur text-danger shadow fs-5" @click="alertClearCheck">
@@ -596,7 +592,7 @@ const exportInventories = () => {
                         class="btn text-dark shadow fs-5 w-100"
                         :class="selectedInventories.length ? 'bg-primary-subtle' : 'bg-secondary disabled-link'"
                         :to="selectedInventories.length ? { name: 'GenerateRecipe' } : ''"
-                        @click="selectedInventories.length ? exportInventories : $event.preventDefault()"
+                        @click="exportInventories"
                         >產生食譜</RouterLink
                     >
                 </div>

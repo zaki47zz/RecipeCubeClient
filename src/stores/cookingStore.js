@@ -1,7 +1,7 @@
 import { ref, watch } from 'vue';
 import { defineStore, storeToRefs } from 'pinia';
 import { useInventoryStore } from '@/stores/inventoryStore';
-import { usePantryStore } from './pantryStore';
+import { usePantryStore } from '@/stores/pantryStore';
 
 export const useCookingStore = defineStore('cookingStore', () => {
     //儲存產生食譜用的食材們

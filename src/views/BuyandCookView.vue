@@ -206,7 +206,7 @@ const exportInventories = () => {
                         class="btn text-dark shadow fs-5 w-100"
                         :class="selectedIngredients.length ? 'bg-danger-subtle' : 'bg-secondary disabled-link'"
                         :to="selectedIngredients.length ? { name: 'GenerateRecipe' } : ''"
-                        @click="selectedIngredients.length ? exportInventories : $event.preventDefault()"
+                        @click="exportInventories"
                     >
                         產生食譜
                     </RouterLink>
