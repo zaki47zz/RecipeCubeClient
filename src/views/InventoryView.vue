@@ -2,23 +2,22 @@
 import Swal from 'sweetalert2';
 import SoftBadge from '@/components/SoftBadge.vue';
 import { useIngredientStore } from '@/stores/ingredientStore';
+import { usePantryStore } from '@/stores/pantryStore';
 import InventorySkeleton from '@/components/InventorySkeleton.vue';
 import { onMounted, ref, computed } from 'vue';
 
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL(抓圖片要用的);
 const inventoryApiURL = `${BaseURL}/Inventories`;
-const pantryApiURL = `${BaseURL}/PantryManagements`;
 const userId = localStorage.getItem('UserId');
 const InventoriesURL = `${inventoryApiURL}/${userId}`; //抓庫存的API
-const pantriesURL = `${pantryApiURL}/${userId}`; //抓紀錄的API
 
 const inventories = ref([]); //庫存放這
-const pantries = ref([]); //紀錄放這
 const totalInventories = ref(0); //總共多少項目放這
 const ingredientCategory = ref(new Set()); //分類放這，用Set避免重複
 const selectedInventories = ref([]); //用戶選到的庫存會被加到這
-const ingredientStore = useIngredientStore(); //用於產生食譜的庫存會被加到這
+const ingredientStore = useIngredientStore(); //用於產生食譜的庫存要被加到這
+const pantryStore = usePantryStore(); //用來操作紀錄功能
 
 const isLoading = ref(true); //判斷是否還在載入的flag
 const allSelect = ref(false); //判斷全選與否的flag
@@ -54,91 +53,47 @@ const fetchInventories = async () => {
     }
 };
 
-//fetch紀錄資料
-const fetchPantries = async () => {
-    try {
-        const response = await fetch(pantriesURL);
-        if (!response.ok) {
-            warningMessage.value = '網路連線有異常';
-        }
-        const data = await response.json();
-        pantries.value = data;
-    } catch (error) {
-        warningMessage.value = `API操作出現錯誤: ${error}`;
-    }
-};
-
 //設定庫存圖片路徑
 const getIngredientImageUrl = (fileName) => {
     return `${BaseUrlWithoutApi}/images/ingredient/${fileName}`;
 };
 
 ////提醒開始
-//清空列表按鈕的提醒
-const alertClearCheck = () => {
+//定義公用提醒格式
+const check = (text, buttonText, func, secondTitle) => {
     Swal.fire({
         title: '您確定嗎?',
-        text: '即將清空所選食材列表',
+        text: text,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: '清空',
+        confirmButtonText: buttonText,
         cancelButtonText: '取消',
     }).then((result) => {
         if (result.isConfirmed) {
-            deselectAllCard();
+            func;
             Swal.fire({
-                title: '清空了!',
+                title: secondTitle,
                 icon: 'success',
             });
         }
     });
 };
+//清空列表按鈕的提醒
+const alertClearCheck = () => {
+    check('即將清空所選食材列表', '清空', deselectAllCard(), '清空了!');
+};
 //個別刪除的提醒
 const alertDeleteCheck = (inventory) => {
-    Swal.fire({
-        title: '您確定嗎?',
-        text: '即將刪除所選食材',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: '刪除',
-        cancelButtonText: '取消',
-    }).then((result) => {
-        if (result.isConfirmed) {
-            deleteCard(inventory);
-            Swal.fire({
-                title: '已刪除!',
-                icon: 'success',
-            });
-        }
-    });
+    check('即將刪除所選食材', '刪除', deleteCard(inventory), '已刪除!');
 };
 //群體刪除的提醒
 const alertDeleteAllCheck = () => {
     if (!selectedInventories.value.length) {
         return;
     }
-    Swal.fire({
-        title: '您確定嗎?',
-        text: '即將刪除所選的所有食材',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: '刪除',
-        cancelButtonText: '取消',
-    }).then((result) => {
-        if (result.isConfirmed) {
-            deleteCards();
-            Swal.fire({
-                title: '已刪除!',
-                icon: 'success',
-            });
-        }
-    });
+    check('即將刪除所選的所有食材', '刪除', deleteCards(), '已刪除!');
 };
 ////提醒結束
 
@@ -290,24 +245,7 @@ const saveEditedInventory = async () => {
         const change = editInventory.value.quantity - previousQuantity;
         if (change !== 0) {
             const action = change > 0 ? '增加' : '減少'; //判斷action
-            const response_pantry = await fetch(pantryApiURL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    PantryId: 0,
-                    UserId: editInventory.value.userId,
-                    GroupId: editInventory.value.groupId,
-                    IngredientId: editInventory.value.ingredientId,
-                    Quantity: Math.abs(change),
-                    action: action,
-                    time: new Date(),
-                }),
-            });
-            if (!response_pantry.ok) {
-                warningMessage.value = '紀錄失敗，網路連線有異常';
-            }
+            pantryStore.postPantry(editInventory, Math.abs(change), action);
         }
     } catch (error) {
         warningMessage.value = `API操作出現錯誤: ${error}`;
@@ -332,24 +270,7 @@ const deleteCard = async (inventory) => {
             warningMessage.value = '刪除失敗，網路連線有異常';
         }
         const action = '減少';
-        const response_pantry = await fetch(pantryApiURL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                PantryId: 0,
-                UserId: inventory.userId,
-                GroupId: inventory.groupId,
-                IngredientId: inventory.ingredientId,
-                Quantity: quantity,
-                action: action,
-                time: new Date(),
-            }),
-        });
-        if (!response_pantry.ok) {
-            warningMessage.value = '紀錄失敗，網路連線有異常';
-        }
+        pantryStore.postPantry(inventory, quantity, action);
     } catch (error) {
         warningMessage.value = `API操作出現錯誤: ${error}`;
     } finally {
@@ -376,7 +297,7 @@ const headers = [
 ];
 //內容，利用computed動態監測pantries改變並同步匯入tableData
 const tableData = computed(() => {
-    return pantries.value
+    return pantryStore.pantries.value
         .map((pantry) => ({
             userName: pantry.userName,
             ingredientName: pantry.ingredientName,
@@ -391,7 +312,7 @@ const tableData = computed(() => {
 //按鈕行為
 const showPantryDialog = async () => {
     try {
-        await fetchPantries();
+        await pantryStore.fetchPantries();
         isPantryModalVisible.value = true;
     } catch (error) {
         warningMessage.value = '紀錄讀取失敗';
