@@ -15,6 +15,7 @@ import ChickoutView from '@/views/ChickoutView.vue';
 import CartView from '@/views/CartView.vue';
 import StoreProductDetailView from '@/views/StoreProductDetailView.vue';
 import GenerateRecipeView from '@/views/GenerateRecipeView.vue';
+import ResetPassword from '@/views/ResetPassword.vue';
 
 import { createRouter, createWebHistory } from 'vue-router';
 import OrderView from '@/views/OrderView.vue';
@@ -58,14 +59,22 @@ const router = createRouter({
             component: UserView,
         },
         {
+            // 登入
             path: '/sign-in',
             name: 'SignIn',
             component: SignIn,
         },
         {
+            // 註冊
             path: '/sign-up',
             name: 'SignUp',
             component: SignUp,
+        },
+        {
+            // 忘記密碼
+            path: '/resetPassword',
+            name: 'resetPassword',
+            component: ResetPassword,
         },
         {
             path: '/aboutus',
@@ -120,9 +129,9 @@ const router = createRouter({
                     name: 'storeProductDetailById',
                 },
                 {
-                    path:'/order',
-                    component:OrderView,
-                    name:'order',
+                    path: '/order',
+                    component: OrderView,
+                    name: 'order',
                 },
             ],
         },

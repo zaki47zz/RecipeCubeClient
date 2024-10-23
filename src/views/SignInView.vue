@@ -5,6 +5,7 @@ import VueJwtDecode from 'vue-jwt-decode' // 引入 jwt-decode 函式庫
 const router = useRouter(); // 創建 router 實例
 const API_URL = `${import.meta.env.VITE_API_BASEURL}/Users/SignIn`
 const user = ref({
+    // 後續記得帳號功能，可以在按下記住密碼button後，將帳號密碼寫入localStorage，登入時讀取localStorage帳密，在tokin到期時一起清除
     "email": "user18@example.com",
     "password": "Password123!"
 })
@@ -105,10 +106,12 @@ const handleLoginClick = async () => {
             <div class="card-footer text-center pt-0 px-lg-2 px-1">
                 <p class="mb-4 text-sm mx-auto">
                     不記得密碼嗎?
-                    <a id="forgot-password" class="text-info text-gradient font-weight-bold">忘記密碼</a>
+                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'resetPassword' }">忘記密碼
+                    </RouterLink>
                     <br>
                     還沒有註冊過會員嗎?
-                    <a asp-page="./Register" class="text-info text-gradient font-weight-bold">註冊</a>
+                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'SignUp' }">註冊
+                    </RouterLink>
                     <br>
                     沒有收到驗證電子郵件嗎?
                     <a id="resend-confirmation" class="text-info text-gradient font-weight-bold">重新發送電子郵件確認</a>
