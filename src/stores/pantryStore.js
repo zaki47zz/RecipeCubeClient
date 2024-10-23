@@ -13,12 +13,13 @@ export const usePantryStore = defineStore('pantryStore', () => {
         try {
             const response = await fetch(pantriesURL);
             if (!response.ok) {
-                console.log('網路連線有異常');
+                throw new Error('網路連線有異常');
             }
             const data = await response.json();
             pantries.value = data;
         } catch (error) {
-            console.log(`API操作出現錯誤: ${error}`);
+            console.error('獲取紀錄資料失敗:', error);
+            throw error;
         }
     };
 
@@ -40,11 +41,12 @@ export const usePantryStore = defineStore('pantryStore', () => {
                 }),
             });
             if (!response.ok) {
-                console.log('紀錄失敗，網路連線有異常');
+                throw new Error('網路連線有異常');
             }
             await fetchPantries();
         } catch (error) {
-            console.log(`API操作出現錯誤: ${error}`);
+            console.error('紀錄失敗:', error);
+            throw error;
         }
     };
 

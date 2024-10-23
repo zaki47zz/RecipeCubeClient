@@ -13,37 +13,32 @@ const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到�
 const userId = localStorage.getItem('UserId');
 
 const inventoryStore = useInventoryStore();
-const { inventories, ingredientCategory } = storeToRefs(inventoryStore); //解構一下inventories拿來用
+const { inventories, ingredientCategory } = storeToRefs(inventoryStore); //解構inventories並轉換成響應式物件
 const { fetchInventories, deleteInventory, putInventory } = inventoryStore;
 const selectedInventories = ref([]); //用戶選到的庫存會被加到這
 const cookingStore = useCookingStore(); //用於產生食譜的庫存要被加到這
-const { cookingInventories } = storeToRefs(cookingStore); //解構一下pantries拿來用
-const { resetCookingInventories } = cookingStore; //解構一下pantries拿來用
+const { cookingInventories, isShowingString } = storeToRefs(cookingStore);
+const { resetCookingInventories } = cookingStore;
 const pantryStore = usePantryStore(); //用來操作紀錄功能
-const { pantries } = storeToRefs(pantryStore); //解構一下pantries拿來用
-const { postPantry, fetchPantries } = pantryStore; //解構一下函式拿來用
+const { pantries } = storeToRefs(pantryStore);
+const { postPantry, fetchPantries } = pantryStore;
 
 const isLoading = ref(true); //判斷是否還在載入的flag
 const allSelect = ref(false); //判斷全選與否的flag
 const isInventoryModalVisible = ref(false);
 const isPantryModalVisible = ref(false);
-const warningMessage = ref('');
 
 //當DOM加載完執行fetch
 onMounted(() => {
+    resetCookingInventories();
     SetUpInventories();
 });
 
 //載入庫存
 const SetUpInventories = async () => {
-    try {
-        isLoading.value = true;
-        await fetchInventories();
-    } catch (error) {
-        warningMessage.value = `API操作出現錯誤: ${error}`;
-    } finally {
-        isLoading.value = false;
-    }
+    isLoading.value = true;
+    await fetchInventories();
+    isLoading.value = false;
 };
 
 //設定庫存圖片路徑
@@ -200,50 +195,37 @@ const editCard = (inventory) => {
 };
 //按鈕行為
 const saveEditedInventory = async () => {
-    try {
-        isLoading.value = true;
-        // 如果新數量為 0，則刪除
-        if (editInventory.value.quantity === 0) {
-            await deleteInventory(editInventory.value.inventoryId);
-        } else {
-            // 修改
-            await putInventory(editInventory.value);
-        }
-        // 如果新數量與原數量相同，則無需紀錄
-        if (editInventory.value.quantity === previousQuantity) {
-            return;
-        }
-        // 紀錄
-        const change = editInventory.value.quantity - previousQuantity;
-        if (change !== 0) {
-            const action = change > 0 ? '增加' : '減少'; //判斷action
-            await postPantry(editInventory.value, Math.abs(change), action);
-        }
-    } catch (error) {
-        warningMessage.value = `API操作出現錯誤: ${error}`;
-    } finally {
-        console.log(warningMessage.value);
-        isInventoryModalVisible.value = false;
-        fetchInventories();
-        isLoading.value = false;
+    isLoading.value = true;
+    // 如果新數量為 0，則刪除
+    if (editInventory.value.quantity === 0) {
+        await deleteInventory(editInventory.value.inventoryId);
+    } else {
+        // 修改
+        await putInventory(editInventory.value);
     }
+    // 如果新數量與原數量相同，則無需紀錄
+    if (editInventory.value.quantity === previousQuantity) {
+        return;
+    }
+    // 紀錄
+    const change = editInventory.value.quantity - previousQuantity;
+    if (change !== 0) {
+        const action = change > 0 ? '增加' : '減少'; //判斷action
+        await postPantry(editInventory.value, Math.abs(change), action);
+    }
+    isInventoryModalVisible.value = false;
+    isLoading.value = false;
 };
 ////修改功能結束
 
 ////刪除功能
 //個別刪除功能
 const deleteCard = async (inventory) => {
-    try {
-        isLoading.value = true;
-        await deleteInventory(inventory.inventoryId);
-        const action = '減少';
-        await postPantry(inventory, quantity, action);
-    } catch (error) {
-        warningMessage.value = `API操作出現錯誤: ${error}`;
-    } finally {
-        fetchInventories();
-        isLoading.value = false;
-    }
+    isLoading.value = true;
+    await deleteInventory(inventory.inventoryId);
+    const action = '減少';
+    await postPantry(inventory, quantity, action);
+    isLoading.value = false;
 };
 //群體刪除功能
 const deleteCards = () => {
@@ -278,19 +260,23 @@ const tableData = computed(() => {
 });
 //按鈕行為
 const showPantryDialog = async () => {
-    try {
-        await fetchPantries();
-        isPantryModalVisible.value = true;
-    } catch (error) {
-        warningMessage.value = '紀錄讀取失敗';
-    }
+    await fetchPantries();
+    isPantryModalVisible.value = true;
 };
 ////紀錄功能結束
 
-//將所選庫存送至產生食譜介面
+//將所選食材送至產生食譜介面
 const exportInventories = () => {
-    resetCookingInventories;
-    cookingInventories.value = selectedInventories.value;
+    if (!selectedInventories.value.length) {
+        return;
+    }
+    isShowingString.value = false;
+    cookingInventories.value = [...selectedInventories.value];
+    console.log('Store values:', {
+        cookingInventories: cookingInventories.value,
+        isShowingString: isShowingString.value,
+        isUsingInventory: isUsingInventory.value,
+    });
 };
 </script>
 
@@ -587,7 +573,11 @@ const exportInventories = () => {
                         </li>
                     </ul>
 
-                    <RouterLink class="w-100 btn bg-gradient-info shadow fs-5" :to="{ name: 'GenerateRecipe' }"
+                    <RouterLink
+                        class="w-100 btn shadow fs-5"
+                        :class="selectedInventories.length ? 'bg-gradient-info' : 'bg-secondary disabled-link'"
+                        :to="selectedInventories.length ? { name: 'GenerateRecipe' } : ''"
+                        @click="selectedInventories.length ? exportInventories : $event.preventDefault()"
                         >產生食譜</RouterLink
                     >
                     <button class="w-100 btn blur text-danger shadow fs-5" @click="alertClearCheck">
@@ -603,9 +593,10 @@ const exportInventories = () => {
             <div class="row justify-content-center">
                 <div class="col-lg-3">
                     <RouterLink
-                        class="btn bg-primary-subtle text-dark shadow fs-5 w-100"
-                        @click="exportInventories"
-                        :to="{ name: 'GenerateRecipe' }"
+                        class="btn text-dark shadow fs-5 w-100"
+                        :class="selectedInventories.length ? 'bg-primary-subtle' : 'bg-secondary disabled-link'"
+                        :to="selectedInventories.length ? { name: 'GenerateRecipe' } : ''"
+                        @click="selectedInventories.length ? exportInventories : $event.preventDefault()"
                         >產生食譜</RouterLink
                     >
                 </div>

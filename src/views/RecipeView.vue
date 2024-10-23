@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, computed, watch, nextTick } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useRecipeStore } from '@/stores/recipeStore';
+import { useIngredientStore } from '@/stores/ingredientStore';
 import Swal from 'sweetalert2';
 import BannerRecipe from '@/assets/img/ForBackground/banner-recipe.jpg';
 
@@ -10,6 +12,9 @@ import 'vue-multiselect/dist/vue-multiselect.min.css';
 
 // 使用 Pinia 的 recipeStore
 const recipeStore = useRecipeStore();
+const ingredientStore = useIngredientStore();
+const { ingredients, groupedIngredients } = storeToRefs(ingredientStore);
+const { fetchIngredients } = ingredientStore;
 
 const recipes = computed(() => recipeStore.recipes);
 const currentPage = ref(1);
@@ -17,42 +22,9 @@ const pageSize = ref(8);
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
 
-const getIngredientsApi = `${BaseURL}/Ingredients`;
-const ingredients = ref([]);
 const selectedIngredients = ref([]);
-const groupedIngredients = ref([]);
 // 使用fetch獲取數據 (這段寫在recipeStore了)
 
-const groupIngredientsByCategory = (data) => {
-    const grouped = data.reduce((acc, ingredient) => {
-        // 如果該分類不存在，先創建一個分類
-        let category = acc.find((group) => group.category === ingredient.category);
-        if (!category) {
-            category = { category: ingredient.category, ingredients: [] };
-            acc.push(category);
-        }
-        // 將食材加入對應分類
-        category.ingredients.push(ingredient);
-        return acc;
-    }, []);
-
-    groupedIngredients.value = grouped;
-};
-const fetchIngredients = async () => {
-    try {
-        const response = await fetch(getIngredientsApi);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
-        }
-        const data = await response.json(); // 只需要調用一次 .json()
-        ingredients.value = data;
-        groupIngredientsByCategory(data); // 將數據分組
-        // console.log("食材data:", data);  // 打印出來檢查
-        // console.log("分組後的食材:", groupedIngredients.value);  // 檢查分組結果
-    } catch (error) {
-        console.error('Fetch Fail', error);
-    }
-};
 // 在組件加載後獲取數據
 onMounted(() => {
     recipeStore.fetchRecipes();

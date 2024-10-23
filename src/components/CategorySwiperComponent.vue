@@ -1,41 +1,27 @@
 <script setup>
-import SoftInput from '@/components/SoftInput.vue';
+import { storeToRefs } from 'pinia';
+import { useIngredientStore } from '@/stores/ingredientStore';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, watchEffect } from 'vue';
+import Multiselect from 'vue-multiselect';
+import 'vue-multiselect/dist/vue-multiselect.min.css';
 
-const BaseURL = import.meta.env.VITE_API_BASEURL;
-const ingredientApiURL = `${BaseURL}/Ingredients`;
-const userId = localStorage.getItem('UserId');
-
-const ingredients = ref([]);
-const ingredientCategory = ref(new Set());
-const selectedIngredients = ref([]);
-const warningMessage = ref('');
+const ingredientStore = useIngredientStore();
+const { ingredients, groupedIngredients, ingredientCategory } = storeToRefs(ingredientStore);
+const { fetchIngredients } = ingredientStore;
+const selectedIngredients = ref([]); //所選的食材放這
 
 onMounted(() => {
     fetchIngredients();
 });
 
-const fetchIngredients = async () => {
-    try {
-        const response = await fetch(ingredientApiURL);
-        if (!response.ok) {
-            warningMessage.value = '網路連線有異常';
-            return;
-        }
-        const data = await response.json();
-        ingredients.value = data.map((ingredient) => ({
-            ...ingredient,
-            synonymArray: ingredient.synonym.split(',').map((synonym) => synonym.trim()),
-        }));
-        ingredientCategory.value = new Set(ingredients.value.map((i) => i.category));
-    } catch (error) {
-        warningMessage.value = `API操作出現錯誤: ${error}`;
-    }
-};
+//利用watchEffect讓selectedIngredients變動時自動activate同Id的badge
+watchEffect(async () => {
+    console.log(selectedIngredients.value);
+});
 
 // Swiper設定
 const swiperOptions = {
@@ -78,8 +64,14 @@ const activateBadge = (ingredient, event) => {
     }
 };
 
-////篩選功能(要用multiselect做)
-////篩選功能結束
+//multiselect設定
+const customLabel = (option) => {
+    // 合併名稱和同義字來讓它們參與過濾
+    const label = option.ingredientName || '';
+    const synonym = option.synonym ? ` (${option.synonym})` : '';
+    // 返回顯示的名稱和同義字
+    return `${label}${synonym}`;
+};
 </script>
 
 <template>
@@ -99,12 +91,20 @@ const activateBadge = (ingredient, event) => {
     </div>
     <div class="row">
         <div class="search-box position-relative">
-            <SoftInput
-                placeholder="輸入食材關鍵字..."
-                icon="fas fa-search"
-                iconDir="right"
-                class="w-80 mx-auto text-center my-1"
-            />
+            <Multiselect
+                v-model="selectedIngredients"
+                :options="groupedIngredients"
+                placeholder="搜尋或選擇食材 (可以多選)"
+                :multiple="true"
+                :close-on-select="false"
+                group-label="category"
+                group-values="ingredients"
+                :group-select="false"
+                track-by="ingredientId"
+                :custom-label="customLabel"
+            >
+                <span slot="noResult">找不到該食材</span>
+            </Multiselect>
         </div>
         <div class="col-md-12">
             <!-- 使用 Swiper 和 SwiperSlide 組件 -->
@@ -127,6 +127,7 @@ const activateBadge = (ingredient, event) => {
                             class="badge food-badge bg-secondary"
                             v-for="ingredient in ingredients.filter((i) => i.category == category)"
                             :key="ingredient.ingredientId"
+                            :data-ingredientId="ingredient.ingredientId"
                             @click="activateBadge(ingredient, $event)"
                             >{{ ingredient.ingredientName }}</span
                         >

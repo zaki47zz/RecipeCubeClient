@@ -2,14 +2,23 @@
 import WineWithBeef from '@/assets/img/ForComponent/WineWithBeef.jpg';
 import { useCookingStore } from '@/stores/cookingStore';
 import { storeToRefs } from 'pinia';
+import { onMounted } from 'vue';
 
 const cookingStore = useCookingStore();
-const { cookingInventories } = storeToRefs(cookingStore); //裡面的cookingInventories拿來產生食譜
+const { cookingInventories, isShowingString, isUsingInventory } = storeToRefs(cookingStore); //裡面的cookingInventories拿來產生食譜
+
+onMounted(() => {
+    console.log('Store values:', {
+        cookingInventories: cookingInventories.value,
+        isShowingString: isShowingString.value,
+        isUsingInventory: isUsingInventory.value,
+    });
+});
 </script>
 
 <template>
     <section class="banner-section">
-        <div class="banner-ad bg-primary-subtle block-2">
+        <div class="banner-ad bg-warning-subtle block-2">
             <div class="row banner-content pt-5">
                 <div class="content-wrapper text-center col-md-12">
                     <h1 class="pb-5">食譜產生 Recipe Generate</h1>
@@ -24,12 +33,10 @@ const { cookingInventories } = storeToRefs(cookingStore); //裡面的cookingInve
                 <div class="text-center">
                     <h4>
                         您輸入了
-                        <span v-if="true" class="text-info text-gradient">{{
-                            ingredientStore.cookingInventories.length
-                        }}</span>
-                        樣食材<span v-if="ingredientStore.isShowingString"
+                        <span v-if="true" class="text-info text-gradient">{{ cookingInventories.length }}</span>
+                        樣食材<span v-if="isShowingString"
                             >，並決定
-                            <span v-if="ingredientStore.isUsingInventory" class="text-info text-gradient">納入</span>
+                            <span v-if="isUsingInventory" class="text-info text-gradient">納入</span>
                             <span v-else class="text-info text-gradient">不納入</span>
                             庫存食材一起檢索</span
                         >
@@ -50,10 +57,7 @@ const { cookingInventories } = storeToRefs(cookingStore); //裡面的cookingInve
                             </tr>
                         </thead>
                         <tbody>
-                            <tr
-                                v-for="(inventory, index) in ingredientStore.cookingInventories"
-                                :key="ingredientStore.cookingInventories.inventoryId"
-                            >
+                            <tr v-for="(inventory, index) in cookingInventories" :key="cookingInventories.inventoryId">
                                 <td scope="row" class="text-dark">{{ index + 1 }}</td>
                                 <td class="text-dark">{{ inventory.category }}</td>
                                 <td class="text-dark">{{ inventory.ingredientName }}</td>
@@ -126,7 +130,7 @@ const { cookingInventories } = storeToRefs(cookingStore); //裡面的cookingInve
                 <div class="col-md-12">
                     <div class="banner-ad bootstrap-tabs product-tabs px-3 pb-3">
                         <div class="row g-3 mt-2">
-                            <div class="col-12 col-md-4">
+                            <div class="col-12 col-md-6 col-lg-4">
                                 <div
                                     class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
                                     style="height: 120px"
@@ -157,7 +161,7 @@ const { cookingInventories } = storeToRefs(cookingStore); //裡面的cookingInve
                                 </div>
                             </div>
 
-                            <div class="col-12 col-md-4">
+                            <div class="col-12 col-md-6 col-lg-4">
                                 <div
                                     class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
                                     style="height: 120px"
@@ -187,7 +191,7 @@ const { cookingInventories } = storeToRefs(cookingStore); //裡面的cookingInve
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-md-4">
+                            <div class="col-12 col-md-6 col-lg-4">
                                 <div
                                     class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
                                     style="height: 120px"

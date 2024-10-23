@@ -1,9 +1,21 @@
 <script setup>
+import { useCookingStore } from '@/stores/cookingStore';
+import { storeToRefs } from 'pinia';
+import tippy from 'tippy.js';
 import SoftSwitch from '@/components/SoftSwitch.vue';
 import CategorySwiperComponent from '@/components/CategorySwiperComponent.vue';
-import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
+
+const cookingStore = useCookingStore();
+const { cookingInventories, isUsingInventory, isSet } = storeToRefs(cookingStore);
+const { resetCookingInventories } = cookingStore;
+const selectedIngredients = ref([]);
+
+onMounted(() => {
+    initTippy();
+    resetCookingInventories();
+});
 
 const initTippy = function () {
     tippy('#tooltip-wrapper-set', {
@@ -18,9 +30,14 @@ const initTippy = function () {
     });
 };
 
-onMounted(() => {
-    initTippy();
-});
+//將所選食材送至產生食譜介面
+const exportInventories = () => {
+    //沒有選東西就沒反應
+    if (!selectedIngredients.value.length) {
+        return;
+    }
+    cookingInventories.value = [...selectedIngredients.value];
+};
 </script>
 
 <template>
@@ -161,7 +178,7 @@ onMounted(() => {
         <div class="container-fluid">
             <div class="row justify-content-center">
                 <div class="col-lg-3">
-                    <SoftSwitch name="set" id="set" class="switch-set">
+                    <SoftSwitch v-model="isSet" name="set" id="set" class="switch-set">
                         <span>
                             套餐
                             <span id="tooltip-wrapper-set">
@@ -173,7 +190,7 @@ onMounted(() => {
             </div>
             <div class="row justify-content-center">
                 <div class="col-lg-3">
-                    <SoftSwitch name="inventory" id="inventory" checked="true" class="switch-inventory">
+                    <SoftSwitch v-model="isUsingInventory" name="inventory" id="inventory" class="switch-inventory">
                         <span>
                             使用庫存食材
                             <span id="tooltip-wrapper-inventory">
@@ -186,8 +203,10 @@ onMounted(() => {
             <div class="row justify-content-center">
                 <div class="col-lg-3">
                     <RouterLink
-                        class="btn bg-danger-subtle text-dark shadow fs-5 w-100"
-                        :to="{ name: 'GenerateRecipe' }"
+                        class="btn text-dark shadow fs-5 w-100"
+                        :class="selectedIngredients.length ? 'bg-danger-subtle' : 'bg-secondary disabled-link'"
+                        :to="selectedIngredients.length ? { name: 'GenerateRecipe' } : ''"
+                        @click="selectedIngredients.length ? exportInventories : $event.preventDefault()"
                     >
                         產生食譜
                     </RouterLink>
@@ -200,8 +219,6 @@ onMounted(() => {
             </div>
         </div>
     </section>
-
-    <!-- 加上一個DataTables -->
 </template>
 
 <style lang="css" scoped>
