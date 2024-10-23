@@ -24,6 +24,7 @@
     "tippy.js": "^6.3.7",
     "vue": "^3.5.11",
     "vue-jwt-decode": "^0.1.0",
+    "vue-multiselect": "^3.1.0",
     "vue-router": "^4.4.5",
     "vue-smooth-scroll": "^1.0.13",
     "vue3-easy-data-table": "^1.5.47",

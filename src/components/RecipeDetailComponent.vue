@@ -1,7 +1,8 @@
 <template>
+
     <div v-if="recipe" class="recipe-detail-container">
         <h2 class="recipe-title">{{ recipe.recipeName }}</h2>
-        <img :src="getRecipeImageUrl(recipe.photo)" :alt="recipe.recipeName" class="recipe-image" />
+        <!-- <img :src="getRecipeImageUrl(recipe.photo)" :alt="recipe.recipeName" class="recipe-image" /> -->
 
         <div class="recipe-info">
             <el-descriptions title="" :column="2" border>
@@ -17,32 +18,36 @@
 
             <!-- <p class="mt-5"><strong>調味料:</strong> {{ recipe.seasoning }}</p> -->
             <!-- <p><strong>狀態:</strong> {{ recipe.status ? '啟用' : '禁用' }}</p> -->
-            <div class="ingredients-section mt-4">
-                <h5>食材列表</h5>
-                <div class="ingredients-container">
-                    <el-card v-for="(ingredientId, index) in recipeStore.selectedRecipe.selectedIngredients"
-                        :key="ingredientId" shadow="hover" class="ingredient-card">
-                        <div class="d-flex align-items-center">
-                            <!-- <img :src="getIngredientImage(ingredientId)" alt="食材圖片" class="ingredient-image" /> -->
-                            <div class="ingredient-info ms-3">
-                                <h5>{{ recipeStore.selectedRecipe.selectedIngredientNames[index] }}</h5>
-                                <p>
-                                    <strong>數量:</strong> {{
-                                        recipeStore.selectedRecipe.ingredientQuantities[ingredientId] }}
-                                    {{ recipeStore.selectedRecipe.ingredientUnits[ingredientId] || '' }}
-                                </p>
+            <div class="row ingredients-seasoning-section mt-4">
+                <!-- 食材區域 -->
+                <div class="col-9 ingredients-section">
+                    <h5>食材列表</h5>
+                    <div class="ingredients-container">
+                        <el-card v-for="(ingredientId, index) in recipeStore.selectedRecipe.selectedIngredients"
+                            :key="ingredientId" shadow="hover" class="ingredient-card">
+                            <div class="d-flex align-items-center">
+                                <div class="ingredient-info ms-3">
+                                    <h6>{{ recipeStore.selectedRecipe.selectedIngredientNames[index] }}</h6>
+                                    <p class="quantity-info">
+                                        <strong>數量:</strong> {{
+                                            recipeStore.selectedRecipe.ingredientQuantities[ingredientId] }}
+                                        {{ recipeStore.selectedRecipe.ingredientUnits[ingredientId] || '' }}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    </el-card>
+                        </el-card>
+                    </div>
                 </div>
-            </div>
-            <div class="seasoning-section mt-5">
-                <h4><strong>調味料:</strong></h4>
-                <div class="seasoning-tags">
-                    <el-tag v-for="(seasoning, index) in seasoningList" :key="index" type="success" effect="light"
-                        class="mb-2 me-3">
-                        {{ seasoning }}
-                    </el-tag>
+
+                <!-- 調味料區域 -->
+                <div class="col-3 seasoning-section mt-4">
+                    <h5>調味料</h5>
+                    <div class="seasoning-tags" style="display: flex; flex-direction: column;">
+                        <el-tag v-for="(seasoning, index) in seasoningList" :key="index" type="primary" effect="light"
+                            class="mb-2 me-3">
+                            {{ seasoning }}
+                        </el-tag>
+                    </div>
                 </div>
             </div>
             <div class="recipe-steps my-4 wide-steps-container" :style="{ height: dynamicHeight, maxWidth: '600px' }">
@@ -55,6 +60,8 @@
             </div>
         </div>
     </div>
+
+
 
 </template>
 
@@ -173,14 +180,18 @@ const seasoningList = computed(() => {
 }
 
 .ingredient-card {
-    padding: 8px;
+    margin-bottom: 2px;
+    margin-right: 2px;
     /* 縮小卡片的內邊距 */
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
     text-align: center;
     background-color: #CFD3DC;
     /* 使用 Element Plus 的變量設置背景色 */
+    height: 100%;
+    /* 確保卡片占滿容器 */
 }
 
 .ingredient-image {
@@ -192,14 +203,14 @@ const seasoningList = computed(() => {
 
 .ingredient-info h6 {
     margin: 8px 0 4px 0;
-    font-size: 1rem;
+    font-size: 0.9rem;
     /* 調整字體大小 */
     font-weight: bold;
 }
 
 .quantity-info {
     margin: 0;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: #555;
 }
 

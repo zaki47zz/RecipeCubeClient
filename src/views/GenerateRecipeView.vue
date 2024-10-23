@@ -1,18 +1,18 @@
 <script setup>
 import WineWithBeef from '@/assets/img/ForComponent/WineWithBeef.jpg';
+import { useCookingStore } from '@/stores/cookingStore';
+import { storeToRefs } from 'pinia';
+
+const cookingStore = useCookingStore();
+const { cookingInventories } = storeToRefs(cookingStore); //裡面的cookingInventories拿來產生食譜
 </script>
 
 <template>
     <section class="banner-section">
-        <div class="banner-ad bg-warning-subtle block-2">
+        <div class="banner-ad bg-primary-subtle block-2">
             <div class="row banner-content pt-5">
                 <div class="content-wrapper text-center col-md-12">
-                    <h1>食譜產生 Recipe Generate</h1>
-                    <header>
-                        <div class="container-fluid">
-                            <div class="row py-3"></div>
-                        </div>
-                    </header>
+                    <h1 class="pb-5">食譜產生 Recipe Generate</h1>
                 </div>
             </div>
         </div>
@@ -23,9 +23,13 @@ import WineWithBeef from '@/assets/img/ForComponent/WineWithBeef.jpg';
             <div class="row justify-content-center">
                 <div class="text-center">
                     <h4>
-                        您輸入了 <span v-if="true" class="text-info text-gradient">N</span> 樣食材<span v-if="true"
+                        您輸入了
+                        <span v-if="true" class="text-info text-gradient">{{
+                            ingredientStore.cookingInventories.length
+                        }}</span>
+                        樣食材<span v-if="ingredientStore.isShowingString"
                             >，並決定
-                            <span v-if="true" class="text-info text-gradient">納入</span>
+                            <span v-if="ingredientStore.isUsingInventory" class="text-info text-gradient">納入</span>
                             <span v-else class="text-info text-gradient">不納入</span>
                             庫存食材一起檢索</span
                         >
@@ -35,20 +39,28 @@ import WineWithBeef from '@/assets/img/ForComponent/WineWithBeef.jpg';
         </div>
         <div class="container-fluid pt-3 pb-5">
             <div class="row justify-content-center">
-                <div class="table-responsive p-1 w-50 banner-ad">
+                <div class="table-responsive p-1 w-60 banner-ad">
                     <table class="table table-borderless text-center align-middle rounded-4">
                         <thead>
                             <tr>
-                                <th scope="col" class="text-dark">編號</th>
-                                <th scope="col" class="text-dark">食材</th>
+                                <th scope="col" class="text-dark">No</th>
+                                <th scope="col" class="text-dark">食材分類</th>
+                                <th scope="col" class="text-dark">食材名稱</th>
                                 <th scope="col" class="text-dark">數量</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <th scope="row" class="text-dark">1</th>
-                                <td class="text-dark">菠菜</td>
-                                <td class="text-dark">X 把</td>
+                            <tr
+                                v-for="(inventory, index) in ingredientStore.cookingInventories"
+                                :key="ingredientStore.cookingInventories.inventoryId"
+                            >
+                                <td scope="row" class="text-dark">{{ index + 1 }}</td>
+                                <td class="text-dark">{{ inventory.category }}</td>
+                                <td class="text-dark">{{ inventory.ingredientName }}</td>
+                                <td class="text-dark">
+                                    {{ inventory.quantity }}
+                                    {{ inventory.unit }}
+                                </td>
                             </tr>
                         </tbody>
                     </table>

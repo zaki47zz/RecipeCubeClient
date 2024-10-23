@@ -9,8 +9,6 @@ body {
     z-index: 0;
 }
 
-
-
 html,
 body,
 #app {
@@ -35,7 +33,7 @@ body,
 </style>
 
 <template>
-    <PerfectScrollbar id="scroll-container">
+    <PerfectScrollbar id="scroll-container" ref="scrollContainer">
         <Loader />
         <Navbar />
         <main class="main-content container position-relative">
@@ -51,4 +49,18 @@ import Footer from './components/Layout/Footer.vue';
 import Loader from './components/Layout/Loader.vue';
 // 引入 PerfectScrollbar 組件
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+const scrollContainer = ref(null); // Ref to access PerfectScrollbar instance
+const router = useRouter(); // Access Vue Router instance
+
+// Listen for route changes and reset the scroll position to top
+onMounted(() => {
+    router.afterEach(() => {
+        if (scrollContainer.value) {
+            const psInstance = scrollContainer.value.$el; // Access the PerfectScrollbar DOM element
+            psInstance.scrollTop = 0; // Reset scroll position to top
+        }
+    });
+});
 </script>
