@@ -91,9 +91,16 @@ const addToCart = (product) => {
     }
 };
 
-// 分頁 功能
+// 呼叫方法
+loadProducts();
+loadCategories();
 
-const totalProducts = computed(() => products.value.length); // 總商品數
+// 分頁功能 Start
+const IsFilter = ref(false);
+
+const totalProducts = computed(() => {
+    return IsFilter.value ? filteredProducts.value.length : products.value.length;
+}); // 總商品數 如果 沒有按下篩選 IsFilter == false => 全部商品  else => 篩選的商品
 const totalPages = computed(() => Math.ceil(totalProducts.value / pageSize.value)); //總頁數
 const pageSize = ref(9); // 每頁顯示商品數
 const currentPage = ref(1); // 當前頁碼
@@ -101,7 +108,9 @@ const currentPage = ref(1); // 當前頁碼
 const paginatedProducts = computed(() => {
     const start = (currentPage.value - 1) * pageSize.value;
     const end = start + pageSize.value;
-    return filteredProducts.value.slice(start, end);
+
+    return IsFilter.value ? filteredProducts.value.slice(start, end) : products.value.slice(start, end);
+    //如果 沒有按下篩選 IsFilter == false => 全部商品  else => 篩選的商品
 });
 // 更新當前頁碼
 const handleCurrentPageChange = (newPage) => {
@@ -119,19 +128,38 @@ watch(totalPages, (newTotalPages) => {
         currentPage.value = newTotalPages;
     }
 });
+// 分頁功能 End
 
 // 篩選功能
+const selectedCategory = ref([]);
 const filteredProducts = ref([]);
-const loadFilteredProducts = async (category) => {
-    if (products.value != null) {
-        filteredProducts.value = products.value.filter((p) => p.category === category);
-    }
-    console.log(filteredProducts.value);
+
+const clickCategory = (category) => {
+    IsFilter.value = true;
+    currentPage.value = 1; // 篩選後重設頁碼為第一頁
+    loadFilteredProducts(category);
+    // console.log('現在選的類別:', selectedCategory.value);
 };
 
-// 呼叫方法
-loadProducts();
-loadCategories();
+const clearCategory = () => {
+    IsFilter.value = false; // 表示篩選已清除
+    selectedCategory.value = null;
+
+    loadFilteredProducts(null); // 加載所有商品
+    // console.log('按下清除篩選鍵後 IsFilter：', IsFilter.value);
+    // console.log('按下清除篩選鍵後 selectedCategory：', selectedCategory.value);
+    // console.log('按下清除篩選鍵後 filteredProducts.value：', filteredProducts.value);
+};
+
+const loadFilteredProducts = async (category) => {
+    if (category && IsFilter.value) {
+        filteredProducts.value = products.value.filter((p) => p.category === category);
+        selectedCategory.value = category; //把現在選擇的類別存進去
+    } else {
+        filteredProducts.value = products.value;
+    }
+    // console.log(filteredProducts.value);
+};
 </script>
 
 <template>
@@ -214,13 +242,24 @@ loadCategories();
                                                         class="d-flex justify-content-between fruite-name"
                                                         v-for="category in categories"
                                                         :key="category.category"
-                                                        @click="loadFilteredProducts(category.category)"
+                                                        @click="clickCategory(category.category)"
                                                     >
                                                         <a href="#"
                                                             ><i class="fas fa-apple-alt me-2"></i
                                                             >{{ category.category }}</a
                                                         >
-                                                        <span>({{ category.count }})</span>
+                                                        <div class="d-flex align-items-center">
+                                                            <span>({{ category.count }})</span>
+                                                            <!-- 顯示XX 來取消篩選 回到全部商品 -->
+                                                            <!-- 要加上.stop 阻止冒泡事件 -->
+                                                            <button
+                                                                v-if="selectedCategory === category.category"
+                                                                @click.stop="clearCategory"
+                                                                class="btn btn-danger btn-sm ms-2 animate__animated animate__bounceIn"
+                                                            >
+                                                                <i class="fa-regular fa-circle-xmark"></i>
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </li>
                                             </ul>

@@ -18,6 +18,9 @@ import 'vue3-perfect-scrollbar/style.css';
 // 引入 vue-smooth-scroll
 import vueSmoothScroll from 'vue-smooth-scroll';
 
+// 引入 animate.css
+import 'animate.css/animate.min.css';
+
 const app = createApp(App);
 
 app.use(createPinia());
