@@ -1,23 +1,27 @@
 <script setup>
 import Swal from 'sweetalert2';
 import SoftBadge from '@/components/SoftBadge.vue';
-import { useIngredientStore } from '@/stores/ingredientStore';
+import { storeToRefs } from 'pinia';
+import { useInventoryStore } from '@/stores/inventoryStore';
+import { useCookingStore } from '@/stores/cookingStore';
 import { usePantryStore } from '@/stores/pantryStore';
 import InventorySkeleton from '@/components/InventorySkeleton.vue';
 import { onMounted, ref, computed } from 'vue';
 
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL(抓圖片要用的);
-const inventoryApiURL = `${BaseURL}/Inventories`;
 const userId = localStorage.getItem('UserId');
-const InventoriesURL = `${inventoryApiURL}/${userId}`; //抓庫存的API
 
-const inventories = ref([]); //庫存放這
-const totalInventories = ref(0); //總共多少項目放這
-const ingredientCategory = ref(new Set()); //分類放這，用Set避免重複
+const inventoryStore = useInventoryStore();
+const { inventories, ingredientCategory } = storeToRefs(inventoryStore); //解構一下inventories拿來用
+const { fetchInventories, deleteInventory, putInventory } = inventoryStore;
 const selectedInventories = ref([]); //用戶選到的庫存會被加到這
-const ingredientStore = useIngredientStore(); //用於產生食譜的庫存要被加到這
+const cookingStore = useCookingStore(); //用於產生食譜的庫存要被加到這
+const { cookingInventories } = storeToRefs(cookingStore); //解構一下pantries拿來用
+const { resetCookingInventories } = cookingStore; //解構一下pantries拿來用
 const pantryStore = usePantryStore(); //用來操作紀錄功能
+const { pantries } = storeToRefs(pantryStore); //解構一下pantries拿來用
+const { postPantry, fetchPantries } = pantryStore; //解構一下函式拿來用
 
 const isLoading = ref(true); //判斷是否還在載入的flag
 const allSelect = ref(false); //判斷全選與否的flag
@@ -27,25 +31,14 @@ const warningMessage = ref('');
 
 //當DOM加載完執行fetch
 onMounted(() => {
-    fetchInventories();
+    SetUpInventories();
 });
 
-//fetch庫存資料
-const fetchInventories = async () => {
+//載入庫存
+const SetUpInventories = async () => {
     try {
         isLoading.value = true;
-        const response = await fetch(InventoriesURL);
-        if (!response.ok) {
-            warningMessage.value = '網路連線有異常';
-        }
-        const data = await response.json();
-        inventories.value = data.map((inventory) => ({
-            //因為陣列每項inventory都是物件，要用物件角度思考
-            ...inventory, //...展開式表示把原先物件內容還原
-            synonymArray: inventory.synonym.split(',').map((synonym) => synonym.trim()), //加入新的一項，拆分synonym然後去空白轉陣列
-        }));
-        totalInventories.value = inventories.value.length;
-        ingredientCategory.value = new Set(inventories.value.map((i) => i.category)); //利用map回傳陣列存進set再存進ref set
+        await fetchInventories();
     } catch (error) {
         warningMessage.value = `API操作出現錯誤: ${error}`;
     } finally {
@@ -59,7 +52,7 @@ const getIngredientImageUrl = (fileName) => {
 };
 
 ////提醒開始
-//定義公用提醒格式
+// 定義公用提醒格式
 const check = (text, buttonText, func, secondTitle) => {
     Swal.fire({
         title: '您確定嗎?',
@@ -72,7 +65,7 @@ const check = (text, buttonText, func, secondTitle) => {
         cancelButtonText: '取消',
     }).then((result) => {
         if (result.isConfirmed) {
-            func;
+            func();
             Swal.fire({
                 title: secondTitle,
                 icon: 'success',
@@ -80,20 +73,23 @@ const check = (text, buttonText, func, secondTitle) => {
         }
     });
 };
-//清空列表按鈕的提醒
+
+// 清空列表按鈕的提醒
 const alertClearCheck = () => {
-    check('即將清空所選食材列表', '清空', deselectAllCard(), '清空了!');
+    check('即將清空所選食材列表', '清空', () => deselectAllCard(), '清空了!');
 };
-//個別刪除的提醒
+
+// 個別刪除的提醒
 const alertDeleteCheck = (inventory) => {
-    check('即將刪除所選食材', '刪除', deleteCard(inventory), '已刪除!');
+    check('即將刪除所選食材', '刪除', () => deleteCard(inventory), '已刪除!');
 };
-//群體刪除的提醒
+
+// 群體刪除的提醒
 const alertDeleteAllCheck = () => {
     if (!selectedInventories.value.length) {
         return;
     }
-    check('即將刪除所選的所有食材', '刪除', deleteCards(), '已刪除!');
+    check('即將刪除所選的所有食材', '刪除', () => deleteCards(), '已刪除!');
 };
 ////提醒結束
 
@@ -208,34 +204,10 @@ const saveEditedInventory = async () => {
         isLoading.value = true;
         // 如果新數量為 0，則刪除
         if (editInventory.value.quantity === 0) {
-            const deleteURL = `${inventoryApiURL}/${editInventory.value.inventoryId}`;
-            const response_delete = await fetch(deleteURL, { method: 'DELETE' });
-            if (!response_delete.ok) {
-                warningMessage.value = '刪除失敗，網路連線有異常';
-            }
+            await deleteInventory(editInventory.value.inventoryId);
         } else {
             // 修改
-            const editURL = `${inventoryApiURL}/${editInventory.value.inventoryId}`;
-            console.log(editInventory.value);
-            const response_edit = await fetch(editURL, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    InventoryId: editInventory.value.inventoryId,
-                    UserId: editInventory.value.userId,
-                    GroupId: editInventory.value.groupId,
-                    IngredientId: editInventory.value.ingredientId,
-                    Quantity: editInventory.value.quantity,
-                    ExpiryDate: editInventory.value.expiryDate,
-                    IsExpiring: editInventory.value.isExpiring,
-                    Visibility: editInventory.value.visibility,
-                }),
-            });
-            if (!response_edit.ok) {
-                warningMessage.value = '修改失敗，網路連線有異常';
-            }
+            await putInventory(editInventory.value);
         }
         // 如果新數量與原數量相同，則無需紀錄
         if (editInventory.value.quantity === previousQuantity) {
@@ -245,7 +217,7 @@ const saveEditedInventory = async () => {
         const change = editInventory.value.quantity - previousQuantity;
         if (change !== 0) {
             const action = change > 0 ? '增加' : '減少'; //判斷action
-            pantryStore.postPantry(editInventory, Math.abs(change), action);
+            await postPantry(editInventory.value, Math.abs(change), action);
         }
     } catch (error) {
         warningMessage.value = `API操作出現錯誤: ${error}`;
@@ -263,14 +235,9 @@ const saveEditedInventory = async () => {
 const deleteCard = async (inventory) => {
     try {
         isLoading.value = true;
-        const deleteURL = `${inventoryApiURL}/${inventory.inventoryId}`;
-        const quantity = inventory.quantity;
-        const response = await fetch(deleteURL, { method: 'DELETE' });
-        if (!response.ok) {
-            warningMessage.value = '刪除失敗，網路連線有異常';
-        }
+        await deleteInventory(inventory.inventoryId);
         const action = '減少';
-        pantryStore.postPantry(inventory, quantity, action);
+        await postPantry(inventory, quantity, action);
     } catch (error) {
         warningMessage.value = `API操作出現錯誤: ${error}`;
     } finally {
@@ -297,7 +264,7 @@ const headers = [
 ];
 //內容，利用computed動態監測pantries改變並同步匯入tableData
 const tableData = computed(() => {
-    return pantryStore.pantries.value
+    return pantries.value
         .map((pantry) => ({
             userName: pantry.userName,
             ingredientName: pantry.ingredientName,
@@ -312,7 +279,7 @@ const tableData = computed(() => {
 //按鈕行為
 const showPantryDialog = async () => {
     try {
-        await pantryStore.fetchPantries();
+        await fetchPantries();
         isPantryModalVisible.value = true;
     } catch (error) {
         warningMessage.value = '紀錄讀取失敗';
@@ -322,8 +289,8 @@ const showPantryDialog = async () => {
 
 //將所選庫存送至產生食譜介面
 const exportInventories = () => {
-    ingredientStore.cookingInventories = selectedInventories.value;
-    console.log(ingredientStore.cookingInventories);
+    resetCookingInventories;
+    cookingInventories.value = selectedInventories.value;
 };
 </script>
 

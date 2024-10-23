@@ -42,6 +42,7 @@ export const usePantryStore = defineStore('pantryStore', () => {
             if (!response.ok) {
                 console.log('紀錄失敗，網路連線有異常');
             }
+            await fetchPantries();
         } catch (error) {
             console.log(`API操作出現錯誤: ${error}`);
         }

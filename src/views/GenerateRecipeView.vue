@@ -1,8 +1,10 @@
 <script setup>
 import WineWithBeef from '@/assets/img/ForComponent/WineWithBeef.jpg';
-import { useIngredientStore } from '@/stores/ingredientStore';
+import { useCookingStore } from '@/stores/cookingStore';
+import { storeToRefs } from 'pinia';
 
-const ingredientStore = useIngredientStore(); //裡面的cookingInventories拿來產生食譜
+const cookingStore = useCookingStore();
+const { cookingInventories } = storeToRefs(cookingStore); //裡面的cookingInventories拿來產生食譜
 </script>
 
 <template>

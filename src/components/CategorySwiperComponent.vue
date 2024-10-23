@@ -1,6 +1,5 @@
 <script setup>
 import SoftInput from '@/components/SoftInput.vue';
-import { useIngredientStore } from '@/stores/ingredientStore';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css';
@@ -14,7 +13,6 @@ const userId = localStorage.getItem('UserId');
 const ingredients = ref([]);
 const ingredientCategory = ref(new Set());
 const selectedIngredients = ref([]);
-const ingredientStore = useIngredientStore();
 const warningMessage = ref('');
 
 onMounted(() => {
