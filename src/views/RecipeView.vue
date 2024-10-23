@@ -392,7 +392,7 @@ watch(totalPages, (newTotalPages) => {
                                                     width: '50%',
                                                     height: '100%',
                                                     backgroundImage: `url(${
-                                                        getRecipeImageUrl(recipe.photo) || 'default_image.jpg'
+                                                        getRecipeImageUrl(recipe.photoName) || 'default_image.jpg'
                                                     })`,
                                                     backgroundSize: 'cover',
                                                     backgroundPosition: 'center',

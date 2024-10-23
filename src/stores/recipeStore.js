@@ -18,6 +18,7 @@ export const useRecipeStore = defineStore('recipeStore', {
                     throw new Error('Network response was not ok');
                 }
                 const data = await response.json();
+                console.log(data);
                 this.recipes = data;
                 this.totalRecipes = data.length;
             } catch (error) {
