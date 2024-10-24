@@ -1,27 +1,64 @@
 <script setup>
 import CategorySwiperComponent from '@/components/CategorySwiperComponent.vue';
 import Swal from 'sweetalert2';
+import { ref } from 'vue';
 
-//加入食材庫存提醒
-const alertClearCheck = () => {
+const selectedIngredient = ref([]);
+
+////提醒
+//公版
+const check = (text, icon, buttonText, func, secondTitle) => {
     Swal.fire({
         title: '您確定嗎?',
-        text: '即將加入食材至庫存',
-        icon: 'question',
+        text: text,
+        icon: icon,
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: '加入',
+        confirmButtonText: buttonText,
         cancelButtonText: '取消',
     }).then((result) => {
         if (result.isConfirmed) {
+            func();
             Swal.fire({
-                title: '成功加入!',
+                title: secondTitle,
                 icon: 'success',
             });
         }
     });
 };
+// 清空列表按鈕的提醒
+const alertClearCheck = () => {
+    check(
+        '即將清空所選食材列表',
+        'warning',
+        '清空',
+        () => {
+            //箭頭函式可以讓編譯時不馬上執行
+            selectedIngredient.value = [];
+        },
+        '清空了!'
+    );
+};
+//加入食材庫存提醒
+const alertAddCheck = () => {
+    check(
+        '即將加入食材至庫存',
+        'question',
+        '加入',
+        () => {
+            addIngredients();
+        },
+        '成功加入!'
+    );
+};
+////提醒結束
+
+const addIngredients = () => {};
+
+////加入食材
+
+////加入食材結束
 </script>
 
 <template>
@@ -50,7 +87,7 @@ const alertClearCheck = () => {
             <div class="row">
                 <div class="col-md-12">
                     <div class="d-flex justify-content-between mt-2">
-                        <h5>今天買了</h5>
+                        <h4>您今天買了</h4>
                         <p class="badge bg-secondary"><i class="fa-solid fa-repeat"></i> 數量換算表</p>
                     </div>
                 </div>
@@ -126,8 +163,13 @@ const alertClearCheck = () => {
         <div class="container-fluid">
             <div class="row justify-content-center">
                 <div class="col-lg-3">
-                    <button class="btn bg-primary-subtle text-dark shadow fs-5 w-100" @click="alertClearCheck">
+                    <button class="btn bg-primary-subtle text-dark shadow fs-5 w-100" @click="alertAddCheck">
                         加入食材
+                    </button>
+                </div>
+                <div class="col-lg-3">
+                    <button class="w-100 btn blur text-danger shadow fs-5" @click="alertClearCheck">
+                        清空所選食材
                     </button>
                 </div>
             </div>
