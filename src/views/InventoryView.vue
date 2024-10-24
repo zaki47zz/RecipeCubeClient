@@ -272,7 +272,12 @@ const exportInventories = () => {
         return;
     }
     isShowingString.value = false;
+    // 更新 Pinia 中的 cookingInventories
     cookingInventories.value = [...selectedInventories.value];
+    // 保存選擇的食材 ID 到 localStorage
+    const ingredientIds = cookingInventories.value.map((inventory) => inventory.ingredientId);
+    console.log("保存食材:", ingredientIds)
+    localStorage.setItem('selectedIngredients', JSON.stringify(ingredientIds));
 };
 </script>
 
@@ -348,12 +353,8 @@ const exportInventories = () => {
                         </select>
                     </div>
                     <div class="col-md-3 mt-2">
-                        <input
-                            type="text"
-                            class="form-control w-100 text-center"
-                            placeholder="搜尋"
-                            v-model="filters.searchWord"
-                        />
+                        <input type="text" class="form-control w-100 text-center" placeholder="搜尋"
+                            v-model="filters.searchWord" />
                     </div>
                 </div>
             </div>
@@ -381,31 +382,19 @@ const exportInventories = () => {
                             </div>
                         </div>
                         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
-                            <div v-if="isLoading" class="col"><InventorySkeleton></InventorySkeleton></div>
-                            <div
-                                v-else
-                                class="col"
-                                v-for="inventory in filteredInventories"
-                                :key="inventory.inventoryId"
-                            >
-                                <div
-                                    class="card h-100 p-0 shadow-sm position-relative"
-                                    :data-inventoryId="inventory.inventoryId"
-                                >
-                                    <SoftBadge
-                                        v-if="inventory.isExpiring"
-                                        variant="gradient"
-                                        color="info"
-                                        class="position-absolute top-2 start-2"
-                                    >
+                            <div v-if="isLoading" class="col">
+                                <InventorySkeleton></InventorySkeleton>
+                            </div>
+                            <div v-else class="col" v-for="inventory in filteredInventories"
+                                :key="inventory.inventoryId">
+                                <div class="card h-100 p-0 shadow-sm position-relative"
+                                    :data-inventoryId="inventory.inventoryId">
+                                    <SoftBadge v-if="inventory.isExpiring" variant="gradient" color="info"
+                                        class="position-absolute top-2 start-2">
                                         即將過期
                                     </SoftBadge>
-                                    <SoftBadge
-                                        v-if="inventory.isExpired"
-                                        variant="gradient"
-                                        color="warning"
-                                        class="position-absolute top-2 start-2"
-                                    >
+                                    <SoftBadge v-if="inventory.isExpired" variant="gradient" color="warning"
+                                        class="position-absolute top-2 start-2">
                                         已過期
                                     </SoftBadge>
                                     <span class="position-absolute top-0 end-0 p-2 z-index-3">
@@ -418,14 +407,10 @@ const exportInventories = () => {
                                     </span>
                                     <div class="card-body d-flex flex-column" @click="activateCard($event, inventory)">
                                         <div class="image-container mb-3">
-                                            <img
-                                                :src="getIngredientImageUrl(inventory.photo)"
-                                                :alt="inventory.ingredientName"
-                                                class="product-image"
-                                            />
-                                            <span class="amount-badge"
-                                                >{{ inventory.quantity }}{{ inventory.unit }}</span
-                                            >
+                                            <img :src="getIngredientImageUrl(inventory.photo)"
+                                                :alt="inventory.ingredientName" class="product-image" />
+                                            <span class="amount-badge">{{ inventory.quantity }}{{ inventory.unit
+                                                }}</span>
                                         </div>
                                         <h5 class="card-title text-center">{{ inventory.ingredientName }}</h5>
                                         <p class="card-text text-center">{{ inventory.category }}</p>
@@ -442,15 +427,8 @@ const exportInventories = () => {
 
     <section>
         <el-dialog v-model="isPantryModalVisible" title="歷史編輯紀錄" width="70%" center class="bg-primary-subtle">
-            <EasyDataTable
-                :headers="headers"
-                :items="tableData"
-                :rows-per-page="10"
-                table-class="customize-table"
-                header-text-direction="center"
-                body-text-direction="center"
-                class="w-100"
-            >
+            <EasyDataTable :headers="headers" :items="tableData" :rows-per-page="10" table-class="customize-table"
+                header-text-direction="center" body-text-direction="center" class="w-100">
                 <template #empty-message>
                     <div class="empty-state">
                         <p>沒有歷史紀錄</p>
@@ -469,57 +447,32 @@ const exportInventories = () => {
                 <div class="p-3 w-90">
                     <div class="mb-3">
                         <label for="userId" class="m-0 p-0 fs-6">庫存所有者</label>
-                        <input
-                            v-model="editInventory.userName"
-                            name="userId"
-                            type="text"
-                            class="form-control w-100 text-center"
-                            disabled
-                        />
+                        <input v-model="editInventory.userName" name="userId" type="text"
+                            class="form-control w-100 text-center" disabled />
                     </div>
                     <div class="mb-3">
                         <label for="ingredientName" class="m-0 p-0 fs-6">食材名稱</label>
-                        <input
-                            v-model="editInventory.ingredientName"
-                            name="ingredientName"
-                            type="text"
-                            placeholder="食材名稱"
-                            class="form-control w-100 text-center"
-                            disabled
-                        />
+                        <input v-model="editInventory.ingredientName" name="ingredientName" type="text"
+                            placeholder="食材名稱" class="form-control w-100 text-center" disabled />
                     </div>
                     <div class="mb-3">
                         <label for="quantity" class="m-0 p-0 fs-6">數量</label>
                         <div class="d-flex justify-content-between align-items-center gap-3">
-                            <input
-                                v-model="editInventory.quantity"
-                                name="quantity"
-                                type="text"
-                                placeholder="數量"
-                                class="form-control w-100 text-center"
-                            />
+                            <input v-model="editInventory.quantity" name="quantity" type="text" placeholder="數量"
+                                class="form-control w-100 text-center" />
                             <span>{{ editInventory.unit }}</span>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label for="expiryDate" class="m-0 p-0 fs-6">到期日</label>
-                        <input
-                            v-model="editInventory.expiryDate"
-                            name="expiryDate"
-                            type="date"
-                            placeholder="到期日"
-                            class="form-control w-100 text-center"
-                        />
+                        <input v-model="editInventory.expiryDate" name="expiryDate" type="date" placeholder="到期日"
+                            class="form-control w-100 text-center" />
                     </div>
                     <div class="mb-3">
                         <label for="visibility" class="m-0 p-0 fs-6">權限</label>
-                        <select
-                            v-model="editInventory.visibility"
-                            :placeholder="editInventory.visibility"
-                            name="visibility"
-                            class="form-control w-100 text-center"
-                            :disabled="userId !== editInventory.userId"
-                        >
+                        <select v-model="editInventory.visibility" :placeholder="editInventory.visibility"
+                            name="visibility" class="form-control w-100 text-center"
+                            :disabled="userId !== editInventory.userId">
                             <option :value="true">私有</option>
                             <option :value="false">群組</option>
                         </select>
@@ -534,20 +487,11 @@ const exportInventories = () => {
     </section>
 
     <section>
-        <div
-            class="offcanvas offcanvas-end rounded-3"
-            data-bs-scroll="true"
-            data-bs-backdrop="false"
-            tabindex="-1"
-            id="offcanvasIngredient"
-        >
+        <div class="offcanvas offcanvas-end rounded-3" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1"
+            id="offcanvasIngredient">
             <div class="offcanvas-header justify-content-center">
-                <button
-                    type="button"
-                    class="btn-close rounded-circle bg-dark"
-                    data-bs-dismiss="offcanvas"
-                    aria-label="Close"
-                ></button>
+                <button type="button" class="btn-close rounded-circle bg-dark" data-bs-dismiss="offcanvas"
+                    aria-label="Close"></button>
             </div>
             <div class="offcanvas-body">
                 <div class="order-md-last">
@@ -556,11 +500,8 @@ const exportInventories = () => {
                         <span class="badge bg-dark rounded-pill">{{ selectedInventories.length }}</span>
                     </h4>
                     <ul class="list-group mb-3">
-                        <li
-                            v-for="inventory in selectedInventories"
-                            :key="inventory.inventoryId"
-                            class="list-group-item d-flex justify-content-between lh-sm"
-                        >
+                        <li v-for="inventory in selectedInventories" :key="inventory.inventoryId"
+                            class="list-group-item d-flex justify-content-between lh-sm">
                             <div>
                                 <h6 class="my-0">{{ inventory.ingredientName }}</h6>
                                 <small class="text-body-secondary">{{ inventory.category }}</small>
@@ -569,13 +510,11 @@ const exportInventories = () => {
                         </li>
                     </ul>
 
-                    <RouterLink
-                        class="w-100 btn shadow fs-5"
+                    <RouterLink class="w-100 btn shadow fs-5"
                         :class="selectedInventories.length ? 'bg-gradient-info' : 'bg-secondary disabled-link'"
-                        :to="selectedInventories.length ? { name: 'GenerateRecipe' } : ''"
-                        @click="exportInventories"
-                        >產生食譜</RouterLink
-                    >
+                        :to="selectedInventories.length ? { name: 'GenerateRecipe' } : ''" @click="exportInventories">
+                        產生食譜
+                    </RouterLink>
                     <button class="w-100 btn blur text-danger shadow fs-5" @click="alertClearCheck">
                         清空所選食材
                     </button>
@@ -588,22 +527,15 @@ const exportInventories = () => {
         <div class="container-fluid">
             <div class="row justify-content-center">
                 <div class="col-lg-3">
-                    <RouterLink
-                        class="btn text-dark shadow fs-5 w-100"
+                    <RouterLink class="btn text-dark shadow fs-5 w-100"
                         :class="selectedInventories.length ? 'bg-primary-subtle' : 'bg-secondary disabled-link'"
-                        :to="selectedInventories.length ? { name: 'GenerateRecipe' } : ''"
-                        @click="exportInventories"
-                        >產生食譜</RouterLink
-                    >
+                        :to="selectedInventories.length ? { name: 'GenerateRecipe' } : ''" @click="exportInventories">
+                        產生食譜
+                    </RouterLink>
                 </div>
                 <div class="col-lg-3">
-                    <button
-                        type="button"
-                        class="btn blur shadow text-dark fs-5 w-100"
-                        data-bs-toggle="offcanvas"
-                        data-bs-target="#offcanvasIngredient"
-                        aria-controls="offcanvasIngredient"
-                    >
+                    <button type="button" class="btn blur shadow text-dark fs-5 w-100" data-bs-toggle="offcanvas"
+                        data-bs-target="#offcanvasIngredient" aria-controls="offcanvasIngredient">
                         查看您選擇的食材
                     </button>
                 </div>
@@ -717,6 +649,7 @@ const exportInventories = () => {
     box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px !important;
     cursor: pointer;
 }
+
 .driver:hover {
     transform: scale(1.05);
 }
