@@ -6,14 +6,38 @@ import Swal from 'sweetalert2';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
-import { onMounted, ref, watchEffect } from 'vue';
+import { onMounted, ref, watchEffect, computed } from 'vue';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.min.css';
+
+//定義 props，接收父組件的 v-model 值
+//modelValue 是 v-model 在 Vue 3 中的默認 prop 名稱
+const props = defineProps({
+    modelValue: {
+        type: Array,
+        default: () => [],
+    },
+});
+
+// 定義 emit
+const emit = defineEmits(['update:modelValue']);
+
+//利用computed創建雙向繫結，讓父component方便操作內部
+const selectedIngredients = computed({
+    // getter: 當要抓selectedIngredients的值時返回props.modelValue
+    get() {
+        return props.modelValue;
+    },
+    // setter: 當要賦selectedIngredients值時觸發更新事件
+    set(newValue) {
+        // 發送更新事件到父組件
+        emit('update:modelValue', newValue);
+    },
+});
 
 const ingredientStore = useIngredientStore();
 const { ingredients, groupedIngredients, ingredientCategory } = storeToRefs(ingredientStore);
 const { fetchIngredients, postIngredient } = ingredientStore;
-const selectedIngredients = ref([]); //所選的食材放這
 
 const customIngredient = ref({
     ingredientId: '',
@@ -27,7 +51,7 @@ const customIngredient = ref({
     previewUrl: '',
 }); //自定義食材資料
 
-const isModalVisible = ref(true);
+const isModalVisible = ref(false);
 
 onMounted(() => {
     fetchIngredients();
@@ -94,11 +118,14 @@ const postIngredientAlert = () => {
 
 //Badge點擊事件
 const activateBadge = (ingredient) => {
-    const Index = selectedIngredients.value.indexOf(ingredient);
-    if (Index === -1) {
-        selectedIngredients.value.push(ingredient);
+    const index = selectedIngredients.value.findIndex((item) => item.ingredientId === ingredient.ingredientId);
+
+    if (index === -1) {
+        selectedIngredients.value = [...selectedIngredients.value, ingredient];
     } else {
-        selectedIngredients.value.splice(Index, 1);
+        selectedIngredients.value = selectedIngredients.value.filter(
+            (item) => item.ingredientId !== ingredient.ingredientId
+        );
     }
 };
 
@@ -126,9 +153,7 @@ const addCustomIngredient = () => {
     formData.append('expireDay', customIngredient.value.expireDay);
     formData.append('unit', customIngredient.value.unit);
     formData.append('gram', customIngredient.value.gram);
-    if (customIngredient.value.photo) {
-        formData.append('photo', customIngredient.value.photo);
-    }
+    formData.append('photo', customIngredient.value.photo);
     //post出去
     postIngredient(formData);
 };
@@ -241,6 +266,7 @@ const handlePhotoUpload = (event) => {
             center
             :modal-append-to-body="true"
             :append-to-body="true"
+            :z-index="1000"
             class="el-dialog bg-primary-subtle"
         >
             <form class="bg-white rounded-4 p-3" @submit.prevent>
@@ -392,7 +418,7 @@ const handlePhotoUpload = (event) => {
     background: #f8d7da;
 }
 .swal2-container {
-    z-index: 20000 !important;
+    z-index: 99999 !important;
 }
 .btn-link {
     margin-right: 30px;
