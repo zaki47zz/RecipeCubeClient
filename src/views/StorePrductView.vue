@@ -195,12 +195,12 @@ const loadFilteredProducts = async (category) => {
         <!-- RouterLink End -->
 
         <!-- Fruits Shop Start-->
-        <div class="container-fluid fruite py-1">
+        <div class="container-fluid fruite py-1 p-0 mx-0">
             <div class="container py-1">
                 <div class="row g-4">
                     <div class="col-lg-12">
                         <div class="row g-4">
-                            <div class="col-xl-3">
+                            <div class="col-xl-10">
                                 <div class="input-group w-100 mx-auto d-flex">
                                     <input
                                         type="search"
@@ -213,8 +213,8 @@ const loadFilteredProducts = async (category) => {
                                     ></span>
                                 </div>
                             </div>
-                            <div class="col-6"></div>
-                            <div class="col-xl-3">
+                            <!-- <div class="col-6"></div> -->
+                            <div class="col-xl-2">
                                 <div class="bg-light ps-3 py-3 rounded d-flex justify-content-between mb-4">
                                     <label for="fruits">預設排序:</label>
                                     <select
@@ -341,7 +341,7 @@ const loadFilteredProducts = async (category) => {
                                             :current-page="currentPage"
                                             :page-size="pageSize"
                                             background
-                                            layout="size,total, ->,prev,pager,next,jumper"
+                                            layout="sizes,total, ->,prev,pager,next,jumper"
                                             :page-sizes="[9, 12, 15, 18, 21]"
                                             :total="totalProducts"
                                             @size-change="handlePageSizeChange"
