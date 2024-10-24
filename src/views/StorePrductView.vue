@@ -106,7 +106,7 @@ const totalProducts = computed(() => {
     return filteredProducts.value.length;
 });
 const totalPages = computed(() => Math.ceil(totalProducts.value / pageSize.value)); //總頁數
-const pageSize = ref(9); // 每頁顯示商品數
+const pageSize = ref(12); // 每頁顯示商品數
 const currentPage = ref(1); // 當前頁碼
 
 const paginatedProducts = computed(() => {
@@ -164,7 +164,7 @@ const loadFilteredProducts = async (category) => {
 </script>
 
 <template>
-    <div>
+    <div class="p-0 m-0">
         <!-- Single Page Header start -->
         <div class="container-fluid page-header py-5">
             <h1 class="text-center custom-color display-6">商店Store</h1>
@@ -195,13 +195,13 @@ const loadFilteredProducts = async (category) => {
         <!-- RouterLink End -->
 
         <!-- Fruits Shop Start-->
-        <div class="container-fluid fruite py-1 p-0 mx-0">
-            <div class="container py-1">
+        <div class="container-fluid fruite py-1">
+            <div class="py-1 p-0 m-0">
                 <div class="row g-4">
                     <div class="col-lg-12">
                         <div class="row g-4">
                             <div class="col-xl-10">
-                                <div class="input-group w-100 mx-auto d-flex">
+                                <div class="input-group w-100 d-flex">
                                     <input
                                         type="search"
                                         class="form-control p-3"
@@ -231,8 +231,8 @@ const loadFilteredProducts = async (category) => {
                                 </div>
                             </div>
                         </div>
-                        <div class="row g-4">
-                            <div class="col-lg-3">
+                        <div class="row g-5">
+                            <div class="col-lg-2">
                                 <div class="row g-4">
                                     <div class="col-lg-12">
                                         <div class="mb-3">
@@ -275,7 +275,7 @@ const loadFilteredProducts = async (category) => {
                                                 type="range"
                                                 class="form-range w-100"
                                                 v-model="priceRange"
-                                                min="0"
+                                                min="1"
                                                 max="1200"
                                                 @input="handlePriceRangeInput"
                                             />
@@ -285,10 +285,10 @@ const loadFilteredProducts = async (category) => {
                                     <!-- 價格區間 End -->
                                 </div>
                             </div>
-                            <div class="col-lg-9">
-                                <div class="row g-4 justify-content-center">
+                            <div class="col-lg-10">
+                                <div class="row g-4 justify-content-between">
                                     <div
-                                        class="col-md-6 col-lg-6 col-xl-4"
+                                        class="col-md-6 col-lg-4 col-xl-3 animate__animated animate__fadeIn"
                                         v-for="product in paginatedProducts"
                                         :key="product.productId"
                                     >
@@ -342,7 +342,7 @@ const loadFilteredProducts = async (category) => {
                                             :page-size="pageSize"
                                             background
                                             layout="sizes,total, ->,prev,pager,next,jumper"
-                                            :page-sizes="[9, 12, 15, 18, 21]"
+                                            :page-sizes="[12, 20, 48, 96, 300]"
                                             :total="totalProducts"
                                             @size-change="handlePageSizeChange"
                                             @current-change="handleCurrentPageChange"
@@ -376,5 +376,13 @@ const loadFilteredProducts = async (category) => {
 
 .click-router {
     cursor: pointer;
+}
+
+.img-fluid {
+    height: 100%;
+}
+
+.container-fluid {
+    min-width: 100%;
 }
 </style>

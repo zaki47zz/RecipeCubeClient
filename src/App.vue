@@ -28,7 +28,7 @@ body,
 .main-content {
     margin-top: 75px;
     flex-grow: 1;
-    /* 使主內容填滿剩餘空間 */
+    min-width: 90%;
 }
 </style>
 
