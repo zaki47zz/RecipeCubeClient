@@ -9,14 +9,16 @@ const user = ref({
     "email": "user18@example.com",
     "password": "Password123!"
 })
+const loginmessage = ref('');
 const send = async () => {
     const response = await fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify(user.value),
         headers: { 'Content-Type': 'application/json' }
     });
+    
+    const datas = await response.json()
     if (response.ok) {
-        const datas = await response.json()
         const originaltoken = datas.token; //原始JWT
         console.log("原始jwt",originaltoken);
         const decoded = VueJwtDecode.decode(originaltoken);
@@ -47,7 +49,6 @@ const send = async () => {
                     // console.log("UserId:", UserId);
                 } else {
                     console.error('找不到 certserialnumber');
-                    return true; // 表示登入成功
                 }
             } catch (error) {
                 console.error("解碼 JWT 失敗", error);
@@ -55,18 +56,18 @@ const send = async () => {
             alert(datas.message);
             return true; // 表示登入成功
         }
+    } 
     else {
-        alert("登入失敗");
+        loginmessage.value = datas.message;; // 顯示錯誤訊息
         return false; // 表示登入失敗
-    }
-    }
+    }   
 }
 
 const handleLoginClick = async () => {
   const loginSuccess = await send(); // 先發送請求
   if (loginSuccess) {
     // 只有在登入成功時才刷新頁面並跳轉到 "/"
-    location.assign('/'); // 刷新頁面並跳轉到 "/"
+    location.assign('/');  // 刷新頁面並跳轉到 "/"
   }
 };
 </script>
@@ -85,14 +86,13 @@ const handleLoginClick = async () => {
                         <input type="email" class="form-control" name="email" v-model.trim="user.email" id="email"
                             placeholder="Email" required />
                         <label for="email" class="form-label">Email</label>
-                        <span class="text-danger"></span>
                     </div>
                     <div class="form-floating mb-3">
                         <input type="password" class="form-control" name="password" v-model.trim="user.password"
                             id="password" value="" placeholder="密碼" required />
                         <label for="password" class="form-label">密碼</label>
-                        <span class="text-danger"></span>
                     </div>
+                    <span class="text-danger text-center">{{ loginmessage }}</span>
                     <!-- <div class="form-check form-switch">
                         <input class="form-check-input" />
                         <label class="form-check-label">記住密碼</label>
