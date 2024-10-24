@@ -55,10 +55,10 @@ const send = async () => {
             alert(datas.message);
             return true; // 表示登入成功
         }
-    }
     else {
         alert("登入失敗");
         return false; // 表示登入失敗
+    }
     }
 }
 
@@ -106,15 +106,16 @@ const handleLoginClick = async () => {
             <div class="card-footer text-center pt-0 px-lg-2 px-1">
                 <p class="mb-4 text-sm mx-auto">
                     不記得密碼嗎?
-                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'resetPassword' }">忘記密碼
+                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'resetpassword' }">忘記密碼
                     </RouterLink>
                     <br>
                     還沒有註冊過會員嗎?
-                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'SignUp' }">註冊
+                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'signup' }">註冊
                     </RouterLink>
                     <br>
                     沒有收到驗證電子郵件嗎?
-                    <a id="resend-confirmation" class="text-info text-gradient font-weight-bold">重新發送電子郵件確認</a>
+                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'resetemailConfirmed' }">重新發送電子郵件確認
+                    </RouterLink>
                 </p>
             </div>
         </div>
