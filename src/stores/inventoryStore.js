@@ -39,7 +39,6 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
         visibility = false
     ) => {
         try {
-            await fetchIngredients();
             const response = await fetch(inventoryApiURL, {
                 method: 'POST',
                 headers: {

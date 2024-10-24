@@ -43,6 +43,25 @@ export const useCookingStore = defineStore('cookingStore', () => {
         cookingInventories.value.concat(inventories.value);
     });
 
+    //監控cookingInventories的值，如果有變就更新localStorage
+    watch(
+        () => cookingInventories.value,
+        async (newValue) => {
+            console.log('newValue');
+            if (newValue.length > 0) {
+                localStorage.setItem('cookingInventories', JSON.stringify(newValue));
+            }
+        },
+        { deep: true }
+    );
+
+    //從localStorage抓資料(防止刷新頁面)
+    const setCookingInventories = () => {
+        console.log(JSON.parse(localStorage.getItem('cookingInventories')));
+        const cookingInventoriesData = JSON.parse(localStorage.getItem('cookingInventories'));
+        cookingInventories.value = cookingInventoriesData ? cookingInventoriesData : [];
+    };
+
     //將剩餘食材加入庫存並更新紀錄
     const { postInventory } = inventoryStore;
     const { postPantry } = pantryStore;
@@ -51,5 +70,12 @@ export const useCookingStore = defineStore('cookingStore', () => {
 
     ////動態操作結束
 
-    return { cookingInventories, isShowingString, isUsingInventory, isSet, resetCookingInventories };
+    return {
+        cookingInventories,
+        isShowingString,
+        isUsingInventory,
+        isSet,
+        resetCookingInventories,
+        setCookingInventories,
+    };
 });

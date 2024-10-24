@@ -6,13 +6,10 @@ import { onMounted } from 'vue';
 
 const cookingStore = useCookingStore();
 const { cookingInventories, isShowingString, isUsingInventory } = storeToRefs(cookingStore); //裡面的cookingInventories拿來產生食譜
+const { setCookingInventories } = cookingStore;
 
 onMounted(() => {
-    console.log('Store values:', {
-        cookingInventories: cookingInventories.value,
-        isShowingString: isShowingString.value,
-        isUsingInventory: isUsingInventory.value,
-    });
+    setCookingInventories();
 });
 </script>
 

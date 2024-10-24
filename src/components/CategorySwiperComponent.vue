@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { useIngredientStore } from '@/stores/ingredientStore';
 import { Swiper, SwiperSlide } from 'swiper/vue';
+import Swal from 'sweetalert2';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -11,15 +12,16 @@ import 'vue-multiselect/dist/vue-multiselect.min.css';
 
 const ingredientStore = useIngredientStore();
 const { ingredients, groupedIngredients, ingredientCategory } = storeToRefs(ingredientStore);
-const { fetchIngredients } = ingredientStore;
+const { fetchIngredients, postIngredient } = ingredientStore;
 const selectedIngredients = ref([]); //所選的食材放這
+
 const customIngredient = ref({
     ingredientId: '',
     ingredientName: '',
     category: '',
     synonym: '',
-    expireDay: 0,
-    unit: '',
+    expireDay: 7,
+    unit: '克',
     gram: 0,
     photo: '',
     previewUrl: '',
@@ -67,6 +69,29 @@ const swiperOptions = {
     },
 };
 
+//提醒
+const postIngredientAlert = () => {
+    Swal.fire({
+        title: '您確定嗎?',
+        text: '將加入自定義食材到食材資料庫',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: '加入',
+        cancelButtonText: '取消',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            addCustomIngredient();
+            isModalVisible.value = false; // 成功後關閉 modal
+            Swal.fire({
+                title: '已加入!',
+                icon: 'success',
+            });
+        }
+    });
+};
+
 //Badge點擊事件
 const activateBadge = (ingredient) => {
     const Index = selectedIngredients.value.indexOf(ingredient);
@@ -78,7 +103,35 @@ const activateBadge = (ingredient) => {
 };
 
 ////自定義食材
-
+const synonyms = ref([]);
+//新增別名
+const addSynonym = () => {
+    synonyms.value.push(''); // 每次點擊新增一個空字串
+};
+//刪除指定索引的別名
+const removeSynonym = (index) => {
+    synonyms.value.splice(index, 1); // 根據索引移除別名
+};
+//加入自定義食材
+const addCustomIngredient = () => {
+    if (synonyms.value.length > 0) {
+        //把額外的別名加回來字串中
+        customIngredient.value.synonym += `, ${synonyms.value.join(', ')}`;
+    }
+    //定義要傳送的formData(因為有圖片，後端是寫用formData接)
+    const formData = new FormData();
+    formData.append('ingredientName', customIngredient.value.ingredientName);
+    formData.append('category', customIngredient.value.category);
+    formData.append('synonym', customIngredient.value.synonym);
+    formData.append('expireDay', customIngredient.value.expireDay);
+    formData.append('unit', customIngredient.value.unit);
+    formData.append('gram', customIngredient.value.gram);
+    if (customIngredient.value.photo) {
+        formData.append('photo', customIngredient.value.photo);
+    }
+    //post出去
+    postIngredient(formData);
+};
 ////自定義食材結束
 
 //multiselect設定
@@ -92,20 +145,22 @@ const customLabel = (ingredient) => {
 
 //處理圖片上傳
 const handlePhotoUpload = (event) => {
-    const file = event.target.files[0];
+    const file = event.target.files[0]; // 從事件中取得上傳的第一個檔案
     if (file) {
-        customIngredient.value.photo = file; // 保留原始 file
-        console.log('圖片:', customIngredient.value.photo);
+        // 將檔案保存在 customIngredient 物件的 photo 屬性中 (保持原始檔案格式)
+        customIngredient.value.photo = file;
+        // 建立一個 FileReader 物件來讀取檔案內容
         const reader = new FileReader();
+        // 當 FileReader 完成讀取後觸發此函數
         reader.onload = (e) => {
-            // 這裡是用於顯示圖片預覽的 URL
+            // 將讀取結果 (檔案的 Base64 URL) 存入 customIngredient 的 previewUrl 屬性
+            // 這是用來在前端顯示圖片預覽的 URL
             customIngredient.value.previewUrl = e.target.result;
         };
+        // 開始以 Data URL 格式讀取檔案
         reader.readAsDataURL(file);
     }
 };
-//加入自定義食材
-const addCustomIngredient = () => {};
 </script>
 
 <template>
@@ -170,15 +225,25 @@ const addCustomIngredient = () => {};
 
                 <SwiperSlide class="nav-link category-item">
                     <h6 class="text-dark">沒有想要的食材?</h6>
-                    <button class="btn blur rounded-3 shadow text-center">加入自定義食材</button>
+                    <button class="btn blur rounded-3 shadow text-center" @click="isModalVisible = true">
+                        加入自定義食材
+                    </button>
                 </SwiperSlide>
             </Swiper>
         </div>
     </div>
 
     <section>
-        <el-dialog v-model="isModalVisible" title="加入自定義食材" width="70%" center class="bg-primary-subtle">
-            <form class="bg-white rounded-4 p-3">
+        <el-dialog
+            v-model="isModalVisible"
+            title="加入自定義食材"
+            width="50%"
+            center
+            :modal-append-to-body="true"
+            :append-to-body="true"
+            class="el-dialog bg-primary-subtle"
+        >
+            <form class="bg-white rounded-4 p-3" @submit.prevent>
                 <div class="mb-4">
                     <label for="ingredientName" class="form-label fs-6">食材名稱</label>
                     <input
@@ -202,13 +267,26 @@ const addCustomIngredient = () => {};
 
                 <div class="mb-4">
                     <label for="synonym" class="form-label fs-6">別名</label>
-                    <input
-                        v-model="customIngredient.synonym"
-                        type="text"
-                        id="synonym"
-                        class="form-control"
-                        placeholder="例如: Tofu"
-                    />
+                    <div class="d-flex justify-content-between align-items-center">
+                        <input
+                            v-model="customIngredient.synonym"
+                            type="text"
+                            id="synonym"
+                            class="form-control"
+                            placeholder="(選填) 例如: Tofu"
+                        />
+                        <span class="synonym-adder mx-2 fs-2" @click="addSynonym">+</span>
+                    </div>
+
+                    <!-- 動態生成的別名欄位 -->
+                    <div
+                        v-for="(synonym, index) in synonyms"
+                        :key="index"
+                        class="d-flex justify-content-between align-items-center mt-2"
+                    >
+                        <input v-model="synonyms[index]" type="text" class="form-control" />
+                        <span class="synonym-remover mx-2 fs-3" @click="removeSynonym(index)">×</span>
+                    </div>
                 </div>
 
                 <div class="mb-4">
@@ -218,8 +296,7 @@ const addCustomIngredient = () => {};
                         type="number"
                         id="expireDay"
                         class="form-control"
-                        value="7"
-                        placeholder="例如: 7"
+                        placeholder="(選填，預設7天) 例如: 7"
                     />
                 </div>
 
@@ -230,8 +307,7 @@ const addCustomIngredient = () => {};
                         type="text"
                         id="unit"
                         class="form-control"
-                        value="克"
-                        placeholder="例如: 盒"
+                        placeholder="(選填，預設'克') 例如: 盒"
                     />
                 </div>
 
@@ -243,7 +319,7 @@ const addCustomIngredient = () => {};
                         id="gram"
                         class="form-control"
                         value=""
-                        placeholder="(選填，當常用單位非'克'時建議填寫) 例如: 200"
+                        placeholder="(選填，常用單位非'克'時建議填寫) 例如: 200"
                     />
                 </div>
 
@@ -253,7 +329,7 @@ const addCustomIngredient = () => {};
                         class="position-relative"
                         style="
                             width: 50%;
-                            height: 200px;
+                            height: 300px;
                             background-color: #f8f9fa;
                             border: 2px dashed #ced4da;
                             border-radius: 8px;
@@ -263,12 +339,13 @@ const addCustomIngredient = () => {};
                             cursor: pointer;
                         "
                     >
-                        <div v-if="!recipeData.previewUrl" class="text-center">
+                        <div v-if="!customIngredient.previewUrl" class="text-center">
                             <i class="fas fa-cloud-upload-alt mb-2" style="font-size: 48px; color: #6c757d"></i>
                             <p class="mb-0 fs-6" style="color: #6c757d">點擊或拖曳上傳食材照片</p>
                         </div>
                         <img
                             v-else
+                            :src="customIngredient.previewUrl"
                             alt="食材預覽"
                             style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px"
                         />
@@ -281,7 +358,7 @@ const addCustomIngredient = () => {};
                     </div>
                 </div>
                 <div class="d-flex justify-content-center">
-                    <button class="btn btn-info me-5" @click="addCustomIngredient">加入</button>
+                    <button class="btn btn-info me-5" @click="postIngredientAlert">加入</button>
                     <button class="btn btn-secondary" @click="isModalVisible = false">關閉</button>
                 </div>
             </form>
@@ -313,6 +390,9 @@ const addCustomIngredient = () => {};
 .swiper-prev:hover,
 .swiper-next:hover {
     background: #f8d7da;
+}
+.swal2-container {
+    z-index: 20000 !important;
 }
 .btn-link {
     margin-right: 30px;
@@ -361,5 +441,14 @@ const addCustomIngredient = () => {};
 .food-badge.active {
     background-color: #93c759 !important;
     color: #ffffff !important;
+}
+.synonym-adder:hover,
+.synonym-remover:hover {
+    color: #b2b2b2;
+    /* 懸停時變色 */
+    cursor: pointer;
+    transform: scale(1.1);
+    /* 懸停時放大效果 */
+    transition: transform 0.2s;
 }
 </style>
