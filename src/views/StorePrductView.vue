@@ -8,9 +8,13 @@ import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
 
-// 讀取所有商品
-
 const products = ref([]);
+const filteredProducts = ref([]);
+const selectedCategory = ref(null);
+const ProductsByPriceRange = ref([]);
+const priceRange = ref(1200); // 預設最大價格
+
+// 讀取所有商品
 
 const ApiURL = `${BaseURL}/Products/ProductsNcategory`;
 
@@ -18,6 +22,7 @@ const loadProducts = async () => {
     const response = await fetch(`${ApiURL}`);
     const data = await response.json();
     products.value = data;
+    filteredProducts.value = data;
     console.log(data);
 };
 
@@ -31,6 +36,10 @@ const loadCategories = async () => {
     categories.value = datas;
     console.log(BaseUrlWithoutApi);
 };
+
+// 呼叫方法
+loadProducts();
+loadCategories();
 
 // 跳轉至商品明細頁面
 const router = useRouter();
@@ -91,16 +100,11 @@ const addToCart = (product) => {
     }
 };
 
-// 呼叫方法
-loadProducts();
-loadCategories();
-
 // 分頁功能 Start
-const IsFilter = ref(false);
 
 const totalProducts = computed(() => {
-    return IsFilter.value ? filteredProducts.value.length : products.value.length;
-}); // 總商品數 如果 沒有按下篩選 IsFilter == false => 全部商品  else => 篩選的商品
+    return filteredProducts.value.length;
+});
 const totalPages = computed(() => Math.ceil(totalProducts.value / pageSize.value)); //總頁數
 const pageSize = ref(9); // 每頁顯示商品數
 const currentPage = ref(1); // 當前頁碼
@@ -109,13 +113,11 @@ const paginatedProducts = computed(() => {
     const start = (currentPage.value - 1) * pageSize.value;
     const end = start + pageSize.value;
 
-    return IsFilter.value ? filteredProducts.value.slice(start, end) : products.value.slice(start, end);
-    //如果 沒有按下篩選 IsFilter == false => 全部商品  else => 篩選的商品
+    return filteredProducts.value.slice(start, end);
 });
 // 更新當前頁碼
 const handleCurrentPageChange = (newPage) => {
     currentPage.value = newPage; //更新當前頁碼
-    // loadProducts(newPage, pageSize.value); // reload Products
 };
 
 const handlePageSizeChange = (newSize) => {
@@ -131,34 +133,33 @@ watch(totalPages, (newTotalPages) => {
 // 分頁功能 End
 
 // 篩選功能
-const selectedCategory = ref([]);
-const filteredProducts = ref([]);
 
 const clickCategory = (category) => {
-    IsFilter.value = true;
     currentPage.value = 1; // 篩選後重設頁碼為第一頁
     loadFilteredProducts(category);
-    // console.log('現在選的類別:', selectedCategory.value);
 };
 
 const clearCategory = () => {
-    IsFilter.value = false; // 表示篩選已清除
     selectedCategory.value = null;
 
     loadFilteredProducts(null); // 加載所有商品
-    // console.log('按下清除篩選鍵後 IsFilter：', IsFilter.value);
-    // console.log('按下清除篩選鍵後 selectedCategory：', selectedCategory.value);
-    // console.log('按下清除篩選鍵後 filteredProducts.value：', filteredProducts.value);
+};
+
+const handlePriceRangeInput = () => {
+    currentPage.value = 1;
+    loadFilteredProducts(selectedCategory.value);
+    console.log(filteredProducts.value);
 };
 
 const loadFilteredProducts = async (category) => {
-    if (category && IsFilter.value) {
-        filteredProducts.value = products.value.filter((p) => p.category === category);
+    ProductsByPriceRange.value = products.value.filter((p) => p.price <= priceRange.value);
+    console.log('價格篩選後的產品:', ProductsByPriceRange.value);
+    if (category) {
+        filteredProducts.value = ProductsByPriceRange.value.filter((p) => p.category === category);
         selectedCategory.value = category; //把現在選擇的類別存進去
     } else {
-        filteredProducts.value = products.value;
+        filteredProducts.value = ProductsByPriceRange.value;
     }
-    // console.log(filteredProducts.value);
 };
 </script>
 
@@ -255,9 +256,10 @@ const loadFilteredProducts = async (category) => {
                                                             <button
                                                                 v-if="selectedCategory === category.category"
                                                                 @click.stop="clearCategory"
-                                                                class="btn btn-danger btn-sm ms-2 animate__animated animate__bounceIn"
+                                                                class="btn btn-sm ms-2 animate__animated animate__bounceIn"
+                                                                style="color: #9bc8fb; background-color: #fbeae3"
                                                             >
-                                                                <i class="fa-regular fa-circle-xmark"></i>
+                                                                <i class="fa-solid fa-x"></i>
                                                             </button>
                                                         </div>
                                                     </div>
@@ -265,29 +267,22 @@ const loadFilteredProducts = async (category) => {
                                             </ul>
                                         </div>
                                     </div>
+                                    <!-- 價格區間 Start -->
                                     <div class="col-lg-12">
                                         <div class="mb-3">
                                             <h4 class="mb-2">價格區間</h4>
                                             <input
                                                 type="range"
                                                 class="form-range w-100"
-                                                id="rangeInput"
-                                                name="rangeInput"
+                                                v-model="priceRange"
                                                 min="0"
-                                                max="500"
-                                                value="0"
-                                                oninput="amount.value=rangeInput.value"
+                                                max="1200"
+                                                @input="handlePriceRangeInput"
                                             />
-                                            <output
-                                                id="amount"
-                                                name="amount"
-                                                min-velue="0"
-                                                max-value="500"
-                                                for="rangeInput"
-                                                >0</output
-                                            >
+                                            <span>當前價格上限: {{ priceRange }}</span>
                                         </div>
                                     </div>
+                                    <!-- 價格區間 End -->
                                 </div>
                             </div>
                             <div class="col-lg-9">
