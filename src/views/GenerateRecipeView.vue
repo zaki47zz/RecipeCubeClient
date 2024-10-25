@@ -27,15 +27,27 @@ const getRecipeImageUrl = (fileName) => {
 const fetchRecipes = async () => {
     try {
         console.log('Fetching recipes with filters:', filters.value);
+        const userId = localStorage.getItem('UserId')
+        console.log(userId)
+        if (!userId) {
+            console.error('無法獲取用戶 ID');
+            return;
+        }
         const ingredientIds = cookingInventories.value.map((inventory) => inventory.ingredientId);
+
         console.log('Ingredient IDs for API:', ingredientIds);
+        // 構造請求 body
+        const requestBody = {
+            UserId: userId,
+            SelectedIngredients: ingredientIds,
+        };
         // 呼叫 API，傳入選擇的食材
         const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(ingredientIds),
+            body: JSON.stringify(requestBody),
         });
 
         // 檢查回應狀態
@@ -55,7 +67,16 @@ const fetchRecipes = async () => {
         // 解析返回的結果
         const data = await response.json();
         recipes.value = data; // 將返回的食譜儲存在 `recipes` 中
+        // 遍歷推薦的食譜
+        recipes.value.forEach(recipe => {
+            if (!recipe.isEnoughIngredients) {
+                recipe.missingIngredients.forEach(ingredient => {
+                    console.log(`缺少的食材: ${ingredient.IngredientName}, 缺少數量: ${ingredient.MissingQuantity}${ingredient.Unit}`);
+                });
+            }
+        });
         console.log("推薦食譜:", recipes.value)
+
     } catch (error) {
         console.error('錯誤:', error);
     }
@@ -163,18 +184,57 @@ const completeMatchRecipes = computed(() => {
 
 const partialMatchRecipes = computed(() => {
     const partialRecipes = filteredRecipes.value.filter(recipe => {
+        // 判斷該食譜是否缺少某些食材
         return recipe.ingredientIds.some(id => !cookingInventories.value.some(inv => inv.ingredientId === id));
     }).map(recipe => {
-        const missingIngredients = recipe.ingredientIds.filter(id => !cookingInventories.value.some(inv => inv.ingredientId === id));
-        const missingIngredientNames = missingIngredients.map(id => recipe.ingredientNames[recipe.ingredientIds.indexOf(id)]);
+        // 確認缺少的食材
+        const missingIngredients = recipe.ingredientIds
+            .filter(id => !cookingInventories.value.some(inv => inv.ingredientId === id))
+            .map(id => {
+                // 獲取食材名稱
+                const ingredientName = recipe.ingredientNames[recipe.ingredientIds.indexOf(id)];
+                // console.log(`找到缺少的食材名稱: ${ingredientName}，對應的 ID: ${id}`);
+
+                // 解構 missingIngredients
+                const missingIngredientsList = JSON.parse(JSON.stringify(recipe.missingIngredients));
+
+                // 使用 IngredientId 查找缺少的食材詳細資訊
+                // console.log(`正在查找是否有 IngredientId 為 ${id} 的缺少食材...`, missingIngredientsList);
+                const missingIngredientDetail = missingIngredientsList.find(missing => missing.ingredientId === id);
+
+                // 檢查是否找到對應的食材詳細資訊
+                // console.log(`查找結果：`, missingIngredientDetail);
+
+                // 保留食材的單位和缺少的數量
+                const ingredientUnit = missingIngredientDetail?.unit || '未知單位';
+                const missingQuantity = missingIngredientDetail?.missingQuantity || 0;
+
+                // 回傳包含完整資訊的缺少食材物件
+                return {
+                    ingredientId: id,
+                    ingredientName,
+                    missingQuantity,
+                    unit: ingredientUnit,
+                };
+            });
+
+        // 將調試資訊顯示在控制台
+        // console.log(`食譜 ${recipe.recipeName} 缺少的食材詳情:`, missingIngredients);
+
         return {
             ...recipe,
-            missingIngredients: missingIngredientNames,
+            missingIngredients,
         };
     });
+
+    // 顯示最終部分匹配的食譜資訊
     console.log('部分匹配的食譜:', partialRecipes);
     return partialRecipes;
 });
+
+
+
+
 
 //#endregion 分類 完全符合/不符合食譜
 </script>
@@ -244,7 +304,7 @@ const partialMatchRecipes = computed(() => {
     <!-- 搜尋 -->
     <section class="mt-1 px-2">
         <div class="container-fluid">
-            <div class="col-sm-10 offset-sm-2 offset-md-0 col-lg-12 d-none d-lg-block">
+            <div class="col-sm-10 offset-sm-2 offset-md-0 col-lg-12 d-lg-block">
                 <RecipeFilterComponent @filterChange="handleFilterChange" :showSearchField="false">
                 </RecipeFilterComponent>
             </div>
@@ -335,8 +395,16 @@ const partialMatchRecipes = computed(() => {
                                                     </div>
                                                 </div>
                                                 <!-- 顯示缺少的食材 -->
-                                                <p class="text-danger mt-2">缺少的食材: {{
-                                                    recipe.missingIngredients.join(',') }}</p>
+                                                <p class="text-danger mt-2">
+                                                    缺少的食材:
+                                                    <span v-for="(ingredient, index) in recipe.missingIngredients"
+                                                        :key="index">
+                                                        {{ ingredient.ingredientName }} ({{ ingredient.missingQuantity
+                                                        }} {{ ingredient.unit }})
+                                                        <span v-if="index < recipe.missingIngredients.length - 1">,
+                                                        </span>
+                                                    </span>
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
