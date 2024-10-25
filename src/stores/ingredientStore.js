@@ -73,6 +73,34 @@ export const useIngredientStore = defineStore('ingredientStore', () => {
         return expiryDate; //回傳預設日期
     };
 
+    const getUnitGram = async (ingredientId) => {
+        try {
+            await fetchIngredients();
+            const targetIngredient = ingredients.value.find((ingredient) => ingredient.ingredientId === ingredientId);
+
+            // 沒有這筆食材就undefine
+            if (!targetIngredient) {
+                console.error('Ingredient not found:', ingredientId);
+                return undefined;
+            }
+
+            // 如果是克就undefine
+            if (targetIngredient.unit === '克') {
+                return undefined;
+            }
+
+            return {
+                ingredientId: targetIngredient.ingredientId,
+                ingredientName: targetIngredient.ingredientName,
+                unit: targetIngredient.unit,
+                gram: targetIngredient.gram ?? 'X',
+            };
+        } catch (error) {
+            console.error('Error in getUnitGram:', error);
+            return undefined;
+        }
+    };
+
     return {
         ingredients,
         groupedIngredients,
@@ -80,5 +108,6 @@ export const useIngredientStore = defineStore('ingredientStore', () => {
         fetchIngredients,
         postIngredient,
         getDefaultExpiryDate,
+        getUnitGram,
     };
 });

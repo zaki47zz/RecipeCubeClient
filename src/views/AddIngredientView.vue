@@ -2,7 +2,7 @@
 import CategorySwiperComponent from '@/components/CategorySwiperComponent.vue';
 import Swal from 'sweetalert2';
 import { ref, watch } from 'vue';
-import { storeToRefs } from 'pinia';
+import UnitConversionComponent from '@/components/UnitConversionComponent.vue';
 import { useInventoryStore } from '@/stores/inventoryStore';
 import { usePantryStore } from '@/stores/pantryStore';
 
@@ -94,9 +94,6 @@ const swalAlert = (text) => {
 };
 ////提醒結束
 
-//換算表按鈕
-const showTable = () => {};
-
 //刪除食材按鈕
 const deleteInventory = (inventory) => {
     const deletingIndex = selectedIngredients.value.findIndex((item) => item.ingredientId === inventory.ingredientId);
@@ -171,7 +168,7 @@ const addInventories = async () => {
     <section class="pt-5 overflow-hidden">
         <div class="container-fluid banner-ad">
             <!-- 在子component用v-model相當於繫結它內部的props.modelValue，後面放什麼就會被傳過去 -->
-            <CategorySwiperComponent v-model="selectedIngredients" color="bg-primary-subtle"></CategorySwiperComponent>
+            <CategorySwiperComponent v-model="selectedIngredients"></CategorySwiperComponent>
         </div>
     </section>
 
@@ -184,9 +181,10 @@ const addInventories = async () => {
                 <div class="col-md-12">
                     <div class="d-flex justify-content-between mt-2">
                         <h4>您今天買了 {{ selectedIngredients.length }} 樣食材</h4>
-                        <p class="conversion-table badge bg-secondary" @click="showTable">
-                            <i class="fa-solid fa-repeat"></i> 數量換算表
-                        </p>
+                        <UnitConversionComponent
+                            :addingInventoriesList="addingInventories"
+                            color="primary"
+                        ></UnitConversionComponent>
                     </div>
                 </div>
             </div>
@@ -297,13 +295,5 @@ const addInventories = async () => {
     transform: scale(1.1);
     transition: transform 0.2s;
     box-shadow: 0px 21px 44px rgba(0, 0, 0, 0.08);
-}
-
-.conversion-table {
-    cursor: pointer;
-}
-
-.conversion-table:hover {
-    opacity: 80%;
 }
 </style>

@@ -51,5 +51,9 @@ export const usePantryStore = defineStore('pantryStore', () => {
         }
     };
 
-    return { pantries, fetchPantries, postPantry };
+    const getFrequentlyUsedIngredients = () => {
+        //找出歷史紀錄裡出現過次數超過總次數10%以上的食材
+    };
+
+    return { pantries, fetchPantries, postPantry, getFrequentlyUsedIngredients };
 });

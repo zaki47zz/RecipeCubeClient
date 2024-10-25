@@ -108,5 +108,15 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
         }
     };
 
-    return { inventories, ingredientCategory, fetchInventories, postInventory, deleteInventory, putInventory };
+    const getRunningOutIngredients = () => {};
+
+    return {
+        inventories,
+        ingredientCategory,
+        fetchInventories,
+        postInventory,
+        deleteInventory,
+        putInventory,
+        getRunningOutIngredients,
+    };
 });
