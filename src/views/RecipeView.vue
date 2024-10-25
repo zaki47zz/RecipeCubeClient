@@ -346,18 +346,7 @@ watch(totalPages, (newTotalPages) => {
     background: url('@/assets/img/ForBackground/ad-bg-pattern.png') no-repeat center / cover;
 }
 
-/* Product Tabs Styles */
-.product-tabs .nav-tabs {
-    justify-content: flex-end;
-    border: none;
-}
 
-.product-tabs .nav-tabs .nav-link.active,
-.product-tabs .nav-tabs .nav-item.show .nav-link {
-    border: none;
-    border-bottom: 3px solid rgb(127, 180, 255);
-    background-color: transparent;
-}
 
 .custom-scroll-container {
     max-height: 300px;
