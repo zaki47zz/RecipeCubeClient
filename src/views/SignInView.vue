@@ -40,6 +40,7 @@ const send = async () => {
                         UserId: decoded.certserialnumber,
                         Email: decoded.email,
                         UserName: decodeURIComponent(escape(decoded.unique_name)),
+                        Phone: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/mobilephone"],
                         GroudId: decoded.groupsid,
                         Exp: decoded.exp,  // JWT 過期時間
                         // Email: decoded.email  
