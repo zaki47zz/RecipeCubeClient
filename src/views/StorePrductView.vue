@@ -8,9 +8,13 @@ import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
 
-// 讀取所有商品
-
 const products = ref([]);
+const filteredProducts = ref([]);
+const selectedCategory = ref(null);
+const ProductsByPriceRange = ref([]);
+const priceRange = ref(1200); // 預設最大價格
+
+// 讀取所有商品
 
 const ApiURL = `${BaseURL}/Products/ProductsNcategory`;
 
@@ -18,6 +22,7 @@ const loadProducts = async () => {
     const response = await fetch(`${ApiURL}`);
     const data = await response.json();
     products.value = data;
+    filteredProducts.value = data;
     console.log(data);
 };
 
@@ -31,6 +36,10 @@ const loadCategories = async () => {
     categories.value = datas;
     console.log(BaseUrlWithoutApi);
 };
+
+// 呼叫方法
+loadProducts();
+loadCategories();
 
 // 跳轉至商品明細頁面
 const router = useRouter();
@@ -91,22 +100,24 @@ const addToCart = (product) => {
     }
 };
 
-// 分頁 功能
+// 分頁功能 Start
 
-const totalProducts = computed(() => products.value.length); // 總商品數
+const totalProducts = computed(() => {
+    return filteredProducts.value.length;
+});
 const totalPages = computed(() => Math.ceil(totalProducts.value / pageSize.value)); //總頁數
-const pageSize = ref(9); // 每頁顯示商品數
+const pageSize = ref(12); // 每頁顯示商品數
 const currentPage = ref(1); // 當前頁碼
 
 const paginatedProducts = computed(() => {
     const start = (currentPage.value - 1) * pageSize.value;
     const end = start + pageSize.value;
+
     return filteredProducts.value.slice(start, end);
 });
 // 更新當前頁碼
 const handleCurrentPageChange = (newPage) => {
     currentPage.value = newPage; //更新當前頁碼
-    // loadProducts(newPage, pageSize.value); // reload Products
 };
 
 const handlePageSizeChange = (newSize) => {
@@ -119,23 +130,41 @@ watch(totalPages, (newTotalPages) => {
         currentPage.value = newTotalPages;
     }
 });
+// 分頁功能 End
 
 // 篩選功能
-const filteredProducts = ref([]);
-const loadFilteredProducts = async (category) => {
-    if (products.value != null) {
-        filteredProducts.value = products.value.filter((p) => p.category === category);
-    }
+
+const clickCategory = (category) => {
+    currentPage.value = 1; // 篩選後重設頁碼為第一頁
+    loadFilteredProducts(category);
+};
+
+const clearCategory = () => {
+    selectedCategory.value = null;
+
+    loadFilteredProducts(null); // 加載所有商品
+};
+
+const handlePriceRangeInput = () => {
+    currentPage.value = 1;
+    loadFilteredProducts(selectedCategory.value);
     console.log(filteredProducts.value);
 };
 
-// 呼叫方法
-loadProducts();
-loadCategories();
+const loadFilteredProducts = async (category) => {
+    ProductsByPriceRange.value = products.value.filter((p) => p.price <= priceRange.value);
+    console.log('價格篩選後的產品:', ProductsByPriceRange.value);
+    if (category) {
+        filteredProducts.value = ProductsByPriceRange.value.filter((p) => p.category === category);
+        selectedCategory.value = category; //把現在選擇的類別存進去
+    } else {
+        filteredProducts.value = ProductsByPriceRange.value;
+    }
+};
 </script>
 
 <template>
-    <div>
+    <div class="p-0 m-0">
         <!-- Single Page Header start -->
         <div class="container-fluid page-header py-5">
             <h1 class="text-center custom-color display-6">商店Store</h1>
@@ -167,12 +196,12 @@ loadCategories();
 
         <!-- Fruits Shop Start-->
         <div class="container-fluid fruite py-1">
-            <div class="container py-1">
+            <div class="py-1 p-0 m-0">
                 <div class="row g-4">
                     <div class="col-lg-12">
                         <div class="row g-4">
-                            <div class="col-xl-3">
-                                <div class="input-group w-100 mx-auto d-flex">
+                            <div class="col-xl-10">
+                                <div class="input-group w-100 d-flex">
                                     <input
                                         type="search"
                                         class="form-control p-3"
@@ -184,8 +213,8 @@ loadCategories();
                                     ></span>
                                 </div>
                             </div>
-                            <div class="col-6"></div>
-                            <div class="col-xl-3">
+                            <!-- <div class="col-6"></div> -->
+                            <div class="col-xl-2">
                                 <div class="bg-light ps-3 py-3 rounded d-flex justify-content-between mb-4">
                                     <label for="fruits">預設排序:</label>
                                     <select
@@ -202,8 +231,8 @@ loadCategories();
                                 </div>
                             </div>
                         </div>
-                        <div class="row g-4">
-                            <div class="col-lg-3">
+                        <div class="row g-5">
+                            <div class="col-lg-2">
                                 <div class="row g-4">
                                     <div class="col-lg-12">
                                         <div class="mb-3">
@@ -214,47 +243,52 @@ loadCategories();
                                                         class="d-flex justify-content-between fruite-name"
                                                         v-for="category in categories"
                                                         :key="category.category"
-                                                        @click="loadFilteredProducts(category.category)"
+                                                        @click="clickCategory(category.category)"
                                                     >
                                                         <a href="#"
                                                             ><i class="fas fa-apple-alt me-2"></i
                                                             >{{ category.category }}</a
                                                         >
-                                                        <span>({{ category.count }})</span>
+                                                        <div class="d-flex align-items-center">
+                                                            <span>({{ category.count }})</span>
+                                                            <!-- 顯示XX 來取消篩選 回到全部商品 -->
+                                                            <!-- 要加上.stop 阻止冒泡事件 -->
+                                                            <button
+                                                                v-if="selectedCategory === category.category"
+                                                                @click.stop="clearCategory"
+                                                                class="btn btn-sm ms-2 animate__animated animate__bounceIn"
+                                                                style="color: #9bc8fb; background-color: #fbeae3"
+                                                            >
+                                                                <i class="fa-solid fa-x"></i>
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </li>
                                             </ul>
                                         </div>
                                     </div>
+                                    <!-- 價格區間 Start -->
                                     <div class="col-lg-12">
                                         <div class="mb-3">
                                             <h4 class="mb-2">價格區間</h4>
                                             <input
                                                 type="range"
                                                 class="form-range w-100"
-                                                id="rangeInput"
-                                                name="rangeInput"
-                                                min="0"
-                                                max="500"
-                                                value="0"
-                                                oninput="amount.value=rangeInput.value"
+                                                v-model="priceRange"
+                                                min="1"
+                                                max="1200"
+                                                @input="handlePriceRangeInput"
                                             />
-                                            <output
-                                                id="amount"
-                                                name="amount"
-                                                min-velue="0"
-                                                max-value="500"
-                                                for="rangeInput"
-                                                >0</output
-                                            >
+                                            <span>當前價格上限: {{ priceRange }}</span>
                                         </div>
                                     </div>
+                                    <!-- 價格區間 End -->
                                 </div>
                             </div>
-                            <div class="col-lg-9">
-                                <div class="row g-4 justify-content-center">
+                            <div class="col-lg-10">
+                                <div class="row g-4 justify-content-between">
                                     <div
-                                        class="col-md-6 col-lg-6 col-xl-4"
+                                        class="col-md-6 col-lg-4 col-xl-3 animate__animated animate__fadeIn"
                                         v-for="product in paginatedProducts"
                                         :key="product.productId"
                                     >
@@ -307,8 +341,8 @@ loadCategories();
                                             :current-page="currentPage"
                                             :page-size="pageSize"
                                             background
-                                            layout="size,total, ->,prev,pager,next,jumper"
-                                            :page-sizes="[9, 12, 15, 18, 21]"
+                                            layout="sizes,total, ->,prev,pager,next,jumper"
+                                            :page-sizes="[12, 20, 48, 96, 300]"
                                             :total="totalProducts"
                                             @size-change="handlePageSizeChange"
                                             @current-change="handleCurrentPageChange"
@@ -342,5 +376,13 @@ loadCategories();
 
 .click-router {
     cursor: pointer;
+}
+
+.img-fluid {
+    height: 100%;
+}
+
+.container-fluid {
+    min-width: 100%;
 }
 </style>
