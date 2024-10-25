@@ -27,6 +27,12 @@ const getRecipeImageUrl = (fileName) => {
 const fetchRecipes = async () => {
     try {
         console.log('Fetching recipes with filters:', filters.value);
+        const userId = localStorage.getItem('UserId');
+        console.log(userId);
+        if (!userId) {
+            console.error('無法獲取用戶 ID');
+            return;
+        }
         const ingredientIds = cookingInventories.value.map((inventory) => inventory.ingredientId);
         console.log('Ingredient IDs for API:', ingredientIds);
         // 呼叫 API，傳入選擇的食材
@@ -146,20 +152,53 @@ const completeMatchRecipes = computed(() => {
 const partialMatchRecipes = computed(() => {
     const partialRecipes = filteredRecipes.value
         .filter((recipe) => {
+            // 判斷該食譜是否缺少某些食材
             return recipe.ingredientIds.some((id) => !cookingInventories.value.some((inv) => inv.ingredientId === id));
         })
         .map((recipe) => {
-            const missingIngredients = recipe.ingredientIds.filter(
-                (id) => !cookingInventories.value.some((inv) => inv.ingredientId === id)
-            );
-            const missingIngredientNames = missingIngredients.map(
-                (id) => recipe.ingredientNames[recipe.ingredientIds.indexOf(id)]
-            );
+            // 確認缺少的食材
+            const missingIngredients = recipe.ingredientIds
+                .filter((id) => !cookingInventories.value.some((inv) => inv.ingredientId === id))
+                .map((id) => {
+                    // 獲取食材名稱
+                    const ingredientName = recipe.ingredientNames[recipe.ingredientIds.indexOf(id)];
+                    // console.log(`找到缺少的食材名稱: ${ingredientName}，對應的 ID: ${id}`);
+
+                    // 解構 missingIngredients
+                    const missingIngredientsList = JSON.parse(JSON.stringify(recipe.missingIngredients));
+
+                    // 使用 IngredientId 查找缺少的食材詳細資訊
+                    // console.log(`正在查找是否有 IngredientId 為 ${id} 的缺少食材...`, missingIngredientsList);
+                    const missingIngredientDetail = missingIngredientsList.find(
+                        (missing) => missing.ingredientId === id
+                    );
+
+                    // 檢查是否找到對應的食材詳細資訊
+                    // console.log(`查找結果：`, missingIngredientDetail);
+
+                    // 保留食材的單位和缺少的數量
+                    const ingredientUnit = missingIngredientDetail?.unit || '未知單位';
+                    const missingQuantity = missingIngredientDetail?.missingQuantity || 0;
+
+                    // 回傳包含完整資訊的缺少食材物件
+                    return {
+                        ingredientId: id,
+                        ingredientName,
+                        missingQuantity,
+                        unit: ingredientUnit,
+                    };
+                });
+
+            // 將調試資訊顯示在控制台
+            // console.log(`食譜 ${recipe.recipeName} 缺少的食材詳情:`, missingIngredients);
+
             return {
                 ...recipe,
-                missingIngredients: missingIngredientNames,
+                missingIngredients,
             };
         });
+
+    // 顯示最終部分匹配的食譜資訊
     console.log('部分匹配的食譜:', partialRecipes);
     return partialRecipes;
 });
@@ -185,10 +224,12 @@ const partialMatchRecipes = computed(() => {
                     <h4>
                         您輸入了
                         <span class="text-info text-gradient">{{ cookingInventories.length }}</span>
-                        樣食材<span v-if="isShowingString">，並決定
+                        樣食材<span v-if="isShowingString"
+                            >，並決定
                             <span v-if="isUsingInventory" class="text-info text-gradient">納入</span>
                             <span v-else class="text-info text-gradient">不納入</span>
-                            庫存食材一起檢索</span>
+                            庫存食材一起檢索</span
+                        >
                     </h4>
                 </div>
             </div>
@@ -244,19 +285,28 @@ const partialMatchRecipes = computed(() => {
             <!-- 完全匹配的食譜 -->
             <h3>符合所有食材的食譜</h3>
             <div class="row row-cols-1 row-cols-md-2 g-1">
-                <div v-for="(recipe, index) in completeMatchRecipes" :key="index"
-                    class="recipe-card col-12 col-md-6 p-0">
-                    <div class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
-                        style="height: 120px; width: 100%">
+                <div
+                    v-for="(recipe, index) in completeMatchRecipes"
+                    :key="index"
+                    class="recipe-card col-12 col-md-6 p-0"
+                >
+                    <div
+                        class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
+                        style="height: 120px; width: 100%"
+                    >
                         <div class="image-container" style="width: 200px; height: 100%">
-                            <img :src="getRecipeImageUrl(recipe.photoName)" :alt="recipe.recipeName"
-                                class="recipe-image" style="
+                            <img
+                                :src="getRecipeImageUrl(recipe.photoName)"
+                                :alt="recipe.recipeName"
+                                class="recipe-image"
+                                style="
                                     width: 100%;
                                     height: 100%;
                                     object-fit: cover;
                                     border-top-left-radius: 0.75rem;
                                     border-bottom-left-radius: 0.75rem;
-                                " />
+                                "
+                            />
                         </div>
                         <div class="p-3 w-100 d-flex flex-column justify-content-start align-items-center">
                             <h5 class="mt-3 text-center">{{ recipe.recipeName }}</h5>
@@ -279,17 +329,23 @@ const partialMatchRecipes = computed(() => {
             <h3 class="mt-5">缺少某些食材的食譜</h3>
             <div class="row row-cols-1 row-cols-md-2 g-3">
                 <div v-for="(recipe, index) in partialMatchRecipes" :key="index" class="recipe-card col-12">
-                    <div class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
-                        style="height: 120px; width: 100%">
+                    <div
+                        class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
+                        style="height: 120px; width: 100%"
+                    >
                         <div class="image-container" style="width: 200px; height: 100%">
-                            <img :src="getRecipeImageUrl(recipe.photoName)" :alt="recipe.recipeName"
-                                class="recipe-image" style="
+                            <img
+                                :src="getRecipeImageUrl(recipe.photoName)"
+                                :alt="recipe.recipeName"
+                                class="recipe-image"
+                                style="
                                     width: 100%;
                                     height: 100%;
                                     object-fit: cover;
                                     border-top-left-radius: 0.75rem;
                                     border-bottom-left-radius: 0.75rem;
-                                " />
+                                "
+                            />
                         </div>
                         <div class="p-3 w-100 d-flex flex-column justify-content-start align-items-center">
                             <h5 class="mt-3 text-center">{{ recipe.recipeName }}</h5>
