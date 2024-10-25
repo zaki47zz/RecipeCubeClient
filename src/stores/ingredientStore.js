@@ -65,6 +65,7 @@ export const useIngredientStore = defineStore('ingredientStore', () => {
     };
 
     const getDefaultExpiryDate = (ingredientId) => {
+        fetchIngredients();
         const defaultExpiryDays = ingredientsDefaultExpireDay.value[ingredientId]; //抓預設天數
         const expiryDate = new Date(); //抓今天日期
         expiryDate.setHours(0, 0, 0, 0);

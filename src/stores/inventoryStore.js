@@ -9,7 +9,7 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
     const groupId = localStorage.getItem('GroupId');
     const InventoriesURL = `${inventoryApiURL}/${userId}`;
     const ingredientStore = useIngredientStore();
-    const { fetchIngredients, getDefaultExpiryDate } = ingredientStore;
+    const { getDefaultExpiryDate } = ingredientStore;
 
     const inventories = ref([]); //庫存放這
     const ingredientCategory = ref(new Set()); //分類放這，用Set避免重複
@@ -45,8 +45,9 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    UserId: userId,
+                    InventoryId: 0,
                     GroupId: groupId,
+                    UserId: userId,
                     IngredientId: ingredientId,
                     Quantity: quantity,
                     ExpiryDate: expiryDate,

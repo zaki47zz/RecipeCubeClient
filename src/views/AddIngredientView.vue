@@ -2,6 +2,14 @@
 import CategorySwiperComponent from '@/components/CategorySwiperComponent.vue';
 import Swal from 'sweetalert2';
 import { ref, watch } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useInventoryStore } from '@/stores/inventoryStore';
+import { usePantryStore } from '@/stores/pantryStore';
+
+const inventoryStore = useInventoryStore();
+const { postInventory } = inventoryStore;
+const pantryStore = usePantryStore();
+const { postPantry } = pantryStore;
 
 const selectedIngredients = ref([]); //用一個selectedIngredients當作子組建的同名物件供操作
 const addingInventories = ref([]); //定義要加入庫存的食材
@@ -28,7 +36,7 @@ watch(
 );
 
 ////提醒
-//公版
+//確認公版
 const check = (text, icon, buttonText, func, secondTitle) => {
     Swal.fire({
         title: '您確定嗎?',
@@ -73,19 +81,80 @@ const alertAddCheck = () => {
         '成功加入!'
     );
 };
+//提醒公版
+const swalAlert = (text) => {
+    Swal.fire({
+        title: '提醒您',
+        text: text,
+        icon: 'warning',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'OK',
+    });
+};
 ////提醒結束
 
 //換算表按鈕
 const showTable = () => {};
 
 //刪除食材按鈕
-const deleteInventory = () => {};
+const deleteInventory = (inventory) => {
+    const deletingIndex = selectedIngredients.value.findIndex((item) => item.ingredientId === inventory.ingredientId);
+    if (deletingIndex > -1) {
+        selectedIngredients.value = [
+            //為了讓watch讀到，需要直接賦值
+            ...selectedIngredients.value.slice(0, deletingIndex), //第一個到要刪的(不包含要刪的)
+            ...selectedIngredients.value.slice(deletingIndex + 1), //要刪的+1到最後
+        ];
+    }
+};
 
 //刪除全部食材按鈕
-const deleteInventories = () => {};
+const deleteInventories = () => {
+    selectedIngredients.value = [];
+};
 
 //加入食材按鈕
-const addInventories = () => {};
+const addInventories = async () => {
+    console.log(addingInventories.value);
+    for (let inventory of addingInventories.value) {
+        if (inventory.quantity === null) {
+            console.log('數量不可為空');
+            return;
+        }
+        if (inventory.quantity <= 0) {
+            console.log('數量不可小於或等於 0');
+            return;
+        }
+    }
+    // 如果所有庫存項目都是有效的，則繼續處理
+    const inventories = addingInventories.value.map((inventory) => ({
+        ingredientId: inventory.ingredientId,
+        quantity: inventory.quantity,
+        expiryDate: inventory.expiryDate,
+        visibility: inventory.visibility,
+    }));
+    console.log(inventories);
+    if (inventories.length === 0) {
+        swalAlert('請再次檢查您的輸入');
+        return;
+    }
+    const userId = localStorage.getItem('UserId');
+    const action = '增加';
+    try {
+        for (let inventory of inventories) {
+            const { ingredientId, quantity, expiryDate, visibility } = inventory;
+            // 執行 POST 請求
+            await postInventory(ingredientId, quantity, expiryDate, visibility);
+            await postPantry(userId, ingredientId, quantity, action);
+        }
+        // 清空已選食材
+        selectedIngredients.value = [];
+    } catch (error) {
+        console.error('新增庫存時出錯:', error);
+        swalAlert('發生錯誤，請稍後再試');
+    }
+};
 </script>
 
 <template>
@@ -106,16 +175,15 @@ const addInventories = () => {};
         </div>
     </section>
 
-    <div class="d-flex justify-content-center my-3">
-        <hr class="horizontal dark my-0 w-50" />
-    </div>
-
-    <section class="py-3 overflow-hidden">
+    <section v-if="selectedIngredients.length" class="py-3 overflow-hidden">
+        <div class="d-flex justify-content-center mb-5">
+            <hr class="horizontal dark my-0 w-50" />
+        </div>
         <div class="container-fluid post-it shadow">
             <div class="row">
                 <div class="col-md-12">
                     <div class="d-flex justify-content-between mt-2">
-                        <h4>您今天買了</h4>
+                        <h4>您今天買了 {{ selectedIngredients.length }} 樣食材</h4>
                         <p class="conversion-table badge bg-secondary" @click="showTable">
                             <i class="fa-solid fa-repeat"></i> 數量換算表
                         </p>
@@ -140,7 +208,12 @@ const addInventories = () => {};
                                 <th scope="row" class="text-dark">{{ index + 1 }}</th>
                                 <td class="text-dark">{{ inventory.ingredientName }}</td>
                                 <td class="text-dark">
-                                    <input type="text" class="form-control inline-control w-30" /> {{ inventory.unit }}
+                                    <input
+                                        v-model="inventory.quantity"
+                                        type="number"
+                                        class="form-control inline-control w-30"
+                                    />
+                                    {{ inventory.unit }}
                                 </td>
                                 <td class="text-dark">
                                     <select
@@ -159,7 +232,7 @@ const addInventories = () => {};
                                     />
                                 </td>
                                 <td class="text-dark">
-                                    <button class="delete-icon" @click="deleteInventory">
+                                    <button class="delete-icon" @click="deleteInventory(inventory)">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </td>
@@ -169,10 +242,7 @@ const addInventories = () => {};
                 </div>
             </div>
         </div>
-    </section>
-
-    <section class="pt-3">
-        <div class="container-fluid">
+        <div class="container-fluid pt-5">
             <div class="row justify-content-center">
                 <div class="col-lg-3">
                     <button class="btn bg-primary-subtle text-dark shadow fs-5 w-100" @click="alertAddCheck">
