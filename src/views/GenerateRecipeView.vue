@@ -41,6 +41,7 @@ const fetchRecipes = async () => {
             UserId: userId,
             SelectedIngredients: ingredientIds,
         };
+        console.log(requestBody);
         // 呼叫 API，傳入選擇的食材
         const response = await fetch(apiUrl, {
             method: 'POST',
