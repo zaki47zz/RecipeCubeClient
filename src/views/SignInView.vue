@@ -16,13 +16,13 @@ const send = async () => {
         body: JSON.stringify(user.value),
         headers: { 'Content-Type': 'application/json' }
     });
-    
+
     const datas = await response.json()
     if (response.ok) {
         const originaltoken = datas.token; //原始JWT
-        console.log("原始jwt",originaltoken);
+        console.log("原始jwt", originaltoken);
         const decoded = VueJwtDecode.decode(originaltoken);
-        console.log("解碼後jwt",decoded);
+        console.log("解碼後jwt", decoded);
         if (originaltoken) {
             localStorage.setItem('token', originaltoken); // 儲存 JWT
             /*  解析JWT 取得並將UserId寫入localStorage.getItem('UserId')
@@ -38,12 +38,19 @@ const send = async () => {
                     // console.log(username);
                     const UserData = {
                         UserId: decoded.certserialnumber,
+                        Email: decoded.email,
                         UserName: decodeURIComponent(escape(decoded.unique_name)),
+                        GroudId: decoded.groupsid,
                         Exp: decoded.exp,  // JWT 過期時間
                         // Email: decoded.email  
                     };
+
                     localStorage.setItem('UserId', UserData.UserId);
                     const UserId = localStorage.getItem('UserId')
+
+                    localStorage.setItem('GroudId', UserData.GroudId);
+                    const GroudId = localStorage.getItem('GroudId')
+
                     localStorage.setItem('UserData', JSON.stringify(UserData));
                     // console.log("已存入的使用者資料:", UserData);
                     // console.log("UserId:", UserId);
@@ -56,19 +63,19 @@ const send = async () => {
             alert(datas.message);
             return true; // 表示登入成功
         }
-    } 
+    }
     else {
         loginmessage.value = datas.message;; // 顯示錯誤訊息
         return false; // 表示登入失敗
-    }   
+    }
 }
 
 const handleLoginClick = async () => {
-  const loginSuccess = await send(); // 先發送請求
-  if (loginSuccess) {
-    // 只有在登入成功時才刷新頁面並跳轉到 "/"
-    location.assign('/');  // 刷新頁面並跳轉到 "/"
-  }
+    const loginSuccess = await send(); // 先發送請求
+    if (loginSuccess) {
+        // 只有在登入成功時才刷新頁面並跳轉到 "/"
+        location.assign('/');  // 刷新頁面並跳轉到 "/"
+    }
 };
 </script>
 
@@ -99,7 +106,8 @@ const handleLoginClick = async () => {
                     </div> -->
                     <!-- 好像不存在同設備頻繁登出登入的需求，後續再考慮實作此功能 -->
                     <div class="text-center">
-                        <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">登入</button> <!-- 按下按鈕後執行 handleLoginClick -->
+                        <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">登入</button>
+                        <!-- 按下按鈕後執行 handleLoginClick -->
                     </div>
                 </form>
             </div>
@@ -114,7 +122,8 @@ const handleLoginClick = async () => {
                     </RouterLink>
                     <br>
                     沒有收到驗證電子郵件嗎?
-                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'resetemailConfirmed' }">重新發送電子郵件確認
+                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'resetemailConfirmed' }">
+                        重新發送電子郵件確認
                     </RouterLink>
                 </p>
             </div>
