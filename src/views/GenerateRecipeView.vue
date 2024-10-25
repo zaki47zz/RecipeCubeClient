@@ -1,5 +1,4 @@
 <script setup>
-import WineWithBeef from '@/assets/img/ForComponent/WineWithBeef.jpg';
 import RecipeFilterComponent from '@/components/RecipeFilterComponent.vue';
 import { useCookingStore } from '@/stores/cookingStore';
 import { useInventoryStore } from '@/stores/inventoryStore';
@@ -14,6 +13,7 @@ const recipeFilterStore = useRecipeFilterStore();
 const { filters, selectedIngredients } = storeToRefs(recipeFilterStore);
 const { inventories } = storeToRefs(inventoryStore); // 使用庫存資料並引入 fetch 方法
 const { cookingInventories, isShowingString, isUsingInventory } = storeToRefs(cookingStore); //裡面的cookingInventories拿來產生食譜
+const { setCookingInventories } = cookingStore;
 const recipes = ref([]); // 用來儲存 API 返回的食譜
 // 設定 API 的 URL
 const BaseURL = import.meta.env.VITE_API_BASEURL;
@@ -83,27 +83,10 @@ onMounted(async () => {
     // 1. 先加載庫存
     await inventoryStore.fetchInventories();
     // 2. 從 localStorage 中取出保存的食材 ID
-    const storedIngredientIds = localStorage.getItem('selectedIngredients');
-    if (storedIngredientIds) {
-        const ingredientIds = JSON.parse(storedIngredientIds);
-
-        // 3. 恢復到 Pinia 中的 cookingInventories
-        // 確保庫存已經存在，然後過濾出符合選擇的食材
-        cookingInventories.value = inventories.value.filter((inventory) =>
-            ingredientIds.includes(inventory.ingredientId)
-        );
-    }
-    console.log('刷新後的食材:', { cookingInventories: cookingInventories.value });
-    // 4. 呼叫 API 獲取推薦的食譜
-    if (cookingInventories.value.length > 0) {
-        await fetchRecipes();
-        setupIntersectionObserver();
-    }
-});
-
-watch(cookingInventories, (newInventories) => {
-    const ingredientIds = newInventories.map((inventory) => inventory.ingredientId);
-    localStorage.setItem('selectedIngredients', JSON.stringify(ingredientIds));
+    setCookingInventories();
+    // 3. fetch推薦食譜 API
+    await fetchRecipes();
+    setupIntersectionObserver();
 });
 
 // 監聽篩選條件的變化
@@ -246,7 +229,7 @@ const partialMatchRecipes = computed(() => {
                 <div class="text-center">
                     <h4>
                         您輸入了
-                        <span v-if="true" class="text-info text-gradient">{{ cookingInventories.length }}</span>
+                        <span class="text-info text-gradient">{{ cookingInventories.length }}</span>
                         樣食材<span v-if="isShowingString">，並決定
                             <span v-if="isUsingInventory" class="text-info text-gradient">納入</span>
                             <span v-else class="text-info text-gradient">不納入</span>
@@ -294,7 +277,7 @@ const partialMatchRecipes = computed(() => {
     <!-- 搜尋 -->
     <section class="mt-1 px-2">
         <div class="container-fluid">
-            <div class="col-sm-10 offset-sm-2 offset-md-0 col-lg-12 d-lg-block">
+            <div class="col-sm-10 offset-sm-2 offset-md-0 col-lg-12 d-none d-lg-block">
                 <RecipeFilterComponent @filterChange="handleFilterChange" :showSearchField="false">
                 </RecipeFilterComponent>
             </div>
@@ -385,20 +368,14 @@ const partialMatchRecipes = computed(() => {
                                                 </div>
                                                 <!-- 顯示缺少的食材 -->
                                                 <p class="text-danger mt-2">
-                                                    缺少的食材:
-                                                    <span v-for="(ingredient, index) in recipe.missingIngredients"
-                                                        :key="index">
-                                                        {{ ingredient.ingredientName }} ({{ ingredient.missingQuantity
-                                                        }} {{ ingredient.unit }})
-                                                        <span v-if="index < recipe.missingIngredients.length - 1">,
-                                                        </span>
-                                                    </span>
+                                                    缺少的食材: {{ recipe.missingIngredients.join(',') }}
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            <p class="text-danger mt-2">缺少的食材: {{ recipe.missingIngredients.join(',') }}</p>
                         </div>
                     </div>
                 </div>
