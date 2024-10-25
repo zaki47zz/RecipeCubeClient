@@ -22,6 +22,10 @@ export const useCookingStore = defineStore('cookingStore', () => {
     //重設cookingInventories
     const resetCookingInventories = () => {
         cookingInventories.value = [];
+        localStorage.removeItem('cookingInventories');
+        // localStorage.removeItem('isShowingString');
+        // localStorage.removeItem('isUsingInventory');
+        leftInventories.value = [];
         isShowingString.value = true;
         isUsingInventory.value = false;
         isSet.value = false;
@@ -43,23 +47,24 @@ export const useCookingStore = defineStore('cookingStore', () => {
         cookingInventories.value.concat(inventories.value);
     });
 
-    //監控cookingInventories的值，如果有變就更新localStorage
     watch(
         () => cookingInventories.value,
-        async (newValue) => {
-            console.log('newValue');
-            if (newValue.length > 0) {
-                localStorage.setItem('cookingInventories', JSON.stringify(newValue));
-            }
+        (newValue) => {
+            localStorage.setItem('cookingInventories', JSON.stringify(newValue));
+            localStorage.setItem('isShowingString', JSON.stringify(isShowingString.value));
+            localStorage.setItem('isUsingInventory', JSON.stringify(isUsingInventory.value));
         },
         { deep: true }
     );
 
-    //從localStorage抓資料(防止刷新頁面)
     const setCookingInventories = () => {
-        console.log(JSON.parse(localStorage.getItem('cookingInventories')));
         const cookingInventoriesData = JSON.parse(localStorage.getItem('cookingInventories'));
+        const isShowingStringData = JSON.parse(localStorage.getItem('isShowingString'));
+        const isUsingInventoryData = JSON.parse(localStorage.getItem('isUsingInventory'));
+
         cookingInventories.value = cookingInventoriesData ? cookingInventoriesData : [];
+        isShowingString.value = isShowingStringData;
+        isUsingInventory.value = isUsingInventoryData;
     };
 
     //將剩餘食材加入庫存並更新紀錄

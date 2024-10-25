@@ -1,5 +1,4 @@
 <script setup>
-import WineWithBeef from '@/assets/img/ForComponent/WineWithBeef.jpg';
 import RecipeFilterComponent from '@/components/RecipeFilterComponent.vue';
 import { useCookingStore } from '@/stores/cookingStore';
 import { useInventoryStore } from '@/stores/inventoryStore';
@@ -14,6 +13,7 @@ const recipeFilterStore = useRecipeFilterStore();
 const { filters, selectedIngredients } = storeToRefs(recipeFilterStore);
 const { inventories } = storeToRefs(inventoryStore); // 使用庫存資料並引入 fetch 方法
 const { cookingInventories, isShowingString, isUsingInventory } = storeToRefs(cookingStore); //裡面的cookingInventories拿來產生食譜
+const { setCookingInventories } = cookingStore;
 const recipes = ref([]); // 用來儲存 API 返回的食譜
 // 設定 API 的 URL
 const BaseURL = import.meta.env.VITE_API_BASEURL;
@@ -71,27 +71,10 @@ onMounted(async () => {
     // 1. 先加載庫存
     await inventoryStore.fetchInventories();
     // 2. 從 localStorage 中取出保存的食材 ID
-    const storedIngredientIds = localStorage.getItem('selectedIngredients');
-    if (storedIngredientIds) {
-        const ingredientIds = JSON.parse(storedIngredientIds);
-
-        // 3. 恢復到 Pinia 中的 cookingInventories
-        // 確保庫存已經存在，然後過濾出符合選擇的食材
-        cookingInventories.value = inventories.value.filter((inventory) =>
-            ingredientIds.includes(inventory.ingredientId)
-        );
-    }
-    console.log('刷新後的食材:', { cookingInventories: cookingInventories.value });
-    // 4. 呼叫 API 獲取推薦的食譜
-    if (cookingInventories.value.length > 0) {
-        await fetchRecipes();
-        setupIntersectionObserver();
-    }
-});
-
-watch(cookingInventories, (newInventories) => {
-    const ingredientIds = newInventories.map((inventory) => inventory.ingredientId);
-    localStorage.setItem('selectedIngredients', JSON.stringify(ingredientIds));
+    setCookingInventories();
+    // 3. fetch推薦食譜 API
+    await fetchRecipes();
+    setupIntersectionObserver();
 });
 
 // 監聽篩選條件的變化
@@ -201,7 +184,7 @@ const partialMatchRecipes = computed(() => {
                 <div class="text-center">
                     <h4>
                         您輸入了
-                        <span v-if="true" class="text-info text-gradient">{{ cookingInventories.length }}</span>
+                        <span class="text-info text-gradient">{{ cookingInventories.length }}</span>
                         樣食材<span v-if="isShowingString"
                             >，並決定
                             <span v-if="isUsingInventory" class="text-info text-gradient">納入</span>
@@ -251,7 +234,7 @@ const partialMatchRecipes = computed(() => {
     <!-- 搜尋 -->
     <section class="mt-1 px-2">
         <div class="container-fluid">
-            <div class="col-sm-10 offset-sm-2 offset-md-0 col-lg-12 d-none d-lg-block">
+            <div class="col-12">
                 <RecipeFilterComponent @filterChange="handleFilterChange" :showSearchField="false">
                 </RecipeFilterComponent>
             </div>
@@ -260,119 +243,84 @@ const partialMatchRecipes = computed(() => {
     <!-- 產生的食譜 -->
     <section>
         <div class="container-fluid mt-3">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="banner-ad bootstrap-tabs product-tabs px-3 pb-3">
-                        <div class="row g-3 mt-2">
-                            <!-- 完全匹配的食譜 -->
-                            <div>
-                                <h3>符合所有食材的食譜</h3>
-                                <div class="row g-3 mt-2">
-                                    <div
-                                        v-for="(recipe, index) in completeMatchRecipes"
-                                        :key="index"
-                                        class="col-12 col-md-6 col-lg-4 recipe-card"
-                                    >
-                                        <div
-                                            class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
-                                            style="height: 120px"
-                                        >
-                                            <div
-                                                class="d-flex"
-                                                :style="{
-                                                    width: '200px',
-                                                    height: '100%',
-                                                    backgroundImage: `url(${getRecipeImageUrl(recipe.photoName)})`,
-                                                    backgroundSize: 'cover',
-                                                    backgroundPosition: 'center',
-                                                    borderTopLeftRadius: '0.75rem',
-                                                    borderBottomLeftRadius: '0.75rem',
-                                                }"
-                                            ></div>
-                                            <div
-                                                class="p-3 w-100 d-flex flex-column justify-content-start align-items-center"
-                                            >
-                                                <h5 class="mb-1 text-center">{{ recipe.recipeName }}</h5>
-                                                <div class="d-flex flex-wrap gap-2 mb-1 mx-auto">
-                                                    <!-- 第一行標籤 -->
-                                                    <div class="d-flex gap-2">
-                                                        <span class="text-secondary"
-                                                            >#{{ recipe.restriction ? '素' : '葷' }}</span
-                                                        >
-                                                        <span class="text-secondary"
-                                                            >#{{ recipe.westEast ? '西式' : '中式' }}</span
-                                                        >
-                                                    </div>
-                                                    <!-- 第二行標籤 -->
-                                                    <div class="d-flex gap-2">
-                                                        <span class="text-secondary">#{{ recipe.category }}</span>
-                                                        <span class="text-secondary"
-                                                            >#{{ recipe.detailedCategory }}</span
-                                                        >
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+            <!-- 完全匹配的食譜 -->
+            <h3>符合所有食材的食譜</h3>
+            <div class="row row-cols-1 row-cols-md-2 g-1">
+                <div
+                    v-for="(recipe, index) in completeMatchRecipes"
+                    :key="index"
+                    class="recipe-card col-12 col-md-6 p-0"
+                >
+                    <div
+                        class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
+                        style="height: 120px; width: 100%"
+                    >
+                        <div class="image-container" style="width: 200px; height: 100%">
+                            <img
+                                :src="getRecipeImageUrl(recipe.photoName)"
+                                :alt="recipe.recipeName"
+                                class="recipe-image"
+                                style="
+                                    width: 100%;
+                                    height: 100%;
+                                    object-fit: cover;
+                                    border-top-left-radius: 0.75rem;
+                                    border-bottom-left-radius: 0.75rem;
+                                "
+                            />
+                        </div>
+                        <div class="p-3 w-100 d-flex flex-column justify-content-start align-items-center">
+                            <h5 class="mt-3 text-center">{{ recipe.recipeName }}</h5>
+                            <div class="d-flex flex-wrap gap-2 mb-1 mx-auto">
+                                <div class="d-flex gap-2">
+                                    <span class="text-secondary">#{{ recipe.restriction ? '素' : '葷' }}</span>
+                                    <span class="text-secondary">#{{ recipe.westEast ? '西式' : '中式' }}</span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <span class="text-secondary">#{{ recipe.category }}</span>
+                                    <span class="text-secondary">#{{ recipe.detailedCategory }}</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                            <!-- 部分匹配的食譜 -->
-                            <div class="mt-5">
-                                <h3>缺少某些食材的食譜</h3>
-                                <div class="row g-3 mt-2">
-                                    <div
-                                        v-for="(recipe, index) in partialMatchRecipes"
-                                        :key="index"
-                                        class="col-12 col-md-6 col-lg-4 recipe-card"
-                                    >
-                                        <div
-                                            class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
-                                            style="height: 120px"
-                                        >
-                                            <div
-                                                class="d-flex"
-                                                :style="{
-                                                    width: '200px',
-                                                    height: '100%',
-                                                    backgroundImage: `url(${getRecipeImageUrl(recipe.photoName)})`,
-                                                    backgroundSize: 'cover',
-                                                    backgroundPosition: 'center',
-                                                    borderTopLeftRadius: '0.75rem',
-                                                    borderBottomLeftRadius: '0.75rem',
-                                                }"
-                                            ></div>
-                                            <div
-                                                class="p-3 w-100 d-flex flex-column justify-content-start align-items-center"
-                                            >
-                                                <h5 class="mb-1 text-center">{{ recipe.recipeName }}</h5>
-                                                <div class="d-flex flex-wrap gap-2 mb-1 mx-auto">
-                                                    <!-- 第一行標籤 -->
-                                                    <div class="d-flex gap-2">
-                                                        <span class="text-secondary"
-                                                            >#{{ recipe.restriction ? '素' : '葷' }}</span
-                                                        >
-                                                        <span class="text-secondary"
-                                                            >#{{ recipe.westEast ? '西式' : '中式' }}</span
-                                                        >
-                                                    </div>
-                                                    <!-- 第二行標籤 -->
-                                                    <div class="d-flex gap-2">
-                                                        <span class="text-secondary">#{{ recipe.category }}</span>
-                                                        <span class="text-secondary"
-                                                            >#{{ recipe.detailedCategory }}</span
-                                                        >
-                                                    </div>
-                                                </div>
-                                                <!-- 顯示缺少的食材 -->
-                                                <p class="text-danger mt-2">
-                                                    缺少的食材: {{ recipe.missingIngredients.join(',') }}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
+            <!-- 部分匹配的食譜 -->
+            <h3 class="mt-5">缺少某些食材的食譜</h3>
+            <div class="row row-cols-1 row-cols-md-2 g-3">
+                <div v-for="(recipe, index) in partialMatchRecipes" :key="index" class="recipe-card col-12">
+                    <div
+                        class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
+                        style="height: 120px; width: 100%"
+                    >
+                        <div class="image-container" style="width: 200px; height: 100%">
+                            <img
+                                :src="getRecipeImageUrl(recipe.photoName)"
+                                :alt="recipe.recipeName"
+                                class="recipe-image"
+                                style="
+                                    width: 100%;
+                                    height: 100%;
+                                    object-fit: cover;
+                                    border-top-left-radius: 0.75rem;
+                                    border-bottom-left-radius: 0.75rem;
+                                "
+                            />
+                        </div>
+                        <div class="p-3 w-100 d-flex flex-column justify-content-start align-items-center">
+                            <h5 class="mt-3 text-center">{{ recipe.recipeName }}</h5>
+                            <div class="d-flex flex-wrap gap-2 mb-1 mx-auto">
+                                <div class="d-flex gap-2">
+                                    <span class="text-secondary">#{{ recipe.restriction ? '素' : '葷' }}</span>
+                                    <span class="text-secondary">#{{ recipe.westEast ? '西式' : '中式' }}</span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <span class="text-secondary">#{{ recipe.category }}</span>
+                                    <span class="text-secondary">#{{ recipe.detailedCategory }}</span>
                                 </div>
                             </div>
+                            <p class="text-danger mt-2">缺少的食材: {{ recipe.missingIngredients.join(',') }}</p>
                         </div>
                     </div>
                 </div>

@@ -1,44 +1,50 @@
 <template>
-    <div class="filter-container">
-        <div class="row g-3 py-1 px-3 mt-3 bg-warning-subtle rounded-4 shadow d-flex justify-content-between">
+    <div class="container-fluid filter-container">
+        <div class="row pb-2 px-3 my-3 d-flex bg-warning-subtle rounded-4 shadow justify-content-between">
             <!-- 分類欄 -->
             <div class="col-md-2">
-                <p class="fw-bold">分類 CATEGORY</p>
+                <p class="fw-bold mt-3 mb-0">分類 CATEGORY</p>
             </div>
-            <div class="col-md-2 my-auto">
+            <div class="col-md-2 mt-2">
                 <select class="form-select" v-model="filters.restriction">
                     <option value="">選擇葷素食</option>
                     <option :value="true">素食</option>
                     <option :value="false">葷食</option>
                 </select>
             </div>
-            <div class="col-md-2 my-auto">
+            <div class="col-md-2 mt-2">
                 <select class="form-select" v-model="filters.style">
                     <option value="">選擇中西式</option>
                     <option :value="false">中式</option>
                     <option :value="true">西式</option>
                 </select>
             </div>
-            <div class="col-md-3 my-auto">
+            <div class="col-md-3 mt-2">
                 <select class="form-select" v-model="filters.category">
                     <option value="">選擇主類別</option>
-                    <option v-for="(subcategories, category) in recipeFilterStore.categoryOptions" :key="category"
-                        :value="category">
+                    <option
+                        v-for="(subcategories, category) in recipeFilterStore.categoryOptions"
+                        :key="category"
+                        :value="category"
+                    >
                         {{ category }}
                     </option>
                 </select>
             </div>
-            <div class="col-md-3 my-auto">
+            <div class="col-md-3 mt-2">
                 <select class="form-select" v-model="filters.subcategory">
                     <option value="">選擇細部類別</option>
-                    <option v-for="subcategory in recipeFilterStore.subcategoryOptions" :key="subcategory"
-                        :value="subcategory">
+                    <option
+                        v-for="subcategory in recipeFilterStore.subcategoryOptions"
+                        :key="subcategory"
+                        :value="subcategory"
+                    >
                         {{ subcategory }}
                     </option>
                 </select>
             </div>
             <!-- 搜尋食譜名稱或食材欄位 -->
-            <div v-if="showSearchField" class="col-md-3 mx-auto my-3">
+            <div v-if="showSearchField" class="col-md-3 mx-auto mt-2">
                 <select class="form-select" v-model="filters.searchType">
                     <option value="">選擇搜尋食譜或食材</option>
                     <option value="recipeName">搜尋食譜名稱</option>
@@ -46,21 +52,33 @@
                 </select>
             </div>
 
-            <div v-if="showSearchField && filters.searchType === 'recipeName'" class="col-md-9 mx-auto my-3">
-                <input type="text" v-model="filters.searchWord" class="form-control w-100 rounded-3"
-                    placeholder="輸入食譜名稱" />
+            <div v-if="showSearchField && filters.searchType === 'recipeName'" class="col-md-9 mx-auto mt-2">
+                <input
+                    type="text"
+                    v-model="filters.searchWord"
+                    class="form-control w-100 rounded-3"
+                    placeholder="輸入食譜名稱"
+                />
             </div>
 
-            <div v-if="showSearchField && filters.searchType === 'ingredient'" class="col-md-9 mx-auto my-3">
-                <multiselect v-model="selectedIngredients" :options="groupedIngredients" placeholder="搜尋或選擇食材 (可以多選)"
-                    :multiple="true" :close-on-select="false" group-label="category" group-values="ingredients"
-                    :group-select="false" track-by="ingredientId" :custom-label="customLabel">
+            <div v-if="showSearchField && filters.searchType === 'ingredient'" class="col-md-9 mx-auto mt-2">
+                <multiselect
+                    v-model="selectedIngredients"
+                    :options="groupedIngredients"
+                    placeholder="搜尋或選擇食材 (可以多選)"
+                    :multiple="true"
+                    :close-on-select="false"
+                    group-label="category"
+                    group-values="ingredients"
+                    :group-select="false"
+                    track-by="ingredientId"
+                    :custom-label="customLabel"
+                >
                     <span slot="noResult">找不到該食材</span>
                 </multiselect>
             </div>
         </div>
     </div>
-
 </template>
 
 <script setup>
@@ -101,7 +119,6 @@ function onFiltersChange() {
         selectedIngredients: selectedIngredients.value,
     });
 }
-
 
 // Watch `filters` 和 `selectedIngredients`，當它們變化時觸發 `onFiltersChange`
 watch(filters, onFiltersChange, { deep: true });
