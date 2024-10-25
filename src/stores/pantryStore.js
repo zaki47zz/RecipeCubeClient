@@ -5,6 +5,7 @@ export const usePantryStore = defineStore('pantryStore', () => {
     const BaseURL = import.meta.env.VITE_API_BASEURL;
     const pantryApiURL = `${BaseURL}/PantryManagements`;
     const userId = localStorage.getItem('UserId');
+    const groupId = localStorage.getItem('GroupId');
     const pantriesURL = `${pantryApiURL}/${userId}`;
 
     const pantries = ref([]);
@@ -23,7 +24,7 @@ export const usePantryStore = defineStore('pantryStore', () => {
         }
     };
 
-    const postPantry = async (inventory, quantity, action) => {
+    const postPantry = async (userId, ingredientId, quantity, action) => {
         try {
             const response = await fetch(pantryApiURL, {
                 method: 'POST',
@@ -32,9 +33,9 @@ export const usePantryStore = defineStore('pantryStore', () => {
                 },
                 body: JSON.stringify({
                     PantryId: 0,
-                    UserId: inventory.userId,
-                    GroupId: inventory.groupId,
-                    IngredientId: inventory.ingredientId,
+                    UserId: userId,
+                    GroupId: groupId,
+                    IngredientId: ingredientId,
                     Quantity: quantity,
                     action: action,
                     time: new Date(),

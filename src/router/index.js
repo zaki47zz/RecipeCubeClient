@@ -16,6 +16,9 @@ import CartView from '@/views/CartView.vue';
 import StoreProductDetailView from '@/views/StoreProductDetailView.vue';
 import GenerateRecipeView from '@/views/GenerateRecipeView.vue';
 import ResetPassword from '@/views/ResetPassword.vue';
+import ResetEmailConfirmed from '@/views/ResetEmailConfirmed.vue';
+import ResetPasswordSet from '@/views/ResetPasswordSet.vue';
+
 
 import { createRouter, createWebHistory } from 'vue-router';
 import OrderView from '@/views/OrderView.vue';
@@ -55,26 +58,38 @@ const router = createRouter({
         },
         {
             path: '/user',
-            name: 'User',
+            name: 'user',
             component: UserView,
         },
         {
             // 登入
-            path: '/sign-in',
-            name: 'SignIn',
+            path: '/signin',
+            name: 'signin',
             component: SignIn,
         },
         {
             // 註冊
-            path: '/sign-up',
-            name: 'SignUp',
+            path: '/signup',
+            name: 'signup',
             component: SignUp,
         },
         {
-            // 忘記密碼
-            path: '/resetPassword',
-            name: 'resetPassword',
+            // 忘記密碼-1(生成清空密碼導向輸入新密碼頁面連結)
+            path: '/resetpassword',
+            name: 'resetpassword',
             component: ResetPassword,
+        },
+        {
+            // 忘記密碼-2(驗證token才能訪問)
+            path: '/resetpasswordset',
+            name: 'resetpasswordset',
+            component: ResetPasswordSet,
+        },
+        {
+            // 重新發送電子郵件確認
+            path: '/resetemailConfirmed',
+            name: 'resetemailConfirmed',
+            component: ResetEmailConfirmed,
         },
         {
             path: '/aboutus',

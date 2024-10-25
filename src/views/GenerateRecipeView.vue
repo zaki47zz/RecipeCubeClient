@@ -67,16 +67,7 @@ const fetchRecipes = async () => {
         // 解析返回的結果
         const data = await response.json();
         recipes.value = data; // 將返回的食譜儲存在 `recipes` 中
-        // 遍歷推薦的食譜
-        recipes.value.forEach(recipe => {
-            if (!recipe.isEnoughIngredients) {
-                recipe.missingIngredients.forEach(ingredient => {
-                    console.log(`缺少的食材: ${ingredient.IngredientName}, 缺少數量: ${ingredient.MissingQuantity}${ingredient.Unit}`);
-                });
-            }
-        });
-        console.log("推薦食譜:", recipes.value)
-
+        console.log('推薦食譜:', recipes.value);
     } catch (error) {
         console.error('錯誤:', error);
     }
@@ -88,7 +79,7 @@ onMounted(async () => {
         isShowingString: isShowingString.value,
         isUsingInventory: isUsingInventory.value,
     });
-    console.log('食材:', { cookingInventories: cookingInventories.value })
+    console.log('食材:', { cookingInventories: cookingInventories.value });
     // 1. 先加載庫存
     await inventoryStore.fetchInventories();
     // 2. 從 localStorage 中取出保存的食材 ID
@@ -98,7 +89,9 @@ onMounted(async () => {
 
         // 3. 恢復到 Pinia 中的 cookingInventories
         // 確保庫存已經存在，然後過濾出符合選擇的食材
-        cookingInventories.value = inventories.value.filter(inventory => ingredientIds.includes(inventory.ingredientId));
+        cookingInventories.value = inventories.value.filter((inventory) =>
+            ingredientIds.includes(inventory.ingredientId)
+        );
     }
     console.log('刷新後的食材:', { cookingInventories: cookingInventories.value });
     // 4. 呼叫 API 獲取推薦的食譜
@@ -106,8 +99,6 @@ onMounted(async () => {
         await fetchRecipes();
         setupIntersectionObserver();
     }
-
-
 });
 
 watch(cookingInventories, (newInventories) => {
@@ -130,7 +121,6 @@ watch(recipes, (newRecipes) => {
     }
 });
 
-
 const setupIntersectionObserver = () => {
     nextTick(() => {
         const cards = document.querySelectorAll('.recipe-card');
@@ -142,7 +132,7 @@ const setupIntersectionObserver = () => {
         };
 
         const observerCallback = (entries, observer) => {
-            entries.forEach(entry => {
+            entries.forEach((entry) => {
                 if (entry.isIntersecting) {
                     // console.log('卡片進入視窗:', entry.target);
                     entry.target.classList.add('fade-in');
@@ -153,7 +143,7 @@ const setupIntersectionObserver = () => {
 
         const observer = new IntersectionObserver(observerCallback, observerOptions);
 
-        cards.forEach(card => {
+        cards.forEach((card) => {
             observer.observe(card);
         });
     });
@@ -162,7 +152,7 @@ const setupIntersectionObserver = () => {
 
 //#region 分類 完全符合/不符合食譜
 const filteredRecipes = computed(() => {
-    return recipes.value.filter(recipe => {
+    return recipes.value.filter((recipe) => {
         // 根據篩選條件來過濾食譜
         const categoryMatch = !filters.value.category || recipe.category === filters.value.category;
         const subcategoryMatch = !filters.value.subcategory || recipe.detailedCategory === filters.value.subcategory;
@@ -175,8 +165,8 @@ const filteredRecipes = computed(() => {
 });
 // 1. 定義分類的計算屬性
 const completeMatchRecipes = computed(() => {
-    const completeRecipes = filteredRecipes.value.filter(recipe => {
-        return recipe.ingredientIds.every(id => cookingInventories.value.some(inv => inv.ingredientId === id));
+    const completeRecipes = filteredRecipes.value.filter((recipe) => {
+        return recipe.ingredientIds.every((id) => cookingInventories.value.some((inv) => inv.ingredientId === id));
     });
     console.log('完全匹配的食譜:', completeRecipes);
     return completeRecipes;
@@ -381,7 +371,6 @@ const partialMatchRecipes = computed(() => {
                                                 <div class="d-flex flex-wrap gap-2 mb-1 mx-auto">
                                                     <!-- 第一行標籤 -->
                                                     <div class="d-flex gap-2">
-
                                                         <span class="text-secondary">#{{ recipe.restriction ? '素' : '葷'
                                                             }}</span>
                                                         <span class="text-secondary">#{{ recipe.westEast ? '西式' : '中式'

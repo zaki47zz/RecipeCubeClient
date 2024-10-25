@@ -48,7 +48,24 @@ export const useIngredientStore = defineStore('ingredientStore', () => {
         }
     };
 
+    const postIngredient = async (formData) => {
+        try {
+            const response = await fetch(ingredientApiURL, {
+                method: 'POST',
+                body: formData,
+            });
+            if (!response.ok) {
+                throw new Error('新增失敗，網路連線有異常');
+            }
+            await fetchIngredients();
+        } catch (error) {
+            console.error('新增食材失敗:', error);
+            throw error;
+        }
+    };
+
     const getDefaultExpiryDate = (ingredientId) => {
+        fetchIngredients();
         const defaultExpiryDays = ingredientsDefaultExpireDay.value[ingredientId]; //抓預設天數
         const expiryDate = new Date(); //抓今天日期
         expiryDate.setHours(0, 0, 0, 0);
@@ -56,5 +73,12 @@ export const useIngredientStore = defineStore('ingredientStore', () => {
         return expiryDate; //回傳預設日期
     };
 
-    return { ingredients, groupedIngredients, ingredientCategory, fetchIngredients, getDefaultExpiryDate };
+    return {
+        ingredients,
+        groupedIngredients,
+        ingredientCategory,
+        fetchIngredients,
+        postIngredient,
+        getDefaultExpiryDate,
+    };
 });

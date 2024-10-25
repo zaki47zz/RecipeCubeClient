@@ -36,7 +36,7 @@ const send = async () => {
             alert(data.Message); // 顯示錯誤訊息
         } else {
             const data = await response.json();
-            alert(data.Message); // 顯示錯誤訊息
+            alert("email已被使用"); // 顯示錯誤訊息
         }
     }
 };
@@ -76,7 +76,6 @@ const send = async () => {
             </div>
         </form>
     </template>
-
     <template v-else>
         <h2>註冊成功，請確認信箱</h2>
     </template>

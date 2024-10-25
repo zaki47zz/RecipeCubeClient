@@ -210,8 +210,9 @@ const saveEditedInventory = async () => {
     // 紀錄
     const change = editInventory.value.quantity - previousQuantity;
     if (change !== 0) {
+        const { userId, ingredientId } = editInventory.value;
         const action = change > 0 ? '增加' : '減少'; //判斷action
-        await postPantry(editInventory.value, Math.abs(change), action);
+        await postPantry(userId, ingredientId, Math.abs(change), action);
     }
     isInventoryModalVisible.value = false;
     isLoading.value = false;
@@ -223,8 +224,9 @@ const saveEditedInventory = async () => {
 const deleteCard = async (inventory) => {
     isLoading.value = true;
     await deleteInventory(inventory.inventoryId);
+    const { userId, ingredientId, quantity } = inventory;
     const action = '減少';
-    await postPantry(inventory, quantity, action);
+    await postPantry(userId, ingredientId, quantity, action);
     isLoading.value = false;
 };
 //群體刪除功能
