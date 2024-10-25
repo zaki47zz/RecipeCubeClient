@@ -240,54 +240,30 @@ watch(totalPages, (newTotalPages) => {
 
                             <!-- 分頁導航結束 -->
                         </div>
-                        <div class="tab-content" id="nav-tabContent">
-                            <div
-                                class="tab-pane fade show active"
-                                id="nav-all"
-                                role="tabpanel"
-                                aria-labelledby="nav-all-tab"
-                            >
-                                <div class="row g-3 mt-2">
-                                    <div
-                                        class="col-12 col-md-6"
-                                        v-for="recipe in paginatedRecipes"
-                                        :key="recipe.recipeId"
-                                    >
-                                        <div
-                                            class="card shadow-sm rounded-3 d-flex flex-row align-items-center"
-                                            style="height: 150px"
-                                            @click="recipeStore.selectRecipe(recipe)"
-                                        >
-                                            <div
-                                                class="d-flex"
-                                                :style="{
-                                                    width: '50%',
-                                                    height: '100%',
-                                                    backgroundImage: `url(${
-                                                        getRecipeImageUrl(recipe.photoName) || 'default_image.jpg'
-                                                    })`,
-                                                    backgroundSize: 'cover',
-                                                    backgroundPosition: 'center',
-                                                    borderTopLeftRadius: '0.75rem',
-                                                    borderBottomLeftRadius: '0.75rem',
-                                                }"
-                                            ></div>
 
-                                            <!-- 右邊文字和標籤區 -->
-                                            <div
-                                                class="p-3 w-100 d-flex flex-column justify-content-center align-items-center"
-                                            >
-                                                <h5 class="mb-3">{{ recipe.recipeName }}</h5>
-                                                <div class="d-flex gap-2">
-                                                    <span class="badge bg-secondary" v-if="recipe.restriction"
-                                                        >素食</span
-                                                    >
-                                                    <span class="badge bg-secondary" v-else>葷食</span>
-                                                    <span class="badge bg-secondary" v-if="recipe.westEast">西式</span>
-                                                    <span class="badge bg-secondary" v-else>中式</span>
-                                                    <span class="badge bg-secondary">{{ recipe.category }}</span>
-                                                </div>
-                                            </div>
+                        <div class="mt-1 row row-cols-1 row-cols-md-2 g-3">
+                            <div v-for="recipe in paginatedRecipes" :key="recipe.recipeId">
+                                <div
+                                    class="card recipe-card shadow-sm rounded-3 d-flex flex-row align-items-center"
+                                    @click="recipeStore.selectRecipe(recipe)"
+                                >
+                                    <div class="image-container">
+                                        <img
+                                            :src="getRecipeImageUrl(recipe.photoName) || 'default_image.jpg'"
+                                            :alt="recipe.recipeName"
+                                            class="recipe-image"
+                                        />
+                                    </div>
+                                    <div
+                                        class="recipe-content p-3 w-100 d-flex flex-column justify-content-center align-items-center"
+                                    >
+                                        <h5 class="mb-3">{{ recipe.recipeName }}</h5>
+                                        <div class="d-flex gap-2">
+                                            <span class="badge bg-secondary" v-if="recipe.restriction">素食</span>
+                                            <span class="badge bg-secondary" v-else>葷食</span>
+                                            <span class="badge bg-secondary" v-if="recipe.westEast">西式</span>
+                                            <span class="badge bg-secondary" v-else>中式</span>
+                                            <span class="badge bg-secondary">{{ recipe.category }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -346,8 +322,6 @@ watch(totalPages, (newTotalPages) => {
     background: url('@/assets/img/ForBackground/ad-bg-pattern.png') no-repeat center / cover;
 }
 
-
-
 .custom-scroll-container {
     max-height: 300px;
     overflow: hidden;
@@ -357,5 +331,30 @@ watch(totalPages, (newTotalPages) => {
     max-height: 100%;
     padding-right: 15px;
     /* Adjust as needed to avoid content overflow */
+}
+
+.recipe-card {
+    height: 140px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.recipe-card:hover {
+    transform: scale(1.02) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+}
+
+.image-container {
+    width: 200px;
+    height: 100%;
+}
+
+.recipe-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-top-left-radius: 0.75rem;
+    border-bottom-left-radius: 0.75rem;
 }
 </style>
