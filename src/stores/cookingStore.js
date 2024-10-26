@@ -19,16 +19,26 @@ export const useCookingStore = defineStore('cookingStore', () => {
     //決定是否要產生套餐的Flag(在隨買隨煮設定)
     const isSet = ref(false);
 
+    //判斷是不是已經加入過庫存食材了
+    const hasAddedInventories = ref(false);
+
     //重設cookingInventories
     const resetCookingInventories = () => {
         cookingInventories.value = [];
-        localStorage.removeItem('cookingInventories');
-        // localStorage.removeItem('isShowingString');
-        // localStorage.removeItem('isUsingInventory');
         leftInventories.value = [];
         isShowingString.value = true;
         isUsingInventory.value = false;
+        hasAddedInventories.value = false;
         isSet.value = false;
+
+        const keysToRemove = [
+            'cookingInventories',
+            'isShowingString',
+            'isUsingInventory',
+            'isSet',
+            'hasAddedInventories',
+        ];
+        keysToRemove.forEach((key) => localStorage.removeItem(key));
     };
 
     ////動態操作
@@ -41,30 +51,42 @@ export const useCookingStore = defineStore('cookingStore', () => {
     const { fetchInventories } = inventoryStore;
 
     watch(isUsingInventory, async (newValue) => {
-        if (newValue === true) {
-            await fetchInventories();
+        if (newValue === true && !hasAddedInventories.value) {
+            try {
+                await fetchInventories();
+                console.log('庫存食材清單:', inventories.value);
+                cookingInventories.value = [...cookingInventories.value, ...inventories.value];
+                localStorage.setItem('cookingInventories', JSON.stringify(cookingInventories.value));
+                hasAddedInventories.value = true;
+            } catch (error) {
+                console.error('出現問題:', error);
+            }
+        } else if (newValue === false) {
+            // 當關閉使用庫存時，重置標記
+            hasAddedInventories.value = false;
         }
-        cookingInventories.value.concat(inventories.value);
+        localStorage.setItem('hasAddedInventories', JSON.stringify(hasAddedInventories.value));
     });
 
-    watch(
-        () => cookingInventories.value,
-        (newValue) => {
-            localStorage.setItem('cookingInventories', JSON.stringify(newValue));
-            localStorage.setItem('isShowingString', JSON.stringify(isShowingString.value));
-            localStorage.setItem('isUsingInventory', JSON.stringify(isUsingInventory.value));
-        },
-        { deep: true }
-    );
-
+    //用localStorage重置
     const setCookingInventories = () => {
-        const cookingInventoriesData = JSON.parse(localStorage.getItem('cookingInventories'));
-        const isShowingStringData = JSON.parse(localStorage.getItem('isShowingString'));
-        const isUsingInventoryData = JSON.parse(localStorage.getItem('isUsingInventory'));
-
-        cookingInventories.value = cookingInventoriesData ? cookingInventoriesData : [];
-        isShowingString.value = isShowingStringData;
-        isUsingInventory.value = isUsingInventoryData;
+        try {
+            const storedData = {
+                cookingInventories: JSON.parse(localStorage.getItem('cookingInventories')),
+                isShowingString: JSON.parse(localStorage.getItem('isShowingString')),
+                isUsingInventory: JSON.parse(localStorage.getItem('isUsingInventory')),
+                isSet: JSON.parse(localStorage.getItem('isSet')),
+                hasAddedInventories: JSON.parse(localStorage.getItem('hasAddedInventories')),
+            };
+            if (storedData.cookingInventories) cookingInventories.value = storedData.cookingInventories;
+            if (storedData.isShowingString !== null) isShowingString.value = storedData.isShowingString;
+            if (storedData.isSet !== null) isSet.value = storedData.isSet;
+            if (storedData.hasAddedInventories !== null) hasAddedInventories.value = storedData.hasAddedInventories;
+            if (storedData.isUsingInventory !== null) isUsingInventory.value = storedData.isUsingInventory;
+        } catch (error) {
+            console.error('Error setting cooking inventories:', error);
+            resetCookingInventories();
+        }
     };
 
     //將剩餘食材加入庫存並更新紀錄

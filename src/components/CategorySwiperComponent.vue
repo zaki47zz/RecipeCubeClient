@@ -446,7 +446,7 @@ const handlePhotoUpload = (event) => {
     box-shadow: 0px 5px 22px rgba(0, 0, 0, 0.04);
     border-radius: 16px;
     text-align: center;
-    padding: 20px;
+    padding: 10px;
     margin: 20px 0;
     transition: box-shadow 0.3s ease-out, transform 0.3s ease-out;
     display: flex;

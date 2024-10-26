@@ -82,6 +82,7 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
     const putInventory = async (inventory) => {
         try {
             const putURL = `${inventoryApiURL}/${inventory.inventoryId}`;
+            console.log(putURL);
             const response = await fetch(putURL, {
                 method: 'PUT',
                 headers: {

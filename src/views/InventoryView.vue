@@ -203,10 +203,6 @@ const saveEditedInventory = async () => {
         // 修改
         await putInventory(editInventory.value);
     }
-    // 如果新數量與原數量相同，則無需紀錄
-    if (editInventory.value.quantity === previousQuantity) {
-        return;
-    }
     // 紀錄
     const change = editInventory.value.quantity - previousQuantity;
     if (change !== 0) {
@@ -269,12 +265,13 @@ const showPantryDialog = async () => {
 
 //將所選食材送至產生食譜介面
 const exportInventories = () => {
-    console.log(selectedInventories.value);
     if (!selectedInventories.value.length) {
         return;
     }
     isShowingString.value = false;
     cookingInventories.value = [...selectedInventories.value];
+    localStorage.setItem('cookingInventories', JSON.stringify(cookingInventories.value));
+    localStorage.setItem('isShowingString', JSON.stringify(isShowingString.value));
 };
 </script>
 

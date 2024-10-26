@@ -41,7 +41,7 @@ watchEffect(async () => {
         title="單位與克數換算表"
         width="30%"
         center
-        :class="color === 'primary' ? 'bg-primary-subtle' : 'bg-warning-subtle'"
+        :class="color === 'primary' ? 'bg-primary-subtle' : 'bg-danger-subtle'"
     >
         <ul v-if="ingredientGram.length > 0">
             <li v-for="ingredient in ingredientGram" :key="ingredient.ingredientId" class="fs-5 ps-3 my-2">
