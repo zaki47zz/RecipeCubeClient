@@ -13,20 +13,20 @@ const props = defineProps({
     addingInventoriesList: Array,
 });
 
+//利用watchEffect監視addingInventoriesList，當有新值傳來就觸發以下函式
 watchEffect(async () => {
-    console.log('addingInventoriesList:', props.addingInventoriesList);
-
+    //如果props.addingInventoriesList存在且有值
     if (props.addingInventoriesList && props.addingInventoriesList.length > 0) {
+        //利用Promise物件的all函式可以包裝多個非同步函式並透過多執行緒加快速度
         const results = await Promise.all(
+            //map遍歷陣列，將每個inventory.ingredientId傳入getUnitGram函式，得到每個ingredient的克數
             props.addingInventoriesList.map(async (inventory) => {
-                console.log('Processing inventory:', inventory);
                 const result = await getUnitGram(inventory.ingredientId);
-                console.log('getUnitGram result:', result);
                 return result;
             })
         );
+        //過濾掉undefined(即ingredientId對不到，或單位為克的食材)
         ingredientGram.value = results.filter((item) => item);
-        console.log('Final ingredientGram:', ingredientGram.value);
     }
 });
 </script>
@@ -39,20 +39,16 @@ watchEffect(async () => {
     <el-dialog
         v-model="isModalVisible"
         title="單位與克數換算表"
-        width="50%"
+        width="30%"
         center
         :class="color === 'primary' ? 'bg-primary-subtle' : 'bg-warning-subtle'"
     >
-        <div class="d-flex justify-content-center align-items-center bg-white rounded-4">
-            <ul v-if="ingredientGram.length > 0">
-                <li v-for="ingredient in ingredientGram" :key="ingredient.ingredientId" class="fs-5 ps-3 my-2">
-                    <strong
-                        >{{ ingredient.ingredientName }} 每{{ ingredient.unit }}大約 {{ ingredient.gram }} 克</strong
-                    >
-                </li>
-            </ul>
-            <p v-else>暫無換算資料</p>
-        </div>
+        <ul v-if="ingredientGram.length > 0">
+            <li v-for="ingredient in ingredientGram" :key="ingredient.ingredientId" class="fs-5 ps-3 my-2">
+                <strong>{{ ingredient.ingredientName }} 每{{ ingredient.unit }}大約 {{ ingredient.gram }} 克</strong>
+            </li>
+        </ul>
+        <p v-else>暫無換算資料</p>
         <template #footer>
             <span class="dialog-footer d-flex justify-content-center">
                 <el-button type="danger" @click="isModalVisible = false">關閉</el-button>

@@ -280,7 +280,7 @@ const addInventories = async () => {
 
 .post-it {
     background: #fffaa2;
-    padding: 1% 3% 3%;
+    padding: 0.5% 2% 2%;
     text-align: center;
 }
 

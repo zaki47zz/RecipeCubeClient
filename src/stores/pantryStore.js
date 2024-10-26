@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
+import { useIngredientStore } from './ingredientStore';
 
 export const usePantryStore = defineStore('pantryStore', () => {
     const BaseURL = import.meta.env.VITE_API_BASEURL;
@@ -7,6 +8,8 @@ export const usePantryStore = defineStore('pantryStore', () => {
     const userId = localStorage.getItem('UserId');
     const groupId = localStorage.getItem('GroupId');
     const pantriesURL = `${pantryApiURL}/${userId}`;
+    const ingredientStore = useIngredientStore();
+    const { fetchIngredient } = ingredientStore;
 
     const pantries = ref([]);
 
@@ -51,8 +54,39 @@ export const usePantryStore = defineStore('pantryStore', () => {
         }
     };
 
-    const getFrequentlyUsedIngredients = () => {
-        //找出歷史紀錄裡出現過次數超過總次數10%以上的食材
+    const getFrequentlyUsedIngredients = async () => {
+        //先抓資料
+        await fetchPantries();
+
+        //生出每個食材的使用次數表
+        const ingredientCount = pantries.value.reduce((usedCount, pantry) => {
+            //遍歷每個item生成使用次數表物件，利用key概念，避免重複的同時生成項次
+            usedCount[pantry.ingredientId] = (usedCount[pantry.ingredientId] || 0) + 1;
+            //回傳次數表
+            return usedCount;
+        }, {});
+
+        //抓使用總次數
+        const totalCount = pantries.value.length;
+
+        //把次數少於總次數20%以下的食材過濾掉
+        //先用key()取出所有key，filter過篩，map輸出Id陣列
+        const frequentlyUsedIngredientId = Object.keys(ingredientCount)
+            .filter((ingredientId) => ingredientCount[ingredientId] / totalCount > 0.1)
+            .map((ingredientId) => ingredientId);
+
+        let frequentlyUsedIngredients;
+
+        if (frequentlyUsedIngredientId.length === 0) {
+            frequentlyUsedIngredients = [];
+        } else {
+            frequentlyUsedIngredients = await Promise.all(
+                frequentlyUsedIngredientId.map((ingredientId) => fetchIngredient(ingredientId))
+            );
+        }
+
+        //回傳結果
+        return frequentlyUsedIngredients;
     };
 
     return { pantries, fetchPantries, postPantry, getFrequentlyUsedIngredients };

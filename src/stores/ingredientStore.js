@@ -48,6 +48,20 @@ export const useIngredientStore = defineStore('ingredientStore', () => {
         }
     };
 
+    const fetchIngredient = async (ingredientId) => {
+        try {
+            const response = await fetch(`${ingredientApiURL}/${ingredientId}`);
+            if (!response.ok) {
+                throw new Error('網路連線有異常');
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('獲取食材資料失敗:', error);
+            throw error;
+        }
+    };
+
     const postIngredient = async (formData) => {
         try {
             const response = await fetch(ingredientApiURL, {
@@ -106,6 +120,7 @@ export const useIngredientStore = defineStore('ingredientStore', () => {
         groupedIngredients,
         ingredientCategory,
         fetchIngredients,
+        fetchIngredient,
         postIngredient,
         getDefaultExpiryDate,
         getUnitGram,
