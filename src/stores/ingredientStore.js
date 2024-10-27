@@ -39,7 +39,7 @@ export const useIngredientStore = defineStore('ingredientStore', () => {
             ingredientCategory.value = new Set(ingredients.value.map((i) => i.category));
             // 利用 reduce 將 ingredientId 和 expiryDate 存進物件中
             ingredientsDefaultExpireDay.value = ingredients.value.reduce((acc, ingredient) => {
-                acc[ingredient.ingredientId] = ingredient.expiryDate;
+                acc[ingredient.ingredientId] = ingredient.expireDay;
                 return acc;
             }, {});
         } catch (error) {
@@ -78,13 +78,16 @@ export const useIngredientStore = defineStore('ingredientStore', () => {
         }
     };
 
-    const getDefaultExpiryDate = (ingredientId) => {
-        fetchIngredients();
-        const defaultExpiryDays = ingredientsDefaultExpireDay.value[ingredientId]; //抓預設天數
-        const expiryDate = new Date(); //抓今天日期
+    const getDefaultExpiryDate = async (ingredientId) => {
+        // 先檢查是否已經有資料
+        if (Object.keys(ingredientsDefaultExpireDay.value).length === 0) {
+            await fetchIngredients();
+        }
+        const defaultExpiryDays = ingredientsDefaultExpireDay.value[ingredientId];
+        const expiryDate = new Date();
         expiryDate.setHours(0, 0, 0, 0);
-        expiryDate.setDate(expiryDate.getDate() + defaultExpiryDays); //今天日期加預設天數
-        return expiryDate; //回傳預設日期
+        expiryDate.setDate(expiryDate.getDate() + defaultExpiryDays);
+        return expiryDate.toISOString().split('T')[0];
     };
 
     const getUnitGram = async (ingredientId) => {

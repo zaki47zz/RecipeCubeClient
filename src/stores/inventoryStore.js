@@ -32,12 +32,11 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
         }
     };
 
-    const postInventory = async (
-        ingredientId,
-        quantity,
-        expiryDate = getDefaultExpiryDate(ingredientId),
-        visibility = false
-    ) => {
+    const postInventory = async ({ ingredientId, quantity, expiryDate, visibility }) => {
+        // 在函數內部處理預設值
+        const finalExpiryDate = expiryDate ?? (await getDefaultExpiryDate(ingredientId));
+        const finalVisibility = visibility ?? false;
+
         try {
             const response = await fetch(inventoryApiURL, {
                 method: 'POST',
@@ -50,9 +49,9 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
                     UserId: userId,
                     IngredientId: ingredientId,
                     Quantity: quantity,
-                    ExpiryDate: expiryDate,
+                    ExpiryDate: finalExpiryDate,
                     IsExpiring: false,
-                    Visibility: visibility,
+                    Visibility: finalVisibility,
                 }),
             });
             if (!response.ok) {

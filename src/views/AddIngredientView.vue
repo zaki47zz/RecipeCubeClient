@@ -142,7 +142,12 @@ const addInventories = async () => {
         for (let inventory of inventories) {
             const { ingredientId, quantity, expiryDate, visibility } = inventory;
             // 執行 POST 請求
-            await postInventory(ingredientId, quantity, expiryDate, visibility);
+            await postInventory({
+                ingredientId: ingredientId,
+                quantity: quantity,
+                expiryDate: expiryDate,
+                visibility: visibility,
+            });
             await postPantry(userId, ingredientId, quantity, action);
         }
         // 清空已選食材

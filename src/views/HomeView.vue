@@ -1,8 +1,4 @@
-<script setup>
-const add = () => {
-    postInventory(10);
-};
-</script>
+<script setup></script>
 
 <template>
     <div></div>
