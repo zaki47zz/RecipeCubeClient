@@ -194,21 +194,52 @@ const handleCompleteOrder = async (item) => {
 
     if (visibility !== undefined) {
         try {
+            // 強制轉換布林值 以免出錯
+            const visibilityConvertToBoolean = visibility === 'true' ? true : false;
+
             // 遍歷選擇的訂單中的每個商品，並傳遞數量
             for (const item of selectedOrder.value.getOrderItemProductUnit) {
                 await inventoryStore.postInventory(
                     item.ingredientId,
                     item.quantity * item.unitQuantity,
                     undefined,
-                    visibility
+                    visibilityConvertToBoolean
                 );
             }
+
+            // 更新訂單狀態為 5，表示訂單已完成
+            selectedOrder.value.status = 5;
+
+            // 將更新狀態的訂單同步到資料庫
+            await updateOrderStatus(selectedOrder.value);
+
             Swal.fire('完成訂單', '訂單已成功更新', 'success');
         } catch (error) {
             Swal.fire('錯誤', '無法完成訂單操作', 'error');
         }
     }
 };
+
+// 按完成訂單後 要更新訂單狀態
+// 定義更新訂單狀態的方法
+const updateOrderStatus = async (order) => {
+    try {
+        const response = await fetch(`${BaseURL}/Orders/${order.orderId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(order),
+        });
+        if (!response.ok) {
+            throw new Error('更新訂單狀態失敗');
+        }
+    } catch (error) {
+        console.error('更新訂單狀態錯誤:', error);
+        throw error;
+    }
+};
+
 // 處理完成訂單按鈕點擊 End
 
 // 未完成付款訂單 繼續前往綠界付款 Start
