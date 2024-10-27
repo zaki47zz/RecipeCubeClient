@@ -166,7 +166,7 @@ const steps = [
     { status: 5, content: '訂單完成' },
 ];
 
-// 處理完成訂單按鈕點擊
+// 處理完成訂單按鈕點擊 Start
 const handleCompleteOrder = async (item) => {
     selectedOrder.value = orders.value.find((order) => order.orderId === item.orderNum);
     console.log('完成訂單按鈕的訂單', selectedOrder.value);
@@ -196,16 +196,12 @@ const handleCompleteOrder = async (item) => {
         try {
             // 遍歷選擇的訂單中的每個商品，並傳遞數量
             for (const item of selectedOrder.value.getOrderItemProductUnit) {
-                await inventoryStore.postInventory({
-                    // InventoryId: item.inventoryId,
-                    UserId: UserId,
-                    GroupId: GroupId,
-                    IngredientId: item.ingredientId,
-                    Quantity: item.quantity * item.unitQuantity, // 使用商品的數量
-                    ExpiryDate: undefined,
-                    IsExpiring: false,
-                    Visibility: visibility, // 設置可見性
-                });
+                await inventoryStore.postInventory(
+                    item.ingredientId,
+                    item.quantity * item.unitQuantity,
+                    undefined,
+                    visibility
+                );
             }
             Swal.fire('完成訂單', '訂單已成功更新', 'success');
         } catch (error) {
@@ -213,8 +209,9 @@ const handleCompleteOrder = async (item) => {
         }
     }
 };
+// 處理完成訂單按鈕點擊 End
 
-// 未完成付款訂單 繼續前往綠界付款
+// 未完成付款訂單 繼續前往綠界付款 Start
 const handleContinuePay = async (item) => {
     selectedOrder.value = orders.value.find((order) => order.orderId === item.orderNum);
     const fakeOrderId = `${selectedOrder.value.orderId}00`; // 將訂單加入00 避免重複
@@ -274,6 +271,8 @@ const dateTimeOrder = () => {
 
     return orderTime; // 返回台灣時間的 ISO 格式字串
 };
+
+// 未完成付款訂單 繼續前往綠界付款 End
 </script>
 
 <template>
@@ -317,10 +316,32 @@ const dateTimeOrder = () => {
                     <!-- 添加 Operation 欄位的自定義模板 -->
                     <template #item-operation="item">
                         <div>
-                            <button v-if="item.showCompleteButton" @click.stop="handleCompleteOrder(item)">
+                            <button
+                                v-if="item.showCompleteButton"
+                                @click.stop="handleCompleteOrder(item)"
+                                style="
+                                    background-color: #a8e6cf;
+                                    color: #ffffff;
+                                    border: none;
+                                    padding: 8px 12px;
+                                    border-radius: 5px;
+                                "
+                            >
                                 完成訂單
                             </button>
-                            <button v-if="item.showContinuePay" @click.stop="handleContinuePay(item)">繼續付款</button>
+                            <button
+                                v-if="item.showContinuePay"
+                                @click.stop="handleContinuePay(item)"
+                                style="
+                                    background-color: #ffb7b2;
+                                    color: #ffffff;
+                                    border: none;
+                                    padding: 8px 12px;
+                                    border-radius: 5px;
+                                "
+                            >
+                                繼續付款
+                            </button>
                         </div>
                     </template>
                 </EasyDataTable>
