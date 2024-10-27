@@ -13,6 +13,8 @@ const filteredProducts = ref([]);
 const selectedCategory = ref(null);
 const ProductsByPriceRange = ref([]);
 const priceRange = ref(1200); // 預設最大價格
+const searchTerm = ref('');
+const checkFilterProducts = ref(false);
 
 // 讀取所有商品
 
@@ -151,15 +153,31 @@ const handlePriceRangeInput = () => {
     console.log(filteredProducts.value);
 };
 
+const handleSearch = () => {
+    searchTerm.value = searchTerm.value.trim(); // 去除前后空格
+    currentPage.value = 1;
+    loadFilteredProducts(selectedCategory.value);
+};
+
 const loadFilteredProducts = async (category) => {
     ProductsByPriceRange.value = products.value.filter((p) => p.price <= priceRange.value);
     console.log('價格篩選後的產品:', ProductsByPriceRange.value);
+    // 根據類別過濾
     if (category) {
         filteredProducts.value = ProductsByPriceRange.value.filter((p) => p.category === category);
         selectedCategory.value = category; //把現在選擇的類別存進去
     } else {
         filteredProducts.value = ProductsByPriceRange.value;
     }
+    // 根據關鍵詞過濾
+    if (searchTerm.value) {
+        filteredProducts.value = filteredProducts.value.filter(
+            (p) => p.productName.includes(searchTerm.value) // 直接使用 includes 进行模糊搜索
+        );
+    }
+
+    // 更新 checkFilterProducts 的值
+    checkFilterProducts.value = filteredProducts.value.length === 0; // 如果没有商品，则為 true
 };
 </script>
 
@@ -200,6 +218,7 @@ const loadFilteredProducts = async (category) => {
                 <div class="row g-4">
                     <div class="col-lg-12">
                         <div class="row g-4">
+                            <!-- search Start -->
                             <div class="col-xl-10">
                                 <div class="input-group w-100 d-flex">
                                     <input
@@ -207,12 +226,15 @@ const loadFilteredProducts = async (category) => {
                                         class="form-control p-3"
                                         placeholder="keywords"
                                         aria-describedby="search-icon-1"
+                                        v-model="searchTerm"
+                                        @input="handleSearch"
                                     />
                                     <span id="search-icon-1" class="input-group-text p-3"
                                         ><i class="fa fa-search"></i
                                     ></span>
                                 </div>
                             </div>
+                            <!-- search End -->
                             <!-- <div class="col-6"></div> -->
                             <div class="col-xl-2">
                                 <div class="bg-light ps-3 py-3 rounded d-flex justify-content-between mb-4">
@@ -286,11 +308,12 @@ const loadFilteredProducts = async (category) => {
                                 </div>
                             </div>
                             <div class="col-lg-10">
-                                <div class="row g-4 justify-content-between">
+                                <div class="row g-4 justify-content-start">
                                     <div
                                         class="col-md-6 col-lg-4 col-xl-3 animate__animated animate__fadeIn"
                                         v-for="product in paginatedProducts"
                                         :key="product.productId"
+                                        v-if="filteredProducts.length > 0"
                                     >
                                         <div class="rounded position-relative fruite-item">
                                             <div class="fruite-img">
@@ -317,7 +340,7 @@ const loadFilteredProducts = async (category) => {
                                                 <h4 class="click-router" @click="goToProductDetail(product.productId)">
                                                     {{ product.productName }}
                                                 </h4>
-                                                <div class="d-flex justify-content-center flex-lg-wrap">
+                                                <div class="d-flex justify-content-center">
                                                     <!-- 價格 單位量 單位 -->
                                                     <p
                                                         class="text-dark fs-5 fw-bold mb-0 click-router"
@@ -326,6 +349,8 @@ const loadFilteredProducts = async (category) => {
                                                         $ {{ product.price }} 元 / {{ product.unitQuantity }} /
                                                         {{ product.unit }}
                                                     </p>
+                                                </div>
+                                                <div class="d-flex justify-content-center">
                                                     <div
                                                         @click="addToCart(product)"
                                                         class="btn border border-secondary rounded-pill px-3 text-primary"
@@ -336,6 +361,24 @@ const loadFilteredProducts = async (category) => {
                                             </div>
                                         </div>
                                     </div>
+                                    <!-- 顯示没有此商品的提示 -->
+                                    <div v-if="checkFilterProducts" class="mt-4 animate__animated animate__bounceIn">
+                                        <h3 class="text-center mt-2" style="color: #fb9d9e">没有此商品</h3>
+                                        <img
+                                            src="@/assets/img/ForBackground/logo去背.png"
+                                            alt=""
+                                            class="img-fluid mx-auto"
+                                            style="
+                                                width: 300px;
+                                                height: auto;
+                                                display: flex;
+                                                flex-direction: column;
+                                                align-items: center;
+                                                text-align: center;
+                                            "
+                                        />
+                                    </div>
+                                    <!-- 分頁 Start -->
                                     <div class="col-12">
                                         <el-pagination
                                             :current-page="currentPage"
@@ -351,6 +394,7 @@ const loadFilteredProducts = async (category) => {
                                         >
                                         </el-pagination>
                                     </div>
+                                    <!-- 分頁 End -->
                                 </div>
                             </div>
                         </div>
