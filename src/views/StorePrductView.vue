@@ -159,6 +159,14 @@ const handleSearch = () => {
     loadFilteredProducts(selectedCategory.value);
 };
 
+// 排序
+const selectedSortOption = ref('default'); // 初始化排序選項
+
+// 監視 selectedSortOption
+watch(selectedSortOption, () => {
+    loadFilteredProducts(selectedCategory.value); // 更新篩選後的商品
+});
+
 const loadFilteredProducts = async (category) => {
     ProductsByPriceRange.value = products.value.filter((p) => p.price <= priceRange.value);
     console.log('價格篩選後的產品:', ProductsByPriceRange.value);
@@ -174,6 +182,13 @@ const loadFilteredProducts = async (category) => {
         filteredProducts.value = filteredProducts.value.filter(
             (p) => p.productName.includes(searchTerm.value) // 直接使用 includes 进行模糊搜索
         );
+    }
+
+    // 排序邏輯
+    if (selectedSortOption.value === 'priceAsc') {
+        filteredProducts.value.sort((a, b) => a.price - b.price);
+    } else if (selectedSortOption.value === 'priceDesc') {
+        filteredProducts.value.sort((a, b) => b.price - a.price);
     }
 
     // 更新 checkFilterProducts 的值
@@ -244,11 +259,11 @@ const loadFilteredProducts = async (category) => {
                                         name="fruitlist"
                                         class="border-0 form-select-sm bg-light me-3"
                                         form="fruitform"
+                                        v-model="selectedSortOption"
                                     >
-                                        <option value="volvo">無</option>
-                                        <option value="saab">名稱</option>
-                                        <option value="opel">價格</option>
-                                        <option value="audi">種類</option>
+                                        <option value="default">無</option>
+                                        <option value="priceAsc">價格低到高</option>
+                                        <option value="priceDesc">價格高到低</option>
                                     </select>
                                 </div>
                             </div>
