@@ -5,6 +5,7 @@ import { ref } from 'vue';
 import 'vue3-easy-data-table/dist/style.css';
 import type { Header, Item } from 'vue3-easy-data-table';
 import { useInventoryStore } from '@/stores/inventoryStore';
+import { useRouter } from 'vue-router';
 
 // @ts-ignore
 const BaseURL = import.meta.env.VITE_API_BASEURL; //先忽略對import.meta錯誤檢查
@@ -96,6 +97,7 @@ const loadTableItems = () => {
             orderAmount: order.totalAmount,
             orderStatus: status,
             showCompleteButton: status === '已付款' || status === '訂單確認中' || status === '已出貨', // 狀態為已付款或確認訂單或已出貨時顯示按鈕
+            showContinuePay: status === '未付款', //狀態為未付款
         });
         // console.log('Items loaded with showCompleteButton:', items.value);
     });
@@ -211,6 +213,67 @@ const handleCompleteOrder = async (item) => {
         }
     }
 };
+
+// 未完成付款訂單 繼續前往綠界付款
+const handleContinuePay = async (item) => {
+    selectedOrder.value = orders.value.find((order) => order.orderId === item.orderNum);
+    const fakeOrderId = `${selectedOrder.value.orderId}00`; // 將訂單加入00 避免重複
+    const order = {
+        orderId: fakeOrderId,
+        userId: UserId || null,
+        orderTime: dateTimeOrder(),
+        totalAmount: selectedOrder.value.totalAmount || 0,
+        status: 1 || 6, //狀態預設寫 1 未付款,2 已付款，3 訂單確認中，4 已出貨，5 訂單完成
+        orderAddress: selectedOrder.value.orderAddress || null,
+        orderPhone: selectedOrder.value.phoneNumber || null,
+        orderEmail: selectedOrder.value.email || null,
+        orderRemark: selectedOrder.value.orderRemark || null,
+        orderName: selectedOrder.value.userName || null,
+    };
+
+    const paymentResponse = await fetch(`${BaseURL}/Orders/StartPaymentForContinue`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(order),
+    });
+
+    if (paymentResponse.ok) {
+        const paymentHtml = await paymentResponse.text();
+        // 這裡處理支付 HTML，在新窗口打開
+        const paymentWindow = window.open('', '_blank');
+        paymentWindow.document.write(paymentHtml);
+
+        // 導航原頁面到訂單頁面
+        ToOrders();
+    } else {
+        Swal.fire({
+            title: '支付失敗',
+            text: '無法進入支付頁面，請稍後再試',
+            icon: 'error',
+        });
+    }
+};
+
+// 導航到訂單頁面
+const router = useRouter();
+const ToOrders = () => {
+    router.push({ name: 'order' });
+};
+
+// 得到現在時間(訂單下單時間用)
+const dateTimeOrder = () => {
+    const now = new Date();
+
+    // 調整時間為台灣時區 (UTC+8)
+    const taiwanTime = new Date(now.setHours(now.getHours() + 8));
+
+    // 使用 toISOString() 獲取 ISO 格式的日期時間字串
+    const orderTime = taiwanTime.toISOString();
+
+    return orderTime; // 返回台灣時間的 ISO 格式字串
+};
 </script>
 
 <template>
@@ -257,6 +320,7 @@ const handleCompleteOrder = async (item) => {
                             <button v-if="item.showCompleteButton" @click.stop="handleCompleteOrder(item)">
                                 完成訂單
                             </button>
+                            <button v-if="item.showContinuePay" @click.stop="handleContinuePay(item)">繼續付款</button>
                         </div>
                     </template>
                 </EasyDataTable>
