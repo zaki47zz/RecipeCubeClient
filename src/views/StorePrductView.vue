@@ -5,7 +5,15 @@ import { useRouter } from 'vue-router';
 import { computed, ref, watch } from 'vue';
 import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
 import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
+// swiper
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import 'swiper/css';
+import 'swiper/css/effect-coverflow';
+import 'swiper/css/pagination';
+import 'swiper/css/autoplay';
+import { EffectCoverflow, Pagination, Autoplay } from 'swiper/modules';
 
+const modules = [EffectCoverflow, Pagination, Autoplay];
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
 
@@ -195,6 +203,11 @@ const loadFilteredProducts = async (category) => {
     // 更新 checkFilterProducts 的值
     checkFilterProducts.value = filteredProducts.value.length === 0; // 如果没有商品，则為 true
 };
+
+// swiper
+const swiperProducts = computed(() => {
+    return products.value.slice(0, 5);
+});
 </script>
 
 <template>
@@ -202,6 +215,7 @@ const loadFilteredProducts = async (category) => {
     <SideBarCartComponent />
     <!-- 引入購物清單 -->
     <ShoppingListComponent />
+
     <div class="p-0 m-0">
         <!-- Single Page Header start -->
         <div class="container-fluid page-header py-5">
@@ -231,6 +245,37 @@ const loadFilteredProducts = async (category) => {
             </h4>
         </ol>
         <!-- RouterLink End -->
+
+        <!-- 輪播 Start -->
+        <swiper
+            :effect="'coverflow'"
+            :grabCursor="true"
+            :centeredSlides="true"
+            :slidesPerView="'auto'"
+            :coverflowEffect="{
+                rotate: 50,
+                stretch: 0,
+                depth: 100,
+                modifier: 1,
+                slideShadows: true,
+            }"
+            :pagination="true"
+            :autoplay="{
+                delay: 1500, // 每3秒切換一次
+                disableOnInteraction: false, // 用戶互動後仍然繼續播放
+            }"
+            :modules="modules"
+        >
+            <swiper-slide v-for="(product, index) in swiperProducts" :key="index">
+                <img
+                    :src="`${BaseUrlWithoutApi}/images/ingredient/${product.photo}?t=${Date.now()}`"
+                    alt="Product Image"
+                    style="width: 300px; height: 250px"
+                />
+            </swiper-slide>
+        </swiper>
+
+        <!-- 輪播 End -->
 
         <!-- Fruits Shop Start-->
         <div class="container-fluid fruite py-1">
