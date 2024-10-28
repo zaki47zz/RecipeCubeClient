@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import { ref, computed, reactive, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
+import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
 
@@ -242,10 +243,28 @@ onBeforeUnmount(() => {
     </ol>
     <!-- RouterLink End -->
 
+    <!-- 引入購物車 sidebar -->
+    <SideBarCartComponent />
+    <!-- 引入購物清單 -->
+    <ShoppingListComponent />
+
     <!-- Cart Page Start -->
     <div class="container-fluid py-2">
         <div class="container py-2">
-            <div class="table-responsive">
+            <div v-if="cartProducts.length === 0" class="text-center">
+                <h4 class="animate__animated animate__flipInX" style="color: #94ccc3">
+                    購物車沒商品，快去買一些東西吧！
+                </h4>
+                <p>
+                    <img
+                        class="animate__animated animate__bounceIn"
+                        src="@/assets/img/ForBackground/logo去背.png"
+                        alt=""
+                        style="width: 500px; height: auto"
+                    />
+                </p>
+            </div>
+            <div v-else class="table-responsive">
                 <table class="table">
                     <thead>
                         <tr>
@@ -364,8 +383,6 @@ onBeforeUnmount(() => {
                 </div>
             </div>
         </div>
-        <!-- 引入購物車 sidebar -->
-        <SideBarCartComponent />
     </div>
     <!-- Cart Page End -->
 </template>

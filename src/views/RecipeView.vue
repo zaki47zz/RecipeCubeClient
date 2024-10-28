@@ -29,8 +29,9 @@ const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到�
 // 在組件加載後獲取數據
 
 onMounted(async () => {
+
     await recipeStore.fetchRecipes();
-    await fetchIngredients();
+
 });
 
 const getRecipeImageUrl = (fileName) => {
@@ -103,14 +104,7 @@ const filteredRecipes = computed(() => {
         return categoryMatch && subcategoryMatch && searchMatch && restrictionMatch && styleMatch;
     });
 });
-//清空子類別
-watch(
-    () => filters.value.category,
-    (newCategory) => {
-        console.log('主類別改變:', newCategory);
-        filters.value.subcategory = '';
-    }
-);
+
 watch(
     filters,
     () => {
@@ -172,16 +166,13 @@ watch(totalPages, (newTotalPages) => {
     <!-- 推薦食譜 start -->
     <section class="pt-5">
         <div class="container-fluid">
-            <div
-                class="pt-5 rounded-4"
-                :style="{
-                    width: '100%',
-                    height: '100%',
-                    backgroundImage: `url(${BannerRecipe})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                }"
-            >
+            <div class="pt-5 rounded-4" :style="{
+                width: '100%',
+                height: '100%',
+                backgroundImage: `url(${BannerRecipe})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+            }">
                 <div class="row p-3">
                     <div class="col-md-6 d-flex flex-column align-items-center">
                         <h2 class="mt-3 text-white">左思右想還是不知道煮什麼嗎?</h2>
@@ -225,17 +216,11 @@ watch(totalPages, (newTotalPages) => {
                         <div>
                             <!-- 分頁導航 -->
 
-                            <el-pagination
-                                v-model:current-page="currentPage"
-                                v-model:page-size="pageSize"
-                                :total="totalRecipes"
-                                background
-                                layout="sizes, total, ->,prev, pager, next, jumper "
-                                :page-sizes="[8, 12, 16, 20]"
-                                @size-change="handlePageSizeChange"
+                            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize"
+                                :total="totalRecipes" background layout="sizes, total, ->,prev, pager, next, jumper "
+                                :page-sizes="[8, 12, 16, 20]" @size-change="handlePageSizeChange"
                                 @current-change="handleCurrentChange"
-                                class="mt-4 d-flex justify-content-end align-items-center gap-2"
-                            >
+                                class="mt-4 d-flex justify-content-end align-items-center gap-2">
                             </el-pagination>
 
                             <!-- 分頁導航結束 -->
@@ -243,20 +228,14 @@ watch(totalPages, (newTotalPages) => {
 
                         <div class="mt-1 row row-cols-1 row-cols-md-2 g-3">
                             <div v-for="recipe in paginatedRecipes" :key="recipe.recipeId">
-                                <div
-                                    class="card recipe-card shadow-sm rounded-3 d-flex flex-row align-items-center"
-                                    @click="recipeStore.selectRecipe(recipe)"
-                                >
+                                <div class="card recipe-card shadow-sm rounded-3 d-flex flex-row align-items-center"
+                                    @click="recipeStore.selectRecipe(recipe)">
                                     <div class="image-container">
-                                        <img
-                                            :src="getRecipeImageUrl(recipe.photoName) || 'default_image.jpg'"
-                                            :alt="recipe.recipeName"
-                                            class="recipe-image"
-                                        />
+                                        <img :src="getRecipeImageUrl(recipe.photoName) || 'default_image.jpg'"
+                                            :alt="recipe.recipeName" class="recipe-image" />
                                     </div>
                                     <div
-                                        class="recipe-content p-3 w-100 d-flex flex-column justify-content-center align-items-center"
-                                    >
+                                        class="recipe-content p-3 w-100 d-flex flex-column justify-content-center align-items-center">
                                         <h5 class="mb-3">{{ recipe.recipeName }}</h5>
                                         <div class="d-flex gap-2">
                                             <span class="badge bg-secondary" v-if="recipe.restriction">素食</span>
@@ -278,21 +257,12 @@ watch(totalPages, (newTotalPages) => {
     <!-- Recipe Detail Component -->
     <!-- <RecipeDetailComponent v-if="recipeStore.selectedRecipe" :recipe="recipeStore.selectedRecipe">
     </RecipeDetailComponent> -->
-    <el-dialog
-        v-model="recipeStore.dialogVisible"
-        title="食譜詳細資訊"
-        width="75%"
-        @close="recipeStore.closeDialog"
-        center
-        @opened="onDialogOpened"
-    >
+    <el-dialog v-model="recipeStore.dialogVisible" title="食譜詳細資訊" width="75%" @close="recipeStore.closeDialog" center
+        @opened="onDialogOpened">
         <PerfectScrollbar ref="scrollContainer" class="custom-scroll-container">
             <div class="dialog-content">
-                <RecipeDetailComponent
-                    :recipe="recipeStore.selectedRecipe"
-                    :reset-active-step="resetActiveStep"
-                    v-if="recipeStore.selectedRecipe"
-                />
+                <RecipeDetailComponent :recipe="recipeStore.selectedRecipe" :reset-active-step="resetActiveStep"
+                    v-if="recipeStore.selectedRecipe" />
             </div>
         </PerfectScrollbar>
         <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
@@ -323,7 +293,7 @@ watch(totalPages, (newTotalPages) => {
 }
 
 .custom-scroll-container {
-    max-height: 300px;
+    max-height: 350px;
     overflow: hidden;
 }
 

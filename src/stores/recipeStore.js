@@ -26,11 +26,29 @@ export const useRecipeStore = defineStore('recipeStore', {
             }
         },
         selectRecipe(recipe) {
-            this.selectedRecipe = recipe;
+            console.log('Selected Recipe:', recipe); // 確認選擇的食譜是否正確
+            // 透過食譜 ID 獲取完整的食譜資料
+            this.fetchRecipeDetail(recipe.recipeId);
             this.dialogVisible = true; // 顯示 Dialog
         },
         closeDialog() {
             this.dialogVisible = false; // 隱藏 Dialog
+        },
+        async fetchRecipeDetail(recipeId) {
+            const BaseURL = import.meta.env.VITE_API_BASEURL;
+            const ApiURL = `${BaseURL}/Recipes/${recipeId}`; // 使用 GET 方法來獲取詳細資料
+
+            try {
+                const response = await fetch(ApiURL);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                console.log('獲取到的食譜詳細資料:', data);
+                this.selectedRecipe = data; // 將返回的詳細食譜資料賦值給 selectedRecipe
+            } catch (error) {
+                console.error('There was a problem with the fetch operation:', error);
+            }
         },
     }
 });

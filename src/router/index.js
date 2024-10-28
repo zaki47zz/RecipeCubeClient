@@ -19,9 +19,10 @@ import ResetPassword from '@/views/ResetPassword.vue';
 import ResetEmailConfirmed from '@/views/ResetEmailConfirmed.vue';
 import ResetPasswordSet from '@/views/ResetPasswordSet.vue';
 
-
 import { createRouter, createWebHistory } from 'vue-router';
 import OrderView from '@/views/OrderView.vue';
+import HomeView from '@/views/HomeView.vue';
+import RecipeDetailView from '@/views/RecipeDetailView.vue';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -154,6 +155,16 @@ const router = createRouter({
             path: '/generaterecipe',
             name: 'GenerateRecipe',
             component: GenerateRecipeView,
+        },
+        {
+            path: '/home',
+            name: 'Home',
+            component: HomeView,
+        },
+        {
+            path: '/generaterecipe/recipeDetail/:id',
+            name: 'RecipeDetail',
+            component: RecipeDetailView,
         },
     ],
     scrollBehavior(to, from, savedPosition) {

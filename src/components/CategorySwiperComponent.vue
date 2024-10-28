@@ -1,6 +1,7 @@
 <script setup>
 import { storeToRefs } from 'pinia';
 import { useIngredientStore } from '@/stores/ingredientStore';
+import { usePantryStore } from '@/stores/pantryStore';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import Swal from 'sweetalert2';
 import { Navigation } from 'swiper/modules';
@@ -38,6 +39,8 @@ const selectedIngredients = computed({
 const ingredientStore = useIngredientStore();
 const { ingredients, groupedIngredients, ingredientCategory } = storeToRefs(ingredientStore);
 const { fetchIngredients, postIngredient } = ingredientStore;
+const pantryStore = usePantryStore();
+const { getFrequentlyUsedIngredients } = pantryStore;
 
 const customIngredient = ref({
     ingredientId: '',
@@ -51,20 +54,14 @@ const customIngredient = ref({
     previewUrl: '',
 }); //自定義食材資料
 
+const frequentlyUsedIngredients = ref([]);
+
 const isModalVisible = ref(false);
 
-onMounted(() => {
-    fetchIngredients();
-});
-
-// 利用watchEffect讓selectedIngredients變動時自動activate同Id的badge;
-watchEffect(() => {
-    const allBadge = document.querySelectorAll('.badge.active');
-    allBadge.forEach((badge) => badge.classList.remove('active'));
-    for (let ingredient of selectedIngredients.value) {
-        const badge = document.querySelector(`.badge[data-ingredientId="${ingredient.ingredientId}"]`);
-        badge.classList.add('active');
-    }
+onMounted(async () => {
+    await fetchIngredients();
+    frequentlyUsedIngredients.value = await getFrequentlyUsedIngredients(0.1);
+    //因為裡面是Promise物件要用async/await自動解構(相當於.then(result=>變數=result))
 });
 
 // Swiper設定
@@ -127,6 +124,11 @@ const activateBadge = (ingredient) => {
             (item) => item.ingredientId !== ingredient.ingredientId
         );
     }
+};
+
+//讓selectedIngredients變動時自動activate同Id的badge(配合:class);
+const isSelected = (ingredient) => {
+    return selectedIngredients.value.some((selected) => selected.ingredientId === ingredient.ingredientId);
 };
 
 ////自定義食材
@@ -226,7 +228,14 @@ const handlePhotoUpload = (event) => {
                 <SwiperSlide class="nav-link category-item">
                     <h6 class="text-center">您的常用食材</h6>
                     <div class="d-flex flex-wrap justify-content-center gap-2">
-                        <span class="badge food-badge bg-success">青椒</span>
+                        <span
+                            class="badge food-badge bg-secondary"
+                            :class="{ active: isSelected(ingredient) }"
+                            v-for="ingredient in frequentlyUsedIngredients"
+                            :key="ingredient.ingredientId"
+                            @click="activateBadge(ingredient)"
+                            >{{ ingredient.ingredientName }}</span
+                        >
                     </div>
                 </SwiperSlide>
 
@@ -239,6 +248,7 @@ const handlePhotoUpload = (event) => {
                     <div class="d-flex flex-wrap justify-content-center gap-2">
                         <span
                             class="badge food-badge bg-secondary"
+                            :class="{ active: isSelected(ingredient) }"
                             v-for="ingredient in ingredients.filter((i) => i.category == category)"
                             :key="ingredient.ingredientId"
                             :data-ingredientId="ingredient.ingredientId"
@@ -436,7 +446,7 @@ const handlePhotoUpload = (event) => {
     box-shadow: 0px 5px 22px rgba(0, 0, 0, 0.04);
     border-radius: 16px;
     text-align: center;
-    padding: 20px;
+    padding: 10px;
     margin: 20px 0;
     transition: box-shadow 0.3s ease-out, transform 0.3s ease-out;
     display: flex;

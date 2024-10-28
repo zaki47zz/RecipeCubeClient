@@ -39,9 +39,23 @@ export const useIngredientStore = defineStore('ingredientStore', () => {
             ingredientCategory.value = new Set(ingredients.value.map((i) => i.category));
             // 利用 reduce 將 ingredientId 和 expiryDate 存進物件中
             ingredientsDefaultExpireDay.value = ingredients.value.reduce((acc, ingredient) => {
-                acc[ingredient.ingredientId] = ingredient.expiryDate;
+                acc[ingredient.ingredientId] = ingredient.expireDay;
                 return acc;
             }, {});
+        } catch (error) {
+            console.error('獲取食材資料失敗:', error);
+            throw error;
+        }
+    };
+
+    const fetchIngredient = async (ingredientId) => {
+        try {
+            const response = await fetch(`${ingredientApiURL}/${ingredientId}`);
+            if (!response.ok) {
+                throw new Error('網路連線有異常');
+            }
+            const data = await response.json();
+            return data;
         } catch (error) {
             console.error('獲取食材資料失敗:', error);
             throw error;
@@ -64,13 +78,44 @@ export const useIngredientStore = defineStore('ingredientStore', () => {
         }
     };
 
-    const getDefaultExpiryDate = (ingredientId) => {
-        fetchIngredients();
-        const defaultExpiryDays = ingredientsDefaultExpireDay.value[ingredientId]; //抓預設天數
-        const expiryDate = new Date(); //抓今天日期
+    const getDefaultExpiryDate = async (ingredientId) => {
+        // 先檢查是否已經有資料
+        if (Object.keys(ingredientsDefaultExpireDay.value).length === 0) {
+            await fetchIngredients();
+        }
+        const defaultExpiryDays = ingredientsDefaultExpireDay.value[ingredientId];
+        const expiryDate = new Date();
         expiryDate.setHours(0, 0, 0, 0);
-        expiryDate.setDate(expiryDate.getDate() + defaultExpiryDays); //今天日期加預設天數
-        return expiryDate; //回傳預設日期
+        expiryDate.setDate(expiryDate.getDate() + defaultExpiryDays);
+        return expiryDate.toISOString().split('T')[0];
+    };
+
+    const getUnitGram = async (ingredientId) => {
+        try {
+            await fetchIngredients();
+            const targetIngredient = ingredients.value.find((ingredient) => ingredient.ingredientId === ingredientId);
+
+            // 沒有這筆食材就undefine
+            if (!targetIngredient) {
+                console.error('Ingredient not found:', ingredientId);
+                return undefined;
+            }
+
+            // 如果是克就undefine
+            if (targetIngredient.unit === '克') {
+                return undefined;
+            }
+
+            return {
+                ingredientId: targetIngredient.ingredientId,
+                ingredientName: targetIngredient.ingredientName,
+                unit: targetIngredient.unit,
+                gram: targetIngredient.gram ?? 'X',
+            };
+        } catch (error) {
+            console.error('Error in getUnitGram:', error);
+            return undefined;
+        }
     };
 
     return {
@@ -78,7 +123,9 @@ export const useIngredientStore = defineStore('ingredientStore', () => {
         groupedIngredients,
         ingredientCategory,
         fetchIngredients,
+        fetchIngredient,
         postIngredient,
         getDefaultExpiryDate,
+        getUnitGram,
     };
 });

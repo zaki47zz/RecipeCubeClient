@@ -39,8 +39,8 @@ body,
         <Navbar />
         <main class="main-content container position-relative">
             <RouterView />
+            <Footer></Footer>
         </main>
-        <Footer />
         <!-- </PerfectScrollbar> -->
     </component>
 </template>

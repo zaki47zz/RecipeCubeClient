@@ -13,6 +13,7 @@
 
 <style lang="css" scoped>
 .skeleton-card {
+    height: 140px;
     width: 100%;
     padding: 16px;
     border-radius: 8px;

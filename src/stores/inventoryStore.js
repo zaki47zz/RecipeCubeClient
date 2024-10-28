@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import { useIngredientStore } from './ingredientStore';
+import { usePantryStore } from './pantryStore';
 
 export const useInventoryStore = defineStore('inventoryStore', () => {
     const BaseURL = import.meta.env.VITE_API_BASEURL;
@@ -10,6 +11,8 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
     const InventoriesURL = `${inventoryApiURL}/${userId}`;
     const ingredientStore = useIngredientStore();
     const { getDefaultExpiryDate } = ingredientStore;
+    const pantryStore = usePantryStore();
+    const { getFrequentlyUsedIngredients } = pantryStore;
 
     const inventories = ref([]); //庫存放這
     const ingredientCategory = ref(new Set()); //分類放這，用Set避免重複
@@ -32,12 +35,11 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
         }
     };
 
-    const postInventory = async (
-        ingredientId,
-        quantity,
-        expiryDate = getDefaultExpiryDate(ingredientId),
-        visibility = false
-    ) => {
+    const postInventory = async ({ ingredientId, quantity, expiryDate, visibility }) => {
+        // 在函數內部處理預設值
+        const finalExpiryDate = expiryDate ?? (await getDefaultExpiryDate(ingredientId));
+        const finalVisibility = visibility ?? false;
+
         try {
             const response = await fetch(inventoryApiURL, {
                 method: 'POST',
@@ -50,9 +52,9 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
                     UserId: userId,
                     IngredientId: ingredientId,
                     Quantity: quantity,
-                    ExpiryDate: expiryDate,
+                    ExpiryDate: finalExpiryDate,
                     IsExpiring: false,
-                    Visibility: visibility,
+                    Visibility: finalVisibility,
                 }),
             });
             if (!response.ok) {
@@ -82,6 +84,7 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
     const putInventory = async (inventory) => {
         try {
             const putURL = `${inventoryApiURL}/${inventory.inventoryId}`;
+            console.log(putURL);
             const response = await fetch(putURL, {
                 method: 'PUT',
                 headers: {
@@ -108,5 +111,45 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
         }
     };
 
-    return { inventories, ingredientCategory, fetchInventories, postInventory, deleteInventory, putInventory };
+    const getRunningOutIngredients = async () => {
+        if (!inventories.value.length) await fetchInventories();
+
+        const frequentlyUsedIngredientIds = (await getFrequentlyUsedIngredients(0.05)).map(
+            (ingredient) => ingredient.ingredientId
+        );
+        const frequentlyUsedIngredients = inventories.value
+            .filter(
+                (ingredient) =>
+                    frequentlyUsedIngredientIds.includes(ingredient.ingredientId) && ingredient.isExpired === false
+            )
+            .map((ingredient) => ({
+                ingredientId: ingredient.ingredientId,
+                ingredientName: ingredient.ingredientName,
+                quantity: ingredient.quantity,
+                unit: ingredient.unit,
+                source: '常用食材',
+            }));
+        const isExpiredIngredients = inventories.value
+            .filter((inventory) => inventory.isExpired === true)
+            .map((inventory) => ({ ...inventory, source: '已經過期' }));
+
+        const runningOutIngredients = [...frequentlyUsedIngredients, ...isExpiredIngredients];
+        return runningOutIngredients.map((ingredient) => ({
+            ingredientId: ingredient.ingredientId,
+            ingredientName: ingredient.ingredientName,
+            quantity: ingredient.quantity,
+            unit: ingredient.unit,
+            source: ingredient.source,
+        }));
+    };
+
+    return {
+        inventories,
+        ingredientCategory,
+        fetchInventories,
+        postInventory,
+        deleteInventory,
+        putInventory,
+        getRunningOutIngredients,
+    };
 });

@@ -2,20 +2,44 @@
 import { useCookingStore } from '@/stores/cookingStore';
 import { storeToRefs } from 'pinia';
 import tippy from 'tippy.js';
-import SoftSwitch from '@/components/SoftSwitch.vue';
 import CategorySwiperComponent from '@/components/CategorySwiperComponent.vue';
+import UnitConversionComponent from '@/components/UnitConversionComponent.vue';
 import 'tippy.js/dist/tippy.css';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
+import { ElCheckbox } from 'element-plus';
 
 const cookingStore = useCookingStore();
-const { cookingInventories, isUsingInventory, isSet } = storeToRefs(cookingStore);
+const { cookingInventories } = storeToRefs(cookingStore);
 const { resetCookingInventories } = cookingStore;
 const selectedIngredients = ref([]);
+const set = ref(false);
+const useInventory = ref(false);
 
 onMounted(() => {
     initTippy();
     resetCookingInventories();
 });
+
+//利用watch監測selectedIngredients，即時更新cookingInventories
+watch(
+    selectedIngredients,
+    (newIngredients) => {
+        const date = new Date();
+        date.setDate(date.getDate() + 7);
+        const expiryDate = date.toISOString().split('T')[0];
+
+        //cookingInventories 的值
+        cookingInventories.value = newIngredients.map((ingredient) => {
+            return {
+                ...ingredient,
+                quantity: 0, //初始數量
+                expiryDate: expiryDate, //到期日期
+                visibility: false, //預設 visibility
+            };
+        });
+    },
+    { immediate: true }
+);
 
 const initTippy = function () {
     tippy('#tooltip-wrapper-set', {
@@ -30,13 +54,25 @@ const initTippy = function () {
     });
 };
 
+const deleteInventory = (inventory) => {
+    const deletingIndex = selectedIngredients.value.findIndex((item) => item.ingredientId === inventory.ingredientId);
+    if (deletingIndex > -1) {
+        selectedIngredients.value = [
+            //為了讓watch讀到，需要直接賦值
+            ...selectedIngredients.value.slice(0, deletingIndex), //第一個到要刪的(不包含要刪的)
+            ...selectedIngredients.value.slice(deletingIndex + 1), //要刪的+1到最後
+        ];
+    }
+};
+
 //將所選食材送至產生食譜介面
 const exportInventories = () => {
-    //沒有選東西就沒反應
     if (!selectedIngredients.value.length) {
         return;
     }
-    cookingInventories.value = [...selectedIngredients.value];
+    localStorage.setItem('cookingInventories', JSON.stringify(cookingInventories.value));
+    localStorage.setItem('isUsingInventory', useInventory.value);
+    localStorage.setItem('isSet', set.value);
 };
 </script>
 
@@ -93,7 +129,7 @@ const exportInventories = () => {
 
     <section class="py-3 overflow-hidden">
         <div class="container-fluid banner-ad">
-            <CategorySwiperComponent></CategorySwiperComponent>
+            <CategorySwiperComponent v-model="selectedIngredients"></CategorySwiperComponent>
         </div>
     </section>
 
@@ -103,7 +139,10 @@ const exportInventories = () => {
                 <div class="col-md-12">
                     <div class="d-flex justify-content-between mt-1">
                         <h5>您選擇的食材</h5>
-                        <p class="badge bg-secondary"><i class="fa-solid fa-repeat"></i> 數量換算表</p>
+                        <UnitConversionComponent
+                            :addingInventoriesList="cookingInventories"
+                            color="danger"
+                        ></UnitConversionComponent>
                     </div>
                 </div>
             </div>
@@ -121,50 +160,37 @@ const exportInventories = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <th scope="row" class="text-dark">1</th>
-                                <td class="text-dark">菠菜</td>
+                            <tr v-for="(inventory, index) in cookingInventories">
+                                <th scope="row" class="text-dark">{{ index + 1 }}</th>
+                                <td class="text-dark">{{ inventory.ingredientName }}</td>
                                 <td class="text-dark">
-                                    <input type="text" class="form-control inline-control w-30" /> 把
+                                    <input
+                                        v-model="inventory.quantity"
+                                        type="text"
+                                        class="form-control inline-control w-30"
+                                    />
+                                    {{ inventory.unit }}
                                 </td>
                                 <td class="text-dark">
-                                    <select class="form-control inline-control text-center">
-                                        <option value="0">群組</option>
-                                        <option value="1">私人</option>
+                                    <select
+                                        v-model="inventory.visibility"
+                                        class="form-control inline-control text-center"
+                                    >
+                                        <option :value="false">群組</option>
+                                        <option :value="true">私人</option>
                                     </select>
                                 </td>
                                 <td class="text-dark">
                                     <input
+                                        v-model="inventory.expiryDate"
                                         type="date"
                                         class="form-control inline-control text-center"
-                                        value="2024-10-30"
                                     />
                                 </td>
                                 <td class="text-dark">
-                                    <i class="fa-solid fa-trash"></i>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row" class="text-dark">1</th>
-                                <td class="text-dark">菠菜</td>
-                                <td class="text-dark">
-                                    <input type="text" class="form-control inline-control w-30" /> 把
-                                </td>
-                                <td class="text-dark">
-                                    <select class="form-control inline-control text-center">
-                                        <option value="0">群組</option>
-                                        <option value="1">私人</option>
-                                    </select>
-                                </td>
-                                <td class="text-dark">
-                                    <input
-                                        type="date"
-                                        class="form-control inline-control text-center"
-                                        value="2024-10-30"
-                                    />
-                                </td>
-                                <td class="text-dark">
-                                    <i class="fa-solid fa-trash"></i>
+                                    <button class="delete-icon" @click="deleteInventory(inventory)">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
@@ -178,26 +204,26 @@ const exportInventories = () => {
         <div class="container-fluid">
             <div class="row justify-content-center">
                 <div class="col-lg-3">
-                    <SoftSwitch v-model="isSet" name="set" id="set" class="switch-set">
-                        <span>
+                    <ElCheckbox v-model="set" name="set" id="set" class="switch-set">
+                        <span class="fs-6">
                             套餐
                             <span id="tooltip-wrapper-set">
                                 <i class="fa-solid fa-circle-question"></i>
                             </span>
                         </span>
-                    </SoftSwitch>
+                    </ElCheckbox>
                 </div>
             </div>
             <div class="row justify-content-center">
                 <div class="col-lg-3">
-                    <SoftSwitch v-model="isUsingInventory" name="inventory" id="inventory" class="switch-inventory">
-                        <span>
+                    <ElCheckbox v-model="useInventory" name="inventory" id="inventory" class="switch-inventory">
+                        <span class="fs-6">
                             使用庫存食材
                             <span id="tooltip-wrapper-inventory">
                                 <i class="fa-solid fa-circle-question"></i>
                             </span>
                         </span>
-                    </SoftSwitch>
+                    </ElCheckbox>
                 </div>
             </div>
             <div class="row justify-content-center">
@@ -243,14 +269,23 @@ const exportInventories = () => {
 }
 
 .switch-set {
-    /* margin-left: calc(50% - 3.5vw); */
-    left: 50%;
-    transform: translateX(33%);
+    left: 25%;
 }
 
 .switch-inventory {
-    /* margin-left: calc(50% - 3.5vw); */
-    left: 50%;
-    transform: translateX(24%);
+    left: 25%;
+}
+
+.delete-icon {
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 0 3px 0 3px;
+}
+
+.delete-icon:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s;
+    box-shadow: 0px 21px 44px rgba(0, 0, 0, 0.08);
 }
 </style>

@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import { useRouter } from 'vue-router';
 import { computed, ref, watch } from 'vue';
 import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
+import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
@@ -12,7 +13,7 @@ const products = ref([]);
 const filteredProducts = ref([]);
 const selectedCategory = ref(null);
 const ProductsByPriceRange = ref([]);
-const priceRange = ref(1200); // 預設最大價格
+const priceRange = ref(1400); // 預設最大價格
 const searchTerm = ref('');
 const checkFilterProducts = ref(false);
 
@@ -159,6 +160,14 @@ const handleSearch = () => {
     loadFilteredProducts(selectedCategory.value);
 };
 
+// 排序
+const selectedSortOption = ref('default'); // 初始化排序選項
+
+// 監視 selectedSortOption
+watch(selectedSortOption, () => {
+    loadFilteredProducts(selectedCategory.value); // 更新篩選後的商品
+});
+
 const loadFilteredProducts = async (category) => {
     ProductsByPriceRange.value = products.value.filter((p) => p.price <= priceRange.value);
     console.log('價格篩選後的產品:', ProductsByPriceRange.value);
@@ -176,12 +185,23 @@ const loadFilteredProducts = async (category) => {
         );
     }
 
+    // 排序邏輯
+    if (selectedSortOption.value === 'priceAsc') {
+        filteredProducts.value.sort((a, b) => a.price - b.price);
+    } else if (selectedSortOption.value === 'priceDesc') {
+        filteredProducts.value.sort((a, b) => b.price - a.price);
+    }
+
     // 更新 checkFilterProducts 的值
     checkFilterProducts.value = filteredProducts.value.length === 0; // 如果没有商品，则為 true
 };
 </script>
 
 <template>
+    <!-- 引入購物車 sidebar -->
+    <SideBarCartComponent />
+    <!-- 引入購物清單 -->
+    <ShoppingListComponent />
     <div class="p-0 m-0">
         <!-- Single Page Header start -->
         <div class="container-fluid page-header py-5">
@@ -224,7 +244,7 @@ const loadFilteredProducts = async (category) => {
                                     <input
                                         type="search"
                                         class="form-control p-3"
-                                        placeholder="keywords"
+                                        placeholder="請輸入商品名稱"
                                         aria-describedby="search-icon-1"
                                         v-model="searchTerm"
                                         @input="handleSearch"
@@ -244,11 +264,11 @@ const loadFilteredProducts = async (category) => {
                                         name="fruitlist"
                                         class="border-0 form-select-sm bg-light me-3"
                                         form="fruitform"
+                                        v-model="selectedSortOption"
                                     >
-                                        <option value="volvo">無</option>
-                                        <option value="saab">名稱</option>
-                                        <option value="opel">價格</option>
-                                        <option value="audi">種類</option>
+                                        <option value="default">無</option>
+                                        <option value="priceAsc">價格低到高</option>
+                                        <option value="priceDesc">價格高到低</option>
                                     </select>
                                 </div>
                             </div>
@@ -298,7 +318,7 @@ const loadFilteredProducts = async (category) => {
                                                 class="form-range w-100"
                                                 v-model="priceRange"
                                                 min="1"
-                                                max="1200"
+                                                max="1400"
                                                 @input="handlePriceRangeInput"
                                             />
                                             <span>當前價格上限: {{ priceRange }}</span>
@@ -339,6 +359,9 @@ const loadFilteredProducts = async (category) => {
                                                 <!-- 品名 -->
                                                 <h4 class="click-router" @click="goToProductDetail(product.productId)">
                                                     {{ product.productName }}
+                                                    <span class="amount-badge"
+                                                        >{{ product.unitQuantity }} {{ product.unit }}</span
+                                                    >
                                                 </h4>
                                                 <div class="d-flex justify-content-center">
                                                     <!-- 價格 單位量 單位 -->
@@ -346,8 +369,7 @@ const loadFilteredProducts = async (category) => {
                                                         class="text-dark fs-5 fw-bold mb-0 click-router"
                                                         @click="goToProductDetail(product.productId)"
                                                     >
-                                                        $ {{ product.price }} 元 / {{ product.unitQuantity }} /
-                                                        {{ product.unit }}
+                                                        $ {{ product.price }} 元
                                                     </p>
                                                 </div>
                                                 <div class="d-flex justify-content-center">
@@ -408,9 +430,6 @@ const loadFilteredProducts = async (category) => {
         <a href="#" class="btn btn-primary border-3 border-primary rounded-circle back-to-top"
             ><i class="fa fa-arrow-up"></i
         ></a>
-
-        <!-- 引入購物車 sidebar -->
-        <SideBarCartComponent />
     </div>
 </template>
 
@@ -428,5 +447,18 @@ const loadFilteredProducts = async (category) => {
 
 .container-fluid {
     min-width: 100%;
+}
+
+.amount-badge {
+    position: absolute;
+    right: 20px;
+    white-space: nowrap; /* 禁止文字換行 */
+    padding: 0.3em 0.8em;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: white;
+    background-color: #f4b0a5;
+    border: 1px solid #ffb524;
+    border-radius: 1rem;
 }
 </style>

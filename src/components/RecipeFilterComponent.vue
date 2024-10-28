@@ -22,11 +22,8 @@
             <div class="col-md-3 mt-2">
                 <select class="form-select" v-model="filters.category">
                     <option value="">選擇主類別</option>
-                    <option
-                        v-for="(subcategories, category) in recipeFilterStore.categoryOptions"
-                        :key="category"
-                        :value="category"
-                    >
+                    <option v-for="(subcategories, category) in recipeFilterStore.categoryOptions" :key="category"
+                        :value="category">
                         {{ category }}
                     </option>
                 </select>
@@ -34,11 +31,8 @@
             <div class="col-md-3 mt-2">
                 <select class="form-select" v-model="filters.subcategory">
                     <option value="">選擇細部類別</option>
-                    <option
-                        v-for="subcategory in recipeFilterStore.subcategoryOptions"
-                        :key="subcategory"
-                        :value="subcategory"
-                    >
+                    <option v-for="subcategory in recipeFilterStore.subcategoryOptions" :key="subcategory"
+                        :value="subcategory">
                         {{ subcategory }}
                     </option>
                 </select>
@@ -53,27 +47,14 @@
             </div>
 
             <div v-if="showSearchField && filters.searchType === 'recipeName'" class="col-md-9 mx-auto mt-2">
-                <input
-                    type="text"
-                    v-model="filters.searchWord"
-                    class="form-control w-100 rounded-3"
-                    placeholder="輸入食譜名稱"
-                />
+                <input type="text" v-model="filters.searchWord" class="form-control w-100 rounded-3"
+                    placeholder="輸入食譜名稱" />
             </div>
 
             <div v-if="showSearchField && filters.searchType === 'ingredient'" class="col-md-9 mx-auto mt-2">
-                <multiselect
-                    v-model="selectedIngredients"
-                    :options="groupedIngredients"
-                    placeholder="搜尋或選擇食材 (可以多選)"
-                    :multiple="true"
-                    :close-on-select="false"
-                    group-label="category"
-                    group-values="ingredients"
-                    :group-select="false"
-                    track-by="ingredientId"
-                    :custom-label="customLabel"
-                >
+                <multiselect v-model="selectedIngredients" :options="groupedIngredients" placeholder="搜尋或選擇食材 (可以多選)"
+                    :multiple="true" :close-on-select="false" group-label="category" group-values="ingredients"
+                    :group-select="false" track-by="ingredientId" :custom-label="customLabel">
                     <span slot="noResult">找不到該食材</span>
                 </multiselect>
             </div>
@@ -99,13 +80,16 @@ const ingredientStore = useIngredientStore();
 
 const { filters, selectedIngredients } = storeToRefs(recipeFilterStore);
 
-const { groupedIngredients, fetchIngredients } = ingredientStore;
-
+const { groupedIngredients } = storeToRefs(ingredientStore);
+const { fetchIngredients } = ingredientStore;
 onMounted(async () => {
+
     await fetchIngredients();
+
 });
 
 function customLabel(option) {
+    // console.log('Custom label function invoked for option:', option);
     const label = option.ingredientName || '';
     const synonym = option.synonym ? ` (${option.synonym})` : '';
     return `${label}${synonym}`;
@@ -113,7 +97,7 @@ function customLabel(option) {
 // Emit 篩選條件變更
 const emit = defineEmits(['filterChange']);
 function onFiltersChange() {
-    console.log('Filters changed:', filters.value, selectedIngredients.value);
+    // console.log('Filters changed:', filters.value, selectedIngredients.value);
     emit('filterChange', {
         filters: filters.value,
         selectedIngredients: selectedIngredients.value,
@@ -123,6 +107,14 @@ function onFiltersChange() {
 // Watch `filters` 和 `selectedIngredients`，當它們變化時觸發 `onFiltersChange`
 watch(filters, onFiltersChange, { deep: true });
 watch(selectedIngredients, onFiltersChange, { deep: true });
+//清空子類別
+watch(
+    () => filters.value.category,
+    (newCategory) => {
+        // console.log('主類別改變:', newCategory);
+        filters.value.subcategory = '';
+    }
+);
 </script>
 
 <style scoped>
