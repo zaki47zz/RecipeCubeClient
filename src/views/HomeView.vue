@@ -45,43 +45,6 @@ onMounted(() => {
         </div>
     </section>
 
-    <section>
-        <div class="container-fluid py-6 banner-ad">
-            <div class="container">
-                <div class="row g-4">
-                    <div class="col-lg-3 col-md-6 wow animate__fadeInDown" data-wow-delay="0.1s">
-                        <div class="fact-item blur rounded-3 text-center h-100 p-5">
-                            <i class="fa-solid fa-book fa-4x text-dark mb-4"></i>
-                            <p class="mb-2 fs-5">我們擁有的食譜</p>
-                            <CountUp class="text-dark display-4 mb-0" :end-val="321" :duration="2.5" />
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 wow animate__fadeInDown" data-wow-delay="0.3s">
-                        <div class="fact-item blur rounded-3 text-center h-100 p-5">
-                            <i class="fa-solid fa-bread-slice fa-4x text-dark mb-4"></i>
-                            <p class="mb-2 fs-5">提供已定義的食材</p>
-                            <CountUp class="text-dark display-4 mb-0" :end-val="233" :duration="2.5" />
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 wow animate__fadeInDown" data-wow-delay="0.5s">
-                        <div class="fact-item blur rounded-3 text-center h-100 p-5">
-                            <i class="fa-solid fa-users fa-4x text-dark mb-4"></i>
-                            <p class="mb-2 fs-5">目前的群組</p>
-                            <CountUp class="text-dark display-4 mb-0" :end-val="745" :duration="2.5" />
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 wow animate__fadeInDown" data-wow-delay="0.7s">
-                        <div class="fact-item blur rounded-3 text-center h-100 p-5">
-                            <i class="fa-solid fa-user fa-4x text-dark mb-4"></i>
-                            <p class="mb-2 fs-5">目前的使用者</p>
-                            <CountUp class="text-dark display-4 mb-0" :end-val="1546" :duration="2.5" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <section class="service-section banner-wrapper">
         <div class="container-fluid pb-6 pt-5">
             <div class="container">
@@ -139,6 +102,43 @@ onMounted(() => {
                                     >根據庫存消耗狀態自動生成採購清單，讓您在購物時更有效率。支援多人共享，方便家庭成員協作。</span
                                 >
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container-fluid py-6 banner-ad">
+            <div class="container">
+                <div class="row g-4">
+                    <div class="col-lg-3 col-md-6 wow animate__fadeInDown" data-wow-delay="1.1s">
+                        <div class="fact-item blur rounded-3 text-center h-100 p-5">
+                            <i class="fa-solid fa-book fa-4x text-dark mb-4"></i>
+                            <p class="mb-2 fs-5">我們擁有的食譜</p>
+                            <CountUp class="text-dark display-4 mb-0" :end-val="321" :duration="2.5" />
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 wow animate__fadeInDown" data-wow-delay="1.3s">
+                        <div class="fact-item blur rounded-3 text-center h-100 p-5">
+                            <i class="fa-solid fa-bread-slice fa-4x text-dark mb-4"></i>
+                            <p class="mb-2 fs-5">提供已定義的食材</p>
+                            <CountUp class="text-dark display-4 mb-0" :end-val="233" :duration="2.5" />
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 wow animate__fadeInDown" data-wow-delay="1.5s">
+                        <div class="fact-item blur rounded-3 text-center h-100 p-5">
+                            <i class="fa-solid fa-users fa-4x text-dark mb-4"></i>
+                            <p class="mb-2 fs-5">目前的群組</p>
+                            <CountUp class="text-dark display-4 mb-0" :end-val="745" :duration="2.5" />
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 wow animate__fadeInDown" data-wow-delay="1.7s">
+                        <div class="fact-item blur rounded-3 text-center h-100 p-5">
+                            <i class="fa-solid fa-user fa-4x text-dark mb-4"></i>
+                            <p class="mb-2 fs-5">目前的使用者</p>
+                            <CountUp class="text-dark display-4 mb-0" :end-val="1546" :duration="2.5" />
                         </div>
                     </div>
                 </div>
