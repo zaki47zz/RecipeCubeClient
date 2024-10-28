@@ -27,8 +27,9 @@ function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('UserData');
     localStorage.removeItem('UserId');
+    localStorage.removeItem('GroupId');
 
-    
+
     // localStorage.clear(); //清空localStorage
     location.reload();  // 刷新頁面以更新登入狀態
 }
@@ -60,7 +61,7 @@ function logout() {
                 <RouterLink class="nav-link me-2" to="/user">
                     <i class="fa fa-user opacity-6 me-1" aria-hidden="true"
                         :class="isTransparent ? 'text-white' : 'text-dark'" @click="isNavbarShown = false"></i>
-                    {{username}}
+                    {{ username }}
                 </RouterLink>
             </li>
             <li @click="logout" class="nav-item">
