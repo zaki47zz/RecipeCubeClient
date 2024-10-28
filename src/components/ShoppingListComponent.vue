@@ -120,12 +120,19 @@ const addToCart = (product) => {
 
 // 將所有不在購物車中的推薦商品加入購物車
 const addAllToCart = () => {
+    let addedAny = false;
     runningOutIngredients.value.forEach((ingredient) => {
         if (!checkProductInCart(ingredient.ingredientId)) {
             addIngredientToCart(ingredient);
+            addedAny = true;
         }
     });
     loadCart(); // 重新載入購物車資訊
+
+    // 如果有添加任何商品，顯示一次 Swal 提示
+    if (addedAny) {
+        Swal.fire('已將所有商品加入購物車！');
+    }
 };
 </script>
 
