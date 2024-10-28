@@ -1,54 +1,36 @@
 <script setup>
-import { computed, ref, watchEffect } from 'vue';
-import { useIngredientStore } from '@/stores/ingredientStore';
+import { ref, onMounted } from 'vue';
+import { useInventoryStore } from '@/stores/inventoryStore';
 
-const ingredientStore = useIngredientStore();
-const { getUnitGram } = ingredientStore;
+const inventoryStore = useInventoryStore();
+const { getRunningOutIngredients } = inventoryStore;
 
 const isModalVisible = ref(false);
-const ingredientGram = ref([]);
+const runningOutIngredients = ref([]);
 
-const props = defineProps({
-    color: String,
-    addingInventoriesList: Array,
-});
-
-//利用watchEffect監視addingInventoriesList，當有新值傳來就觸發以下函式
-watchEffect(async () => {
-    //如果props.addingInventoriesList存在且有值
-    if (props.addingInventoriesList && props.addingInventoriesList.length > 0) {
-        //利用Promise物件的all函式可以包裝多個非同步函式並透過多執行緒加快速度
-        const results = await Promise.all(
-            //map遍歷陣列，將每個inventory.ingredientId傳入getUnitGram函式，得到每個ingredient的克數
-            props.addingInventoriesList.map(async (inventory) => {
-                const result = await getUnitGram(inventory.ingredientId);
-                return result;
-            })
-        );
-        //過濾掉undefined(即ingredientId對不到，或單位為克的食材)
-        ingredientGram.value = results.filter((item) => item);
-    }
+onMounted(async () => {
+    runningOutIngredients.value = await getRunningOutIngredients();
 });
 </script>
 
 <template>
-    <p class="conversion-button badge bg-secondary" @click="isModalVisible = true">
-        <i class="fa-solid fa-repeat"></i> 數量換算表
-    </p>
+    <button class="btn bg-white p-0 m-0">
+        <p @click="isModalVisible = true"><i class="fa-solid fa-bars"></i></p>
+    </button>
 
-    <el-dialog
-        v-model="isModalVisible"
-        title="單位與克數換算表"
-        width="30%"
-        center
-        :class="color === 'primary' ? 'bg-primary-subtle' : 'bg-danger-subtle'"
-    >
-        <ul v-if="ingredientGram.length > 0">
-            <li v-for="ingredient in ingredientGram" :key="ingredient.ingredientId" class="fs-5 ps-3 my-2">
-                <strong>{{ ingredient.ingredientName }} 每{{ ingredient.unit }}大約 {{ ingredient.gram }} 克</strong>
+    <el-dialog v-model="isModalVisible" width="30%" center>
+        <ul v-if="runningOutIngredients.length > 0">
+            <h4 class="text-center text-black pt-3">推薦購物清單</h4>
+            <li
+                v-for="(ingredient, index) in runningOutIngredients"
+                :key="ingredient.ingredientId"
+                class="fs-5 ps-3 my-2"
+            >
+                ({{ ingredient.source }})
+                <strong>{{ ingredient.ingredientName }} 還剩下 {{ ingredient.quantity }} {{ ingredient.unit }}</strong>
             </li>
         </ul>
-        <p v-else>暫無換算資料</p>
+        <p v-else>暫無推薦購物清單</p>
         <template #footer>
             <span class="dialog-footer d-flex justify-content-center">
                 <el-button type="danger" @click="isModalVisible = false">關閉</el-button>
@@ -58,16 +40,6 @@ watchEffect(async () => {
 </template>
 
 <style lang="css" scoped>
-.conversion-button {
-    cursor: pointer;
-}
-
-.conversion-button:hover {
-    opacity: 95%;
-    transform: scale(1.02) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
-}
-
 * {
     box-sizing: border-box;
 }

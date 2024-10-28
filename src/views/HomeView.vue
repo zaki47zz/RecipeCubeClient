@@ -4,6 +4,7 @@ import WOW from 'wow.js';
 import 'wow.js/css/libs/animate.css';
 import { ref, onMounted, watch } from 'vue';
 import PerfectScrollbar from 'perfect-scrollbar';
+import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 
 // 用於儲存 perfect-scrollbar 實例和滾動位置
 const scrollPosition = ref(0);
@@ -55,6 +56,7 @@ const updateScrollPosition = () => {
                                 <div class="hero-text-tablecell">
                                     <p class="subtitle">總是擔心浪費食材嗎?</p>
                                     <h1>食譜魔方 RecipeCube</h1>
+                                    <ShoppingListComponent></ShoppingListComponent>
                                     <div class="mt-3">
                                         <RouterLink to="/buyandcook"
                                             ><button class="btn bg-gradient-warning me-3">
