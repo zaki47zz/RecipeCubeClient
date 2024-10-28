@@ -12,7 +12,7 @@ const products = ref([]);
 const filteredProducts = ref([]);
 const selectedCategory = ref(null);
 const ProductsByPriceRange = ref([]);
-const priceRange = ref(1200); // 預設最大價格
+const priceRange = ref(1400); // 預設最大價格
 const searchTerm = ref('');
 const checkFilterProducts = ref(false);
 
@@ -313,7 +313,7 @@ const loadFilteredProducts = async (category) => {
                                                 class="form-range w-100"
                                                 v-model="priceRange"
                                                 min="1"
-                                                max="1200"
+                                                max="1400"
                                                 @input="handlePriceRangeInput"
                                             />
                                             <span>當前價格上限: {{ priceRange }}</span>
@@ -455,8 +455,8 @@ const loadFilteredProducts = async (category) => {
     font-size: 1.1rem;
     font-weight: 700;
     color: white;
-    background-color: #ffb524;
-    border: 1px solid #81c408;
+    background-color: #f4b0a5;
+    border: 1px solid #ffb524;
     border-radius: 1rem;
 }
 </style>
