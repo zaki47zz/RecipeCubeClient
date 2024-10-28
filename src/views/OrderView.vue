@@ -5,12 +5,14 @@ import { ref } from 'vue';
 import 'vue3-easy-data-table/dist/style.css';
 import type { Header, Item } from 'vue3-easy-data-table';
 import { useInventoryStore } from '@/stores/inventoryStore';
+import { usePantryStore } from '@/stores/pantryStore';
 import { useRouter } from 'vue-router';
 
 // @ts-ignore
 const BaseURL = import.meta.env.VITE_API_BASEURL; //先忽略對import.meta錯誤檢查
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL
 const inventoryStore = useInventoryStore(); // 使用ingredientStore pinia
+const pantryStore = usePantryStore();
 
 // 讀取localStorage的"UserId"
 const UserId = localStorage.getItem('UserId');
@@ -197,14 +199,16 @@ const handleCompleteOrder = async (item) => {
             // 強制轉換布林值 以免出錯
             const visibilityConvertToBoolean = visibility === 'true' ? true : false;
 
+            const action = '增加';
             // 遍歷選擇的訂單中的每個商品，並傳遞數量
             for (const item of selectedOrder.value.getOrderItemProductUnit) {
-                await inventoryStore.postInventory(
-                    item.ingredientId,
-                    item.quantity * item.unitQuantity,
-                    undefined,
-                    visibilityConvertToBoolean
-                );
+                await inventoryStore.postInventory({
+                    ingredientId: item.ingredientId,
+                    quantity: item.quantity * item.unitQuantity,
+                    expiryDate: undefined,
+                    visibility: visibilityConvertToBoolean,
+                });
+                await pantryStore.postPantry(UserId, item.ingredientId, item.quantity * item.unitQuantity, action);
             }
 
             // 更新訂單狀態為 5，表示訂單已完成
