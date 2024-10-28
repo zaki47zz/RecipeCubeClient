@@ -239,7 +239,7 @@ const loadFilteredProducts = async (category) => {
                                     <input
                                         type="search"
                                         class="form-control p-3"
-                                        placeholder="keywords"
+                                        placeholder="請輸入商品名稱"
                                         aria-describedby="search-icon-1"
                                         v-model="searchTerm"
                                         @input="handleSearch"
@@ -354,6 +354,9 @@ const loadFilteredProducts = async (category) => {
                                                 <!-- 品名 -->
                                                 <h4 class="click-router" @click="goToProductDetail(product.productId)">
                                                     {{ product.productName }}
+                                                    <span class="amount-badge"
+                                                        >{{ product.unitQuantity }} {{ product.unit }}</span
+                                                    >
                                                 </h4>
                                                 <div class="d-flex justify-content-center">
                                                     <!-- 價格 單位量 單位 -->
@@ -361,8 +364,7 @@ const loadFilteredProducts = async (category) => {
                                                         class="text-dark fs-5 fw-bold mb-0 click-router"
                                                         @click="goToProductDetail(product.productId)"
                                                     >
-                                                        $ {{ product.price }} 元 / {{ product.unitQuantity }} /
-                                                        {{ product.unit }}
+                                                        $ {{ product.price }} 元
                                                     </p>
                                                 </div>
                                                 <div class="d-flex justify-content-center">
@@ -443,5 +445,18 @@ const loadFilteredProducts = async (category) => {
 
 .container-fluid {
     min-width: 100%;
+}
+
+.amount-badge {
+    position: absolute;
+    right: 20px;
+    white-space: nowrap; /* 禁止文字換行 */
+    padding: 0.3em 0.8em;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: white;
+    background-color: #ffb524;
+    border: 1px solid #81c408;
+    border-radius: 1rem;
 }
 </style>
