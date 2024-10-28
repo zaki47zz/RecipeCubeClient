@@ -2,6 +2,8 @@
 // 引入 ref API，用來管理響應式狀態
 import { ref } from 'vue';
 
+const exclusiveingredientNames = ref("沒有不可食用食材");
+
 // 定義一個響應式變數 username，儲存使用者名稱
 const username = ref('');
 // 動態修改橫幅標題
@@ -22,6 +24,25 @@ const setActive = (index) => {
     activeIndex.value = index; // 更新 activeIndex，根據點擊的項目
     section.value = menuItems.value[activeIndex.value]; // 根據 index 動態更新橫幅標題
 };
+
+const exclusiveIngredientsString = localStorage.getItem('ExclusiveIngredients');
+
+// 確保有獲取到資料
+if (exclusiveIngredientsString) {
+    // 將字符串按換行符拆分成數組
+    const exclusiveIngredientsArray = exclusiveIngredientsString.split('\n');
+
+    // 使用 map 提取食材名稱，並用逗號連接
+    exclusiveingredientNames.value = exclusiveIngredientsArray
+        .map(item => {
+            const parts = item.split(','); // 根據逗號分隔
+            return parts[1].replace(/"/g, ''); // 返回名稱，去掉引號
+        })
+        .join(','); // 用逗號連接所有名稱
+
+    console.log(exclusiveingredientNames); // 這裡將顯示 "年糕,酥皮,蘋果"
+}
+
 </script>
 
 <template>
@@ -61,7 +82,8 @@ const setActive = (index) => {
                 <p><strong>電話:</strong> {{ storedUserData?.Phone }}</p>
             </div>
             <div v-else-if="activeIndex === 1">
-                飲食偏好
+                <p><strong>偏好食材:</strong> {{ }}</p>
+                <p><strong>不可食用食材:</strong> {{ exclusiveingredientNames }}</p>
             </div>
             <div v-else-if="activeIndex === 2">
                 <p><strong>群組:</strong> {{ storedUserData?.GroupId }}</p>
