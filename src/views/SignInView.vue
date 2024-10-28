@@ -1,35 +1,35 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import VueJwtDecode from 'vue-jwt-decode' // 引入 jwt-decode 函式庫
+import VueJwtDecode from 'vue-jwt-decode'; // 引入 jwt-decode 函式庫
 const router = useRouter(); // 創建 router 實例
-const API_URL = `${import.meta.env.VITE_API_BASEURL}/Users/SignIn`
+const API_URL = `${import.meta.env.VITE_API_BASEURL}/Users/SignIn`;
 const user = ref({
     // 後續記得帳號功能，可以在按下記住密碼button後，將帳號密碼寫入localStorage，登入時讀取localStorage帳密，在tokin到期時一起清除
-    "email": "user18@example.com",
-    "password": "Password123!"
-})
+    email: 'user18@example.com',
+    password: 'Password123!',
+});
 const loginmessage = ref('');
 const send = async () => {
     const response = await fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify(user.value),
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
     });
 
-    const datas = await response.json()
+    const datas = await response.json();
     if (response.ok) {
         const originaltoken = datas.token; //原始JWT
-        console.log("原始jwt", originaltoken);
+        console.log('原始jwt', originaltoken);
         const decoded = VueJwtDecode.decode(originaltoken);
-        console.log("解碼後jwt", decoded);
+        console.log('解碼後jwt', decoded);
         if (originaltoken) {
             localStorage.setItem('token', originaltoken); // 儲存 JWT
             /*  解析JWT 取得並將UserId寫入localStorage.getItem('UserId')
                 使用方法 const UserId = localStorage.getItem('UserId');
             */
             try {
-                const decoded = VueJwtDecode.decode(originaltoken);  // 使用 VueJwtDecode 解碼 JWT
+                const decoded = VueJwtDecode.decode(originaltoken); // 使用 VueJwtDecode 解碼 JWT
                 console.log(decoded);
                 if (decoded.certserialnumber) {
                     // console.log(decoded.unique_name);
@@ -40,17 +40,17 @@ const send = async () => {
                         UserId: decoded.certserialnumber,
                         Email: decoded.email,
                         UserName: decodeURIComponent(escape(decoded.unique_name)),
-                        Phone: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/mobilephone"],
+                        Phone: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/mobilephone'],
                         GroudId: decoded.groupsid,
-                        Exp: decoded.exp,  // JWT 過期時間
-                        // Email: decoded.email  
+                        Exp: decoded.exp, // JWT 過期時間
+                        // Email: decoded.email
                     };
 
                     localStorage.setItem('UserId', UserData.UserId);
-                    const UserId = localStorage.getItem('UserId')
+                    const UserId = localStorage.getItem('UserId');
 
-                    localStorage.setItem('GroudId', UserData.GroudId);
-                    const GroudId = localStorage.getItem('GroudId')
+                    localStorage.setItem('GroupId', UserData.GroudId);
+                    const GroupId = localStorage.getItem('GroupId');
 
                     localStorage.setItem('UserData', JSON.stringify(UserData));
                     // console.log("已存入的使用者資料:", UserData);
@@ -59,23 +59,22 @@ const send = async () => {
                     console.error('找不到 certserialnumber');
                 }
             } catch (error) {
-                console.error("解碼 JWT 失敗", error);
+                console.error('解碼 JWT 失敗', error);
             }
             alert(datas.message);
             return true; // 表示登入成功
         }
-    }
-    else {
-        loginmessage.value = datas.message;; // 顯示錯誤訊息
+    } else {
+        loginmessage.value = datas.message; // 顯示錯誤訊息
         return false; // 表示登入失敗
     }
-}
+};
 
 const handleLoginClick = async () => {
     const loginSuccess = await send(); // 先發送請求
     if (loginSuccess) {
         // 只有在登入成功時才刷新頁面並跳轉到 "/"
-        location.assign('/');  // 刷新頁面並跳轉到 "/"
+        location.assign('/'); // 刷新頁面並跳轉到 "/"
     }
 };
 </script>
@@ -88,16 +87,32 @@ const handleLoginClick = async () => {
                 <p class="mb-0">輸入Email與密碼登入</p>
             </div>
             <div class="card-body">
-                <form @submit.prevent="handleLoginClick"> <!-- 修改事件綁定為 handleLoginClick -->
+                <form @submit.prevent="handleLoginClick">
+                    <!-- 修改事件綁定為 handleLoginClick -->
                     <div class="text-danger" role="alert"></div>
                     <div class="form-floating mb-3">
-                        <input type="email" class="form-control" name="email" v-model.trim="user.email" id="email"
-                            placeholder="Email" required />
+                        <input
+                            type="email"
+                            class="form-control"
+                            name="email"
+                            v-model.trim="user.email"
+                            id="email"
+                            placeholder="Email"
+                            required
+                        />
                         <label for="email" class="form-label">Email</label>
                     </div>
                     <div class="form-floating mb-3">
-                        <input type="password" class="form-control" name="password" v-model.trim="user.password"
-                            id="password" value="" placeholder="密碼" required />
+                        <input
+                            type="password"
+                            class="form-control"
+                            name="password"
+                            v-model.trim="user.password"
+                            id="password"
+                            value=""
+                            placeholder="密碼"
+                            required
+                        />
                         <label for="password" class="form-label">密碼</label>
                     </div>
                     <span class="text-danger text-center">{{ loginmessage }}</span>
@@ -115,13 +130,15 @@ const handleLoginClick = async () => {
             <div class="card-footer text-center pt-0 px-lg-2 px-1">
                 <p class="mb-4 text-sm mx-auto">
                     不記得密碼嗎?
-                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'resetpassword' }">忘記密碼
+                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'resetpassword' }"
+                        >忘記密碼
                     </RouterLink>
-                    <br>
+                    <br />
                     還沒有註冊過會員嗎?
-                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'signup' }">註冊
+                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'signup' }"
+                        >註冊
                     </RouterLink>
-                    <br>
+                    <br />
                     沒有收到驗證電子郵件嗎?
                     <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'resetemailConfirmed' }">
                         重新發送電子郵件確認
@@ -131,6 +148,5 @@ const handleLoginClick = async () => {
         </div>
     </div>
 </template>
-
 
 <style lang="css" scoped></style>

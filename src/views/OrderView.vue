@@ -16,9 +16,7 @@ const pantryStore = usePantryStore();
 
 // 讀取localStorage的"UserId"
 const UserId = localStorage.getItem('UserId');
-const GroupId = localStorage.getItem('GroudId');
 console.log(UserId);
-console.log(GroupId);
 
 // 測試用userId
 // const testUserId = 'e9f150de-3492-47b4-9efe-783a6b9d9319'
@@ -218,6 +216,7 @@ const handleCompleteOrder = async (item) => {
             await updateOrderStatus(selectedOrder.value);
 
             Swal.fire('完成訂單', '訂單已成功更新', 'success');
+            loadOrderByUserId(UserId); // 完成訂單更新 重新載入
         } catch (error) {
             Swal.fire('錯誤', '無法完成訂單操作', 'error');
         }
