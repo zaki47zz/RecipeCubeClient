@@ -64,7 +64,7 @@ const setActive = (index) => {
                 飲食偏好
             </div>
             <div v-else-if="activeIndex === 2">
-                <p><strong>群組:</strong> {{ storedUserData?.GroudId }}</p>
+                <p><strong>群組:</strong> {{ storedUserData?.GroupId }}</p>
             </div>
         </div>
     </div>

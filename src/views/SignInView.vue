@@ -41,7 +41,7 @@ const send = async () => {
                         Email: decoded.email,
                         UserName: decodeURIComponent(escape(decoded.unique_name)),
                         Phone: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/mobilephone'],
-                        GroudId: decoded.groupsid,
+                        GroupId: decoded.groupsid,
                         Exp: decoded.exp, // JWT 過期時間
                         // Email: decoded.email
                     };
@@ -49,7 +49,7 @@ const send = async () => {
                     localStorage.setItem('UserId', UserData.UserId);
                     const UserId = localStorage.getItem('UserId');
 
-                    localStorage.setItem('GroupId', UserData.GroudId);
+                    localStorage.setItem('GroupId', UserData.GroupId);
                     const GroupId = localStorage.getItem('GroupId');
 
                     localStorage.setItem('UserData', JSON.stringify(UserData));
