@@ -7,6 +7,7 @@ import type { Header, Item } from 'vue3-easy-data-table';
 import { useInventoryStore } from '@/stores/inventoryStore';
 import { usePantryStore } from '@/stores/pantryStore';
 import { useRouter } from 'vue-router';
+import { tr } from 'element-plus/es/locale';
 
 // @ts-ignore
 const BaseURL = import.meta.env.VITE_API_BASEURL; //先忽略對import.meta錯誤檢查
@@ -49,11 +50,11 @@ const loadOrderByUserId = async (userId) => {
 loadOrderByUserId(UserId);
 
 const headers: Header[] = [
-    { text: '訂單編號', value: 'orderNum' },
-    { text: '訂單時間', value: 'orderTime' },
-    { text: '商品項目數量', value: 'productLength' },
-    { text: '訂單總價', value: 'orderAmount' },
-    { text: '狀態', value: 'orderStatus' },
+    { text: '訂單編號', value: 'orderNum', sortable: true },
+    { text: '訂單時間', value: 'orderTime', sortable: true },
+    { text: '商品項目數量', value: 'productLength', sortable: true },
+    { text: '訂單總價', value: 'orderAmount', sortable: true },
+    { text: '狀態', value: 'orderStatus', sortable: true },
     { text: '操作', value: 'operation' },
 ];
 

@@ -245,7 +245,20 @@ onBeforeUnmount(() => {
     <!-- Cart Page Start -->
     <div class="container-fluid py-2">
         <div class="container py-2">
-            <div class="table-responsive">
+            <div v-if="cartProducts.length === 0" class="text-center">
+                <h4 class="animate__animated animate__flipInX" style="color: #94ccc3">
+                    購物車沒商品，快去買一些東西吧！
+                </h4>
+                <p>
+                    <img
+                        class="animate__animated animate__bounceIn"
+                        src="@/assets/img/ForBackground/logo去背.png"
+                        alt=""
+                        style="width: 500px; height: auto"
+                    />
+                </p>
+            </div>
+            <div v-else class="table-responsive">
                 <table class="table">
                     <thead>
                         <tr>
