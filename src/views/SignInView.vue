@@ -58,9 +58,6 @@ const send = async () => {
 
                     const exclusiveingredientsResponse = await fetch(`${import.meta.env.VITE_API_BASEURL}/UserIngredients/ExclusiveIngredientsName?User_Id=${UserData.UserId}`);
 
-                    console.log("exclusiveingredientsResponse",exclusiveingredientsResponse);
-
-
                     const exclusiveingredientsGet = await exclusiveingredientsResponse.json();
                     if (exclusiveingredientsResponse.ok) {
                         // 使用 map 方法提取 ID 和名稱，然後將它們轉換為字符串格式
@@ -72,14 +69,13 @@ const send = async () => {
                     }
 
                     const preferingredientsResponse = await fetch(`${import.meta.env.VITE_API_BASEURL}/UserIngredients/PreferedIngredientsName?User_Id=${UserData.UserId}`);
-
                     const preferingredientsGet = await preferingredientsResponse.json();
                     if (preferingredientsResponse.ok) {
-                        const preferIngredientsFormatted = 
-                        preferingredientsGet.preferredIngredients
-                        map(ingredient => `${ingredient.preferIngredientId},"${ingredient.preferIngredientName}"`)
+                        const preferIngredientsFormatted = preferingredientsGet.preferredIngredients
+                        .map(ingredient => `${ingredient.preferIngredientId},"${ingredient.preferIngredientName}"`)
                         .join('\n'); // 每對食材用換行符分隔，根據需要可以修改
                         // 將格式化的字符串存入 localStorage
+                        localStorage.setItem('PreferIngredients', preferIngredientsFormatted);
                     }
 
 
