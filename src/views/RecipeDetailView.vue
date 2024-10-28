@@ -118,72 +118,119 @@ const startCooking = () => {
         </section>
         <!-- 食譜header end -->
         <!-- 食譜詳細資訊 start -->
-        <section class="recipe-details mt-4">
-            <div class="container-fluid">
-                <h3>食譜詳細資訊</h3>
-                <el-descriptions :column="4" border>
-                    <el-descriptions-item label="用戶名稱">{{ userIdDisplay }}</el-descriptions-item>
-                    <el-descriptions-item label="葷素限制">{{
-                        recipeStore.selectedRecipe.restriction ? '素' : '葷'
-                    }}</el-descriptions-item>
-                    <el-descriptions-item label="類別">{{ recipeStore.selectedRecipe.category }}</el-descriptions-item>
-                    <el-descriptions-item label="可見性">{{
-                        recipeStore.selectedRecipe.visibility ? '公開' : '私人'
-                    }}</el-descriptions-item>
-                </el-descriptions>
+        <section class="recipe-details mt-5 text-center">
+            <p class="recipe-title display-4">{{ recipeStore.selectedRecipe.recipeName }}</p>
+            <p class="recipe-description">為之後的食譜描述預留空間</p>
+            <div class="container mt-4">
+                <table class="table table-bordered table-striped table-hover description-table">
+                    <tbody>
+                        <tr>
+                            <th>烹飪時長</th>
+                            <td>50 分鐘</td>
+                        </tr>
+                        <tr>
+                            <th>用戶名稱</th>
+                            <td>{{ userIdDisplay }}</td>
+                        </tr>
+                        <tr>
+                            <th>葷素限制</th>
+                            <td>{{ recipeStore.selectedRecipe.restriction ? '素' : '葷' }}</td>
+                        </tr>
+                        <tr>
+                            <th>類別</th>
+                            <td>{{ recipeStore.selectedRecipe.category }}</td>
+                        </tr>
+                        <tr>
+                            <th>細部類別</th>
+                            <td>{{ recipeStore.selectedRecipe.detailedCategory }}</td>
+                        </tr>
+                        <tr>
+                            <th>可見性</th>
+                            <td>{{ recipeStore.selectedRecipe.visibility ? '公開' : '私人' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </section>
         <!-- 食譜詳細資訊 end -->
         <!-- 食材列表 start -->
-        <section class="mt-5">
+        <section class="mt-5 text-center">
             <div class="container-fluid">
-                <h3>食材</h3>
                 <div class="row g-4">
-                    <el-card
-                        v-for="(ingredient, index) in recipeIngredients"
-                        :key="ingredient.ingredientId"
-                        shadow="hover"
-                        class="col-12 col-md-6 col-lg-4"
-                    >
-                        <div class="align-items-center">
-                            <el-checkbox v-model="selectedIngredients"></el-checkbox>
-                            {{ ingredient.ingredientName }}
-                            {{ ingredient.requiredQuantity }} {{ ingredient.unit }}
-                            (庫存數量:
-                            <span
-                                :class="{
-                                    'text-danger': ingredient.remainingQuantity < ingredient.requiredQuantity,
-                                }"
-                            >
-                                {{ ingredient.remainingQuantity }} {{ ingredient.unit }} </span
-                            >)
+                    <!-- 食材 -->
+                    <div class="col-12">
+                        <h3 class="text-black">食材</h3>
+                        <div class="row g-4">
+                            <ul class="list-unstyled">
+                                <li
+                                    v-for="(ingredient, index) in recipeIngredients"
+                                    :key="ingredient.ingredientId"
+                                    class="mb-1"
+                                >
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <el-checkbox
+                                            v-model="selectedIngredients"
+                                            :label="ingredient.ingredientName"
+                                            class="mt-2"
+                                        ></el-checkbox>
+                                        <span
+                                            :style="{
+                                                'text-decoration-line': selectedIngredients.includes(
+                                                    ingredient.ingredientName
+                                                )
+                                                    ? 'line-through'
+                                                    : 'none',
+                                            }"
+                                            class="ms-2"
+                                        >
+                                            {{ ingredient.requiredQuantity }} {{ ingredient.unit }}
+                                            (庫存數量:
+                                            <span
+                                                :class="{
+                                                    'text-danger':
+                                                        ingredient.remainingQuantity < ingredient.requiredQuantity,
+                                                }"
+                                            >
+                                                {{ ingredient.remainingQuantity }} {{ ingredient.unit }} </span
+                                            >)
+                                        </span>
+                                    </div>
+                                </li>
+                            </ul>
                         </div>
-                    </el-card>
+                    </div>
+                    <!-- 調味料 -->
+                    <div class="col-12">
+                        <h3 class="text-black">調味料</h3>
+                        <div
+                            class="seasoning-tags mt-3"
+                            style="display: flex; flex-wrap: wrap; justify-content: center"
+                        >
+                            <el-tag
+                                v-for="(seasoning, index) in seasoningList"
+                                :key="index"
+                                type="primary"
+                                effect="light"
+                                size="large"
+                                class="mb-2 me-3"
+                            >
+                                {{ seasoning }}
+                            </el-tag>
+                        </div>
+                    </div>
                 </div>
-                <!-- 調味料 start -->
-                <h3>調味料</h3>
-                <div class="seasoning-tags" style="display: flex">
-                    <el-tag
-                        v-for="(seasoning, index) in seasoningList"
-                        :key="index"
-                        type="primary"
-                        effect="light"
-                        size="large"
-                        class="mb-2 me-3"
-                    >
-                        {{ seasoning }}
-                    </el-tag>
-                </div>
-                <!-- 調味料 end -->
             </div>
         </section>
         <!-- 食材列表 end -->
 
         <!-- 步驟 start -->
-        <section class="mt-5">
-            <div class="recipe-steps my-4 wide-steps-container" :style="{ height: dynamicHeight, maxWidth: '600px' }">
+        <section class="mt-6 text-center">
+            <h3 class="text-black">烹飪步驟</h3>
+            <div
+                class="recipe-steps my-4 wide-steps-container d-flex justify-content-center"
+                :style="{ height: dynamicHeight, maxWidth: '600px' }"
+            >
                 <!-- 使用 el-steps 顯示步驟 -->
-                <h5>烹飪步驟</h5>
                 <el-steps :active="activeStep" direction="vertical">
                     <el-step
                         v-for="(step, index) in recipeSteps"
@@ -198,7 +245,7 @@ const startCooking = () => {
         <!-- 步驟 end -->
         <!-- 開始烹飪按鈕 start -->
         <div class="container-fluid text-center mt-5">
-            <el-button type="primary" @click="startCooking">開始烹飪</el-button>
+            <el-button type="success" size="large" @click="startCooking">烹飪完成</el-button>
         </div>
         <!-- 開始烹飪按鈕 end -->
     </div>
@@ -223,5 +270,46 @@ const startCooking = () => {
     position: relative;
     overflow: hidden;
     background: url('@/assets/img/ForBackground/ad-bg-pattern.png') no-repeat center / cover;
+}
+
+.recipe-title {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.recipe-description {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.description-table {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #f8f9fa;
+}
+
+.description-table th,
+.description-table td {
+    padding: 12px;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.description-table th {
+    background-color: #e9ecef;
+    color: #495057;
+    width: 40%;
+    font-weight: 600;
+}
+
+.description-table td {
+    color: #212529;
+}
+
+.description-table tr:hover {
+    background-color: #f1f1f1;
 }
 </style>
