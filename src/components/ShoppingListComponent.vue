@@ -12,11 +12,19 @@ onMounted(async () => {
     runningOutIngredients.value = await getRunningOutIngredients();
 });
 
+// 判斷購物車裡面是否已經有清單上的商品 Start
+
+// 從localStorage讀購物車
+const storeCart = localStorage.getItem('productCart');
+// 將storeCart 寫進 cart ， JSON 要轉換
 const cart = ref([]);
+cart.value = storeCart ? JSON.parse(storeCart) : [];
+
 const checkProductInCart = (ingredientId) => {
-    cart.value = localStorage.getItem('productCart');
     return cart.value.some((item) => item.ingredientId === ingredientId);
 };
+
+// 判斷購物車裡面是否已經有清單上的商品 End
 </script>
 
 <template>
@@ -32,13 +40,13 @@ const checkProductInCart = (ingredientId) => {
                 :key="ingredient.ingredientId"
                 class="fs-5 ps-3 my-2 position-relative"
             >
-                <span class="{ 'in-cart': checkProductInCart(runningOutIngredients.ingredientId) }">
+                <span :class="{ 'in-cart': checkProductInCart(ingredient.ingredientId) }">
                     ({{ ingredient.source }})
                     <strong
                         >{{ ingredient.ingredientName }} 還剩下 {{ ingredient.quantity }} {{ ingredient.unit }}</strong
                     >
-                    <button class="cart-button"><i class="fa-solid fa-cart-arrow-down"></i></button>
                 </span>
+                <button class="cart-button"><i class="fa-solid fa-cart-arrow-down"></i></button>
             </li>
         </ul>
         <p v-else>暫無推薦購物清單</p>
