@@ -97,6 +97,12 @@ const totalPrice = computed(() => {
     }, 0);
 });
 
+const selectedShipping = ref(220); //運費
+//計算商品總價 含運費
+const totalPriceShippingFee = computed(() => {
+    return totalPrice.value + parseInt(selectedShipping.value, 10);
+});
+
 // ======================================================================================================================
 // 組件掛載時監聽 localStorage 的變化
 onMounted(() => {
@@ -170,7 +176,7 @@ const addOrder = async () => {
                 orderId: OrderNum,
                 userId: userId || null,
                 orderTime: dateTimeOrder(),
-                totalAmount: totalPrice.value || 0,
+                totalAmount: totalPriceShippingFee.value || 0,
                 status: 1 || 6, //狀態預設寫 1 未付款,2 已付款，3 訂單確認中，4 已出貨，5 訂單完成
                 orderAddress: userInput.value.orderAddress || null,
                 orderPhone: user.value.phoneNumber || null,
@@ -310,7 +316,7 @@ const ToOrders = () => {
                             </div>
                         </div>
                         <div class="form-item">
-                            <label class="form-label my-3">地址<sup>*</sup></label>
+                            <label class="fs-5 form-label my-3">地址<sup>*</sup></label>
                             <input
                                 type="text"
                                 class="form-control"
@@ -319,15 +325,15 @@ const ToOrders = () => {
                             />
                         </div>
                         <div class="form-item">
-                            <label class="form-label my-3">電話<sup>*</sup></label>
+                            <label class="fs-5 form-label my-3">電話<sup>*</sup></label>
                             <input type="tel" class="form-control" v-model="user.phoneNumber" />
                         </div>
                         <div class="form-item">
-                            <label class="form-label my-3">電子郵件<sup>*</sup></label>
+                            <label class="fs-5 form-label my-3">電子郵件<sup>*</sup></label>
                             <input type="email" class="form-control" v-model="user.email" />
                         </div>
                         <div class="form-item">
-                            <label class="form-label my-3">備註</label>
+                            <label class="fs-5 form-label my-3">備註</label>
                             <textarea
                                 name="text"
                                 class="form-control"
@@ -387,42 +393,30 @@ const ToOrders = () => {
                                     <tr>
                                         <th scope="row"></th>
                                         <td class="py-5">
-                                            <p class="mb-0 text-dark py-4">Shipping</p>
+                                            <p class="mb-0 text-dark py-4">運輸方式</p>
                                         </td>
                                         <td colspan="3" class="py-5">
                                             <div class="form-check text-start">
                                                 <input
-                                                    type="checkbox"
+                                                    type="radio"
                                                     class="form-check-input bg-primary border-0"
                                                     id="Shipping-1"
-                                                    name="Shipping-1"
-                                                    value="Shipping"
+                                                    name="shippingOption"
+                                                    value="220"
+                                                    v-model="selectedShipping"
                                                 />
-                                                <label class="form-check-label" for="Shipping-1">Free Shipping</label>
+                                                <label class="form-check-label" for="Shipping-1">冷藏宅配：$ 220</label>
                                             </div>
                                             <div class="form-check text-start">
                                                 <input
-                                                    type="checkbox"
+                                                    type="radio"
                                                     class="form-check-input bg-primary border-0"
                                                     id="Shipping-2"
-                                                    name="Shipping-1"
-                                                    value="Shipping"
+                                                    name="shippingOption"
+                                                    value="0"
+                                                    v-model="selectedShipping"
                                                 />
-                                                <label class="form-check-label" for="Shipping-2"
-                                                    >Flat rate: $15.00</label
-                                                >
-                                            </div>
-                                            <div class="form-check text-start">
-                                                <input
-                                                    type="checkbox"
-                                                    class="form-check-input bg-primary border-0"
-                                                    id="Shipping-3"
-                                                    name="Shipping-1"
-                                                    value="Shipping"
-                                                />
-                                                <label class="form-check-label" for="Shipping-3"
-                                                    >Local Pickup: $8.00</label
-                                                >
+                                                <label class="form-check-label" for="Shipping-2">自取：$ 0</label>
                                             </div>
                                         </td>
                                     </tr>
@@ -435,73 +429,12 @@ const ToOrders = () => {
                                         <td class="py-5"></td>
                                         <td class="py-5">
                                             <div class="py-3 border-bottom border-top">
-                                                <p class="mb-0 text-dark">$ {{ totalPrice }}</p>
+                                                <p class="mb-0 text-dark">$ {{ totalPriceShippingFee }}</p>
                                             </div>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
-                        <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
-                            <div class="col-12">
-                                <div class="form-check text-start my-3">
-                                    <input
-                                        type="checkbox"
-                                        class="form-check-input bg-primary border-0"
-                                        id="Transfer-1"
-                                        name="Transfer"
-                                        value="Transfer"
-                                    />
-                                    <label class="form-check-label" for="Transfer-1">Direct Bank Transfer</label>
-                                </div>
-                                <p class="text-start text-dark">
-                                    Make your payment directly into our bank account. Please use your Order ID as the
-                                    payment reference. Your order will not be shipped until the funds have cleared in
-                                    our account.
-                                </p>
-                            </div>
-                        </div>
-                        <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
-                            <div class="col-12">
-                                <div class="form-check text-start my-3">
-                                    <input
-                                        type="checkbox"
-                                        class="form-check-input bg-primary border-0"
-                                        id="Payments-1"
-                                        name="Payments"
-                                        value="Payments"
-                                    />
-                                    <label class="form-check-label" for="Payments-1">Check Payments</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
-                            <div class="col-12">
-                                <div class="form-check text-start my-3">
-                                    <input
-                                        type="checkbox"
-                                        class="form-check-input bg-primary border-0"
-                                        id="Delivery-1"
-                                        name="Delivery"
-                                        value="Delivery"
-                                    />
-                                    <label class="form-check-label" for="Delivery-1">Cash On Delivery</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
-                            <div class="col-12">
-                                <div class="form-check text-start my-3">
-                                    <input
-                                        type="checkbox"
-                                        class="form-check-input bg-primary border-0"
-                                        id="Paypal-1"
-                                        name="Paypal"
-                                        value="Paypal"
-                                    />
-                                    <label class="form-check-label" for="Paypal-1">Paypal</label>
-                                </div>
-                            </div>
                         </div>
                         <div class="row g-4 text-center align-items-center justify-content-center pt-4">
                             <button
@@ -509,7 +442,7 @@ const ToOrders = () => {
                                 class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary"
                                 @click="addOrder()"
                             >
-                                Place Order
+                                結帳去
                             </button>
                         </div>
                     </div>
