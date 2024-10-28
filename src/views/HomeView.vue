@@ -1,8 +1,15 @@
-<script setup>
+<script setup lang="ts">
 import CountUp from 'vue-countup-v3';
 import WOW from 'wow.js';
 import 'wow.js/css/libs/animate.css';
-import { onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
+import PerfectScrollbar from 'perfect-scrollbar';
+import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
+
+// 用於儲存 perfect-scrollbar 實例和滾動位置
+const scrollPosition = ref(0);
+let ps = null;
+const startCount = ref(false);
 
 onMounted(() => {
     const wow = new WOW({
@@ -11,10 +18,31 @@ onMounted(() => {
         offset: 100,
         mobile: true,
         live: true,
-        scrollContainer: '#scroll-container', // 或你的 PerfectScrollbar 容器的選擇器
+        scrollContainer: '#scroll-container',
     });
     wow.init();
+
+    const scrollContainer = document.getElementById('scroll-container');
+    if (scrollContainer) {
+        // 初始化 perfect-scrollbar
+        ps = new PerfectScrollbar(scrollContainer);
+        // 監聽滾動事件
+        scrollContainer.addEventListener('ps-scroll-y', updateScrollPosition);
+    }
 });
+
+watch(scrollPosition, (newPosition) => {
+    if (newPosition >= 800) {
+        startCount.value = true;
+    }
+});
+
+const updateScrollPosition = () => {
+    const scrollContainer = document.getElementById('scroll-container');
+    if (scrollContainer) {
+        scrollPosition.value = scrollContainer.scrollTop;
+    }
+};
 </script>
 
 <template>
@@ -28,6 +56,7 @@ onMounted(() => {
                                 <div class="hero-text-tablecell">
                                     <p class="subtitle">總是擔心浪費食材嗎?</p>
                                     <h1>食譜魔方 RecipeCube</h1>
+                                    <ShoppingListComponent></ShoppingListComponent>
                                     <div class="mt-3">
                                         <RouterLink to="/buyandcook"
                                             ><button class="btn bg-gradient-warning me-3">
@@ -113,32 +142,52 @@ onMounted(() => {
         <div class="container-fluid py-6 banner-ad">
             <div class="container">
                 <div class="row g-4">
-                    <div class="col-lg-3 col-md-6 wow animate__fadeInDown" data-wow-delay="1.1s">
+                    <div class="col-lg-3 col-md-6 wow animate__fadeInDown" data-wow-delay="0.1s">
                         <div class="fact-item blur rounded-3 text-center h-100 p-5">
                             <i class="fa-solid fa-book fa-4x text-dark mb-4"></i>
                             <p class="mb-2 fs-5">我們擁有的食譜</p>
-                            <CountUp class="text-dark display-4 mb-0" :end-val="321" :duration="2.5" />
+                            <CountUp
+                                v-if="startCount"
+                                class="counter text-dark display-4 mb-0"
+                                :end-val="321"
+                                :duration="2.5"
+                            />
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6 wow animate__fadeInDown" data-wow-delay="1.3s">
+                    <div class="col-lg-3 col-md-6 wow animate__fadeInDown" data-wow-delay="0.3s">
                         <div class="fact-item blur rounded-3 text-center h-100 p-5">
                             <i class="fa-solid fa-bread-slice fa-4x text-dark mb-4"></i>
                             <p class="mb-2 fs-5">提供已定義的食材</p>
-                            <CountUp class="text-dark display-4 mb-0" :end-val="233" :duration="2.5" />
+                            <CountUp
+                                v-if="startCount"
+                                class="counter text-dark display-4 mb-0"
+                                :end-val="233"
+                                :duration="2.5"
+                            />
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6 wow animate__fadeInDown" data-wow-delay="1.5s">
+                    <div class="col-lg-3 col-md-6 wow animate__fadeInDown" data-wow-delay="0.5s">
                         <div class="fact-item blur rounded-3 text-center h-100 p-5">
                             <i class="fa-solid fa-users fa-4x text-dark mb-4"></i>
                             <p class="mb-2 fs-5">目前的群組</p>
-                            <CountUp class="text-dark display-4 mb-0" :end-val="745" :duration="2.5" />
+                            <CountUp
+                                v-if="startCount"
+                                class="counter text-dark display-4 mb-0"
+                                :end-val="745"
+                                :duration="2.5"
+                            />
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6 wow animate__fadeInDown" data-wow-delay="1.7s">
+                    <div class="col-lg-3 col-md-6 wow animate__fadeInDown" data-wow-delay="0.7s">
                         <div class="fact-item blur rounded-3 text-center h-100 p-5">
                             <i class="fa-solid fa-user fa-4x text-dark mb-4"></i>
                             <p class="mb-2 fs-5">目前的使用者</p>
-                            <CountUp class="text-dark display-4 mb-0" :end-val="1546" :duration="2.5" />
+                            <CountUp
+                                v-if="startCount"
+                                class="counter text-dark display-4 mb-0"
+                                :end-val="1546"
+                                :duration="2.5"
+                            />
                         </div>
                     </div>
                 </div>

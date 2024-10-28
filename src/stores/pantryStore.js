@@ -54,7 +54,7 @@ export const usePantryStore = defineStore('pantryStore', () => {
         }
     };
 
-    const getFrequentlyUsedIngredients = async () => {
+    const getFrequentlyUsedIngredients = async (threshold) => {
         //先抓資料
         await fetchPantries();
 
@@ -72,7 +72,7 @@ export const usePantryStore = defineStore('pantryStore', () => {
         //把次數少於總次數20%以下的食材過濾掉
         //先用key()取出所有key，filter過篩，map輸出Id陣列
         const frequentlyUsedIngredientId = Object.keys(ingredientCount)
-            .filter((ingredientId) => ingredientCount[ingredientId] / totalCount > 0.1)
+            .filter((ingredientId) => ingredientCount[ingredientId] / totalCount > threshold)
             .map((ingredientId) => ingredientId);
 
         let frequentlyUsedIngredients;
