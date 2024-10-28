@@ -56,7 +56,6 @@ const updateScrollPosition = () => {
                                 <div class="hero-text-tablecell">
                                     <p class="subtitle">總是擔心浪費食材嗎?</p>
                                     <h1>食譜魔方 RecipeCube</h1>
-                                    <ShoppingListComponent></ShoppingListComponent>
                                     <div class="mt-3">
                                         <RouterLink to="/buyandcook"
                                             ><button class="btn bg-gradient-warning me-3">
