@@ -1,14 +1,18 @@
 <script setup>
 import RecipeFilterComponent from '@/components/RecipeFilterComponent.vue';
+import RecipeDetailComponent from '@/components/RecipeDetailComponent.vue';
 import { useCookingStore } from '@/stores/cookingStore';
 import { useInventoryStore } from '@/stores/inventoryStore';
 import { useRecipeFilterStore } from '@/stores/recipeFilterStore';
+import { useRecipeStore } from '@/stores/recipeStore';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch, nextTick, computed } from 'vue';
+import { useRouter } from 'vue-router';
 
 const cookingStore = useCookingStore();
 const inventoryStore = useInventoryStore();
 const recipeFilterStore = useRecipeFilterStore();
+const recipeStore = useRecipeStore();
 // 使用 filterStore 的篩選條件
 const { filters, selectedIngredients } = storeToRefs(recipeFilterStore);
 const { inventories } = storeToRefs(inventoryStore); // 使用庫存資料並引入 fetch 方法
@@ -19,23 +23,31 @@ const recipes = ref([]); // 用來儲存 API 返回的食譜
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
 const apiUrl = `${BaseURL}/RecommendRecipe/Recommend`;
-
+const scrollContainer = ref(null);
+const router = useRouter();
+// 當打開對話框時，重置子組件中的 activeStep
+const onDialogOpened = () => {
+    if (scrollContainer.value) {
+        const psInstance = scrollContainer.value.$el; // Get the underlying DOM element of PerfectScrollbar
+        psInstance.scrollTop = 0; // Reset the scroll position to top
+    }
+};
 const getRecipeImageUrl = (fileName) => {
     return `${BaseUrlWithoutApi}/images/recipe/${fileName}`;
 };
 // 呼叫推薦食譜API
 const fetchRecipes = async () => {
     try {
-        console.log('Fetching recipes with filters:', filters.value);
+        // console.log('Fetching recipes with filters:', filters.value);
         const userId = localStorage.getItem('UserId');
-        console.log(userId);
+        // console.log(userId);
         if (!userId) {
             console.error('無法獲取用戶 ID');
             return;
         }
         const ingredientIds = cookingInventories.value.map((inventory) => inventory.ingredientId);
 
-        console.log('Ingredient IDs for API:', ingredientIds);
+        // console.log('Ingredient IDs for API:', ingredientIds);
         // 構造請求 body
         const requestBody = {
             UserId: userId,
@@ -68,7 +80,7 @@ const fetchRecipes = async () => {
         // 解析返回的結果
         const data = await response.json();
         recipes.value = data; // 將返回的食譜儲存在 `recipes` 中
-        console.log('推薦食譜:', recipes.value);
+        // console.log('推薦食譜:', recipes.value);
     } catch (error) {
         console.error('錯誤:', error);
     }
@@ -157,7 +169,7 @@ const completeMatchRecipes = computed(() => {
     const completeRecipes = filteredRecipes.value.filter((recipe) => {
         return recipe.ingredientIds.every((id) => cookingInventories.value.some((inv) => inv.ingredientId === id));
     });
-    console.log('完全匹配的食譜:', completeRecipes);
+    // console.log('完全匹配的食譜:', completeRecipes);
     return completeRecipes;
 });
 
@@ -174,23 +186,28 @@ const partialMatchRecipes = computed(() => {
                 .map((id) => {
                     // 獲取食材名稱
                     const ingredientName = recipe.ingredientNames[recipe.ingredientIds.indexOf(id)];
-                    // console.log(`找到缺少的食材名稱: ${ingredientName}，對應的 ID: ${id}`);
 
                     // 解構 missingIngredients
                     const missingIngredientsList = JSON.parse(JSON.stringify(recipe.missingIngredients));
 
                     // 使用 IngredientId 查找缺少的食材詳細資訊
-                    // console.log(`正在查找是否有 IngredientId 為 ${id} 的缺少食材...`, missingIngredientsList);
                     const missingIngredientDetail = missingIngredientsList.find(
                         (missing) => missing.ingredientId === id
                     );
 
                     // 檢查是否找到對應的食材詳細資訊
-                    // console.log(`查找結果：`, missingIngredientDetail);
+                    let missingQuantity = missingIngredientDetail?.missingQuantity;
+                    let ingredientUnit = missingIngredientDetail?.unit;
 
-                    // 保留食材的單位和缺少的數量
-                    const ingredientUnit = missingIngredientDetail?.unit || '未知單位';
-                    const missingQuantity = missingIngredientDetail?.missingQuantity || 0;
+                    // 如果找不到缺少的食材，且該食材在庫存中但未被選擇
+                    if (missingQuantity === undefined && inventories.value.some((inv) => inv.ingredientId === id)) {
+                        missingQuantity = '未選擇食材';
+                        ingredientUnit = '';
+                    } else {
+                        // 保留食材的單位和缺少的數量
+                        missingQuantity = missingQuantity || 0;
+                        ingredientUnit = ingredientUnit || '未知單位';
+                    }
 
                     // 回傳包含完整資訊的缺少食材物件
                     return {
@@ -211,11 +228,26 @@ const partialMatchRecipes = computed(() => {
         });
 
     // 顯示最終部分匹配的食譜資訊
-    console.log('部分匹配的食譜:', partialRecipes);
+    // console.log('部分匹配的食譜:', partialRecipes);
     return partialRecipes;
 });
 
 //#endregion 分類 完全符合/不符合食譜
+
+function useSelectedRecipe() {
+    const recipeId = recipeStore.selectedRecipe.recipeId;
+    if (!recipeId) {
+        console.error('無法獲取食譜 ID');
+        return;
+    }
+    // 這裡寫你需要執行的邏輯
+    console.log("使用選定的食譜", recipeId);
+    // 比如導航到新的頁面或者呼叫 API
+    // 使用 Vue Router 導航到新的頁面
+    localStorage.setItem('isFromGenerateRecipe', 'true');
+    router.push(`/generaterecipe/recipeDetail/${recipeStore.selectedRecipe.recipeId}`);
+}
+
 </script>
 
 <template>
@@ -236,12 +268,10 @@ const partialMatchRecipes = computed(() => {
                     <h4>
                         您輸入了
                         <span class="text-info text-gradient">{{ cookingInventories.length }}</span>
-                        樣食材<span v-if="isShowingString"
-                            >，並決定
+                        樣食材<span v-if="isShowingString">，並決定
                             <span v-if="isUsingInventory" class="text-info text-gradient">納入</span>
                             <span v-else class="text-info text-gradient">不納入</span>
-                            庫存食材一起檢索</span
-                        >
+                            庫存食材一起檢索</span>
                     </h4>
                 </div>
             </div>
@@ -298,13 +328,11 @@ const partialMatchRecipes = computed(() => {
             <h3>符合所有食材的食譜</h3>
             <div class="row row-cols-1 row-cols-md-2 g-3">
                 <div v-for="(recipe, index) in completeMatchRecipes" :key="index">
-                    <div class="card recipe-card shadow-sm rounded-3 d-flex flex-row align-items-center p-0">
+                    <div class="card recipe-card shadow-sm rounded-3 d-flex flex-row align-items-center p-0"
+                        @click="recipeStore.selectRecipe(recipe)">
                         <div class="image-container">
-                            <img
-                                :src="getRecipeImageUrl(recipe.photoName)"
-                                :alt="recipe.recipeName"
-                                class="recipe-image"
-                            />
+                            <img :src="getRecipeImageUrl(recipe.photoName)" :alt="recipe.recipeName"
+                                class="recipe-image" />
                         </div>
                         <div class="p-3 w-100 d-flex flex-column justify-content-start align-items-center">
                             <h5 class="mt-3 text-center">{{ recipe.recipeName }}</h5>
@@ -327,13 +355,11 @@ const partialMatchRecipes = computed(() => {
             <h3 class="mt-5">缺少某些食材的食譜</h3>
             <div class="row row-cols-1 row-cols-md-2 g-3">
                 <div v-for="(recipe, index) in partialMatchRecipes" :key="index">
-                    <div class="card recipe-card shadow-sm rounded-3 d-flex flex-row align-items-center p-0">
+                    <div class="card recipe-card shadow-sm rounded-3 d-flex flex-row align-items-center p-0"
+                        @click="recipeStore.selectRecipe(recipe)">
                         <div class="image-container">
-                            <img
-                                :src="getRecipeImageUrl(recipe.photoName)"
-                                :alt="recipe.recipeName"
-                                class="recipe-image"
-                            />
+                            <img :src="getRecipeImageUrl(recipe.photoName)" :alt="recipe.recipeName"
+                                class="recipe-image" />
                         </div>
                         <div class="p-3 w-100 d-flex flex-column justify-content-start align-items-center">
                             <h5 class="mt-3 text-center">{{ recipe.recipeName }}</h5>
@@ -361,6 +387,19 @@ const partialMatchRecipes = computed(() => {
             </div>
         </div>
     </section>
+    <!-- el-dialog -->
+    <el-dialog v-model="recipeStore.dialogVisible" title="食譜詳細資訊" width="75%" @close="recipeStore.closeDialog" center
+        @opended="onDialogOpened">
+        <PerfectScrollbar ref="scrollContainer" class="custom-scroll-container">
+            <div class="dialog-content">
+                <RecipeDetailComponent :recipe="recipeStore.selectedRecipe" v-if="recipeStore.selectedRecipe" />
+            </div>
+        </PerfectScrollbar>
+        <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
+            <el-button @click="useSelectedRecipe" type="primary">使用該食譜</el-button>
+            <el-button @click="recipeStore.closeDialog" type="danger">關閉</el-button>
+        </span>
+    </el-dialog>
 </template>
 
 <style lang="css" scoped>
@@ -424,5 +463,16 @@ const partialMatchRecipes = computed(() => {
 
 .fade-in {
     animation: fadeIn 1s ease-in-out forwards;
+}
+
+.custom-scroll-container {
+    max-height: 350px;
+    overflow: hidden;
+}
+
+.dialog-content {
+    max-height: 100%;
+    padding-right: 15px;
+    /* Adjust as needed to avoid content overflow */
 }
 </style>
