@@ -7,9 +7,6 @@ import { useRecipeStore } from '@/stores/recipeStore';
 const inventoryStore = useInventoryStore();
 const recipeStore = useRecipeStore();
 
-//追蹤用戶的食材是否已準備
-const ingredientChecks = ref([]);
-
 // 來追蹤用戶選擇的食材
 const selectedIngredients = ref([]);
 // 檢查 `selectedRecipe` 的初始值
