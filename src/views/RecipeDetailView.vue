@@ -7,14 +7,20 @@ import { useRecipeStore } from '@/stores/recipeStore';
 const inventoryStore = useInventoryStore();
 const recipeStore = useRecipeStore();
 
+//追蹤用戶的食材是否已準備
+const ingredientChecks = ref([]);
+
 // 來追蹤用戶選擇的食材
 const selectedIngredients = ref([]);
 // 檢查 `selectedRecipe` 的初始值
 console.log('selectedRecipe 初始值:', recipeStore.selectedRecipe);
 // 使用 watch 來監聽 `selectedRecipe` 的變化
-watch(() => recipeStore.selectedRecipe, (newVal, oldVal) => {
-    console.log('selectedRecipe 的變化:', oldVal, '=>', newVal);
-});
+watch(
+    () => recipeStore.selectedRecipe,
+    (newVal, oldVal) => {
+        console.log('selectedRecipe 的變化:', oldVal, '=>', newVal);
+    }
+);
 // 計算從 recipeStore 中取得的選擇的食譜
 const currentUser = { id: localStorage.getItem('UserId') }; // 這是示例，請根據實際情況設置當前用戶ID
 
@@ -27,7 +33,9 @@ const recipeIngredients = computed(() => {
         const unit = recipeStore.selectedRecipe.ingredientUnits[ingredientId] || '';
 
         // 找到屬於當前用戶的庫存項目
-        const inventoryItem = inventoryStore.inventories.find(item => item.ingredientId === ingredientId && item.userId === currentUser.id);
+        const inventoryItem = inventoryStore.inventories.find(
+            (item) => item.ingredientId === ingredientId && item.userId === currentUser.id
+        );
         const remainingQuantity = inventoryItem ? inventoryItem.quantity : 0;
 
         return {
@@ -40,10 +48,11 @@ const recipeIngredients = computed(() => {
     });
 });
 
-
 // 計算顯示的用戶 ID
 const userIdDisplay = computed(() => {
-    return recipeStore.selectedRecipe && recipeStore.selectedRecipe.userId === '0' ? '系統預設' : recipeStore.selectedRecipe?.userId;
+    return recipeStore.selectedRecipe && recipeStore.selectedRecipe.userId === '0'
+        ? '系統預設'
+        : recipeStore.selectedRecipe?.userId;
 });
 
 // 用來控制當前步驟的變數
@@ -53,9 +62,9 @@ let activeStep = ref(1);
 const recipeSteps = computed(() => {
     if (recipeStore.selectedRecipe?.steps) {
         return recipeStore.selectedRecipe.steps
-            .split('。')  // 按中文句號 "。" 分割步驟
-            .map(step => step.replace(/^\d+\.\s*/, '').trim())  // 移除每個步驟前面的 "1. "、"2. " 等編號
-            .filter(step => step !== '');  // 過濾掉空白步驟
+            .split('。') // 按中文句號 "。" 分割步驟
+            .map((step) => step.replace(/^\d+\.\s*/, '').trim()) // 移除每個步驟前面的 "1. "、"2. " 等編號
+            .filter((step) => step !== ''); // 過濾掉空白步驟
     }
     return [];
 });
@@ -75,7 +84,7 @@ const incrementStep = (index) => {
 // 將調味料字符串分割為列表
 const seasoningList = computed(() => {
     if (recipeStore.selectedRecipe?.seasoning) {
-        return recipeStore.selectedRecipe.seasoning.split(',').map(item => item.trim());
+        return recipeStore.selectedRecipe.seasoning.split(',').map((item) => item.trim());
     }
     return [];
 });
@@ -95,7 +104,6 @@ const startCooking = () => {
 };
 </script>
 
-
 <template>
     <div>
         <!-- 食譜header start -->
@@ -103,12 +111,7 @@ const startCooking = () => {
             <div class="banner-ad bg-warning-subtle block-2">
                 <div class="row banner-content pt-5">
                     <div class="content-wrapper text-center col-md-12">
-                        <h1>食譜製作 Recipe Cooking</h1>
-                        <header>
-                            <div class="container-fluid">
-                                <div class="row py-3"></div>
-                            </div>
-                        </header>
+                        <h1 class="pb-5">食譜製作 Recipe Cooking</h1>
                     </div>
                 </div>
             </div>
@@ -117,64 +120,77 @@ const startCooking = () => {
         <!-- 食譜詳細資訊 start -->
         <section class="recipe-details mt-4">
             <div class="container-fluid">
-                <el-descriptions title="食譜資訊" :column="2" border>
+                <h3>食譜詳細資訊</h3>
+                <el-descriptions :column="4" border>
                     <el-descriptions-item label="用戶名稱">{{ userIdDisplay }}</el-descriptions-item>
-                    <el-descriptions-item label="葷素限制">{{ recipeStore.selectedRecipe.restriction ? '素' : '葷'
-                        }}</el-descriptions-item>
+                    <el-descriptions-item label="葷素限制">{{
+                        recipeStore.selectedRecipe.restriction ? '素' : '葷'
+                    }}</el-descriptions-item>
                     <el-descriptions-item label="類別">{{ recipeStore.selectedRecipe.category }}</el-descriptions-item>
-                    <el-descriptions-item label="可見性">{{ recipeStore.selectedRecipe.visibility ? '公開' : '私人'
-                        }}</el-descriptions-item>
+                    <el-descriptions-item label="可見性">{{
+                        recipeStore.selectedRecipe.visibility ? '公開' : '私人'
+                    }}</el-descriptions-item>
                 </el-descriptions>
             </div>
         </section>
         <!-- 食譜詳細資訊 end -->
         <!-- 食材列表 start -->
-        <section class="ingredients-section mt-5">
+        <section class="mt-5">
             <div class="container-fluid">
-                <h5>食材與庫存</h5>
+                <h3>食材</h3>
                 <div class="row g-4">
-                    <el-card v-for="(ingredient, index) in recipeIngredients" :key="ingredient.ingredientId"
-                        shadow="hover" class="col-12 col-md-6 col-lg-4">
-                        <div class="d-flex align-items-center">
-                            <el-checkbox v-model="selectedIngredients" :label="ingredient.ingredientName" class="me-3">
-                            </el-checkbox>
-                            <div class="ingredient-info">
-                                <!-- <h5>{{ ingredient.ingredientName }}</h5> -->
-                                <p class="quantity-info">
-                                    需求數量: {{ ingredient.requiredQuantity }} {{ ingredient.unit }}
-                                </p>
-                                <p class="inventory-info">
-                                    庫存數量: <span
-                                        :class="{ 'text-danger': ingredient.remainingQuantity < ingredient.requiredQuantity }">
-                                        {{ ingredient.remainingQuantity }} {{ ingredient.unit }}
-                                    </span>
-                                </p>
-                            </div>
+                    <el-card
+                        v-for="(ingredient, index) in recipeIngredients"
+                        :key="ingredient.ingredientId"
+                        shadow="hover"
+                        class="col-12 col-md-6 col-lg-4"
+                    >
+                        <div class="align-items-center">
+                            <el-checkbox v-model="selectedIngredients"></el-checkbox>
+                            {{ ingredient.ingredientName }}
+                            {{ ingredient.requiredQuantity }} {{ ingredient.unit }}
+                            (庫存數量:
+                            <span
+                                :class="{
+                                    'text-danger': ingredient.remainingQuantity < ingredient.requiredQuantity,
+                                }"
+                            >
+                                {{ ingredient.remainingQuantity }} {{ ingredient.unit }} </span
+                            >)
                         </div>
                     </el-card>
                 </div>
+                <!-- 調味料 start -->
+                <h3>調味料</h3>
+                <div class="seasoning-tags" style="display: flex">
+                    <el-tag
+                        v-for="(seasoning, index) in seasoningList"
+                        :key="index"
+                        type="primary"
+                        effect="light"
+                        size="large"
+                        class="mb-2 me-3"
+                    >
+                        {{ seasoning }}
+                    </el-tag>
+                </div>
+                <!-- 調味料 end -->
             </div>
         </section>
         <!-- 食材列表 end -->
-        <!-- 調味料 s -->
-        <div class="col-3 seasoning-section mt-4">
-            <h5>調味料</h5>
-            <div class="seasoning-tags" style="display: flex;">
-                <el-tag v-for="(seasoning, index) in seasoningList" :key="index" type="primary" effect="light"
-                    class="mb-2 me-3">
-                    {{ seasoning }}
-                </el-tag>
-            </div>
-        </div>
-        <!-- 調味料 e -->
+
         <!-- 步驟 start -->
         <section class="mt-5">
             <div class="recipe-steps my-4 wide-steps-container" :style="{ height: dynamicHeight, maxWidth: '600px' }">
                 <!-- 使用 el-steps 顯示步驟 -->
                 <h5>烹飪步驟</h5>
                 <el-steps :active="activeStep" direction="vertical">
-                    <el-step v-for="(step, index) in recipeSteps" :key="index" :title="step"
-                        @click="incrementStep(index)"></el-step>
+                    <el-step
+                        v-for="(step, index) in recipeSteps"
+                        :key="index"
+                        :title="step"
+                        @click="incrementStep(index)"
+                    ></el-step>
                 </el-steps>
             </div>
         </section>
