@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import { useRouter } from 'vue-router';
 import { computed, ref, watch } from 'vue';
 import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
+import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
@@ -197,6 +198,10 @@ const loadFilteredProducts = async (category) => {
 </script>
 
 <template>
+    <!-- 引入購物車 sidebar -->
+    <SideBarCartComponent />
+    <!-- 引入購物清單 -->
+    <ShoppingListComponent />
     <div class="p-0 m-0">
         <!-- Single Page Header start -->
         <div class="container-fluid page-header py-5">
@@ -425,9 +430,6 @@ const loadFilteredProducts = async (category) => {
         <a href="#" class="btn btn-primary border-3 border-primary rounded-circle back-to-top"
             ><i class="fa fa-arrow-up"></i
         ></a>
-
-        <!-- 引入購物車 sidebar -->
-        <SideBarCartComponent />
     </div>
 </template>
 

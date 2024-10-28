@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
+import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
 
@@ -167,6 +168,11 @@ const incQuantity = (product) => {
     </ol>
     <!-- RouterLink End -->
 
+    <!-- 引入購物車 sidebar -->
+    <SideBarCartComponent />
+    <!-- 引入購物清單 -->
+    <ShoppingListComponent />
+
     <!-- Single Product Start -->
     <div class="container-fluid py-1 mt-5 d-flex justify-content-center">
         <div class="container py-1">
@@ -237,8 +243,6 @@ const incQuantity = (product) => {
                 </div>
             </div>
         </div>
-        <!-- 引入購物車 sidebar -->
-        <SideBarCartComponent />
     </div>
     <!-- Single Product End -->
 </template>

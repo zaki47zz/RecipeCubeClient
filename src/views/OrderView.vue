@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
+import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import Swal from 'sweetalert2';
 import { ref } from 'vue';
 import 'vue3-easy-data-table/dist/style.css';
@@ -333,6 +334,8 @@ const dateTimeOrder = () => {
         <div>
             <!-- 引入購物車 sidebar -->
             <SideBarCartComponent />
+            <!-- 引入購物清單 -->
+            <ShoppingListComponent />
         </div>
         <div>
             <!-- EasyDataTable Start -->

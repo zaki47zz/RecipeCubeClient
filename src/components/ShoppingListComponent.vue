@@ -11,11 +11,17 @@ const runningOutIngredients = ref([]);
 onMounted(async () => {
     runningOutIngredients.value = await getRunningOutIngredients();
 });
+
+const cart = ref([]);
+const checkProductInCart = (ingredientId) => {
+    cart.value = localStorage.getItem('productCart');
+    return cart.value.some((item) => item.ingredientId === ingredientId);
+};
 </script>
 
 <template>
-    <button class="btn bg-white p-0 m-0">
-        <p @click="isModalVisible = true"><i class="fa-solid fa-bars"></i></p>
+    <button class="floating-icon-shoppingList" @click="isModalVisible = true">
+        <i class="fa-solid fa-list-check"></i>
     </button>
 
     <el-dialog v-model="isModalVisible" width="30%" center>
@@ -24,10 +30,15 @@ onMounted(async () => {
             <li
                 v-for="(ingredient, index) in runningOutIngredients"
                 :key="ingredient.ingredientId"
-                class="fs-5 ps-3 my-2"
+                class="fs-5 ps-3 my-2 position-relative"
             >
-                ({{ ingredient.source }})
-                <strong>{{ ingredient.ingredientName }} 還剩下 {{ ingredient.quantity }} {{ ingredient.unit }}</strong>
+                <span class="{ 'in-cart': checkProductInCart(runningOutIngredients.ingredientId) }">
+                    ({{ ingredient.source }})
+                    <strong
+                        >{{ ingredient.ingredientName }} 還剩下 {{ ingredient.quantity }} {{ ingredient.unit }}</strong
+                    >
+                    <button class="cart-button"><i class="fa-solid fa-cart-arrow-down"></i></button>
+                </span>
             </li>
         </ul>
         <p v-else>暫無推薦購物清單</p>
@@ -40,6 +51,9 @@ onMounted(async () => {
 </template>
 
 <style lang="css" scoped>
+@import '@/assets/css/StoreStyle.css';
+@import '@/assets/css/StoreBootstrap.min.css';
+
 * {
     box-sizing: border-box;
 }
@@ -94,5 +108,32 @@ li:nth-child(3n)::marker {
 li:nth-child(3n - 1)::marker {
     content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xml:space='preserve' width='14' viewBox='0 0 50 50'%3E%3Cpath d='M48.3 23.7c-1-9.9-9.9-15.6-18.8-17.8-8.2-2.1-18.8-2.6-24.6 4.8C.6 16.2 1 23.6 4.3 29.3c-.5 1-.8 2-1 3-.6 4 2 7.6 5.1 10 5.9 4.4 14 4.2 19.6-.4 1.5 0 2.9-.2 4.4-.5 1.8 0 3.5 0 5.3-.1 2.3-.1 3.5-1.9 3.5-3.7 4.5-3.3 7.7-8.2 7.1-13.9zM9.1 17.8c1.1-4.1 4.9-5.8 8.8-6.1.9-.1 1.9-.1 2.9-.1-3.2 1.6-6.3 4.6-8 7.4-.1.1-.1.2-.2.3-1.1.9-2.1 1.9-3 2.9-.2.2-.4.4-.5.6-.4-1.7-.5-3.3 0-5z'/%3E%3C/svg%3E")
         ' ';
+}
+
+.cart-button {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #b2d1d3;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex; /* 使用 Flexbox 來居中內容 */
+    justify-content: center;
+    align-items: center;
+    width: 48px;
+    height: 100%; /* 保持寬高相等，讓圖標正中 */
+    padding: 0; /* 移除 padding */
+    margin-right: 5px;
+}
+.cart-button:hover {
+    background-color: #b8f0d3; /* 懸停時變色 */
+}
+
+.in-cart {
+    text-decoration: line-through;
+    color: red;
 }
 </style>

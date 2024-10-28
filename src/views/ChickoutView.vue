@@ -5,6 +5,7 @@ import { ref, computed, reactive, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import CircularJSON from 'circular-json';
 import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
+import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
 
@@ -301,6 +302,11 @@ const ToOrders = () => {
     </ol>
     <!-- RouterLink End -->
 
+    <!-- 引入購物車 sidebar -->
+    <SideBarCartComponent />
+    <!-- 引入購物清單 -->
+    <ShoppingListComponent />
+
     <!-- Checkout Page Start -->
     <div class="container-fluid py-2">
         <div class="container py-2">
@@ -449,8 +455,6 @@ const ToOrders = () => {
                 </div>
             </form>
         </div>
-        <!-- 引入購物車 sidebar -->
-        <SideBarCartComponent />
     </div>
     <!-- Checkout Page End -->
 </template>
