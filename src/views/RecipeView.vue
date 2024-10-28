@@ -293,7 +293,7 @@ watch(totalPages, (newTotalPages) => {
 }
 
 .custom-scroll-container {
-    max-height: 300px;
+    max-height: 350px;
     overflow: hidden;
 }
 

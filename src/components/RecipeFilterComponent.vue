@@ -85,7 +85,7 @@ const { fetchIngredients } = ingredientStore;
 onMounted(async () => {
 
     await fetchIngredients();
-    console.log(ingredientStore.groupedIngredients)
+
 });
 
 function customLabel(option) {
@@ -97,7 +97,7 @@ function customLabel(option) {
 // Emit 篩選條件變更
 const emit = defineEmits(['filterChange']);
 function onFiltersChange() {
-    console.log('Filters changed:', filters.value, selectedIngredients.value);
+    // console.log('Filters changed:', filters.value, selectedIngredients.value);
     emit('filterChange', {
         filters: filters.value,
         selectedIngredients: selectedIngredients.value,
@@ -111,7 +111,7 @@ watch(selectedIngredients, onFiltersChange, { deep: true });
 watch(
     () => filters.value.category,
     (newCategory) => {
-        console.log('主類別改變:', newCategory);
+        // console.log('主類別改變:', newCategory);
         filters.value.subcategory = '';
     }
 );
