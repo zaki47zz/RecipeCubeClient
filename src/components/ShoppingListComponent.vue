@@ -140,7 +140,7 @@ const addAllToCart = () => {
         <i class="fa-solid fa-list-check"></i>
     </button>
 
-    <el-dialog v-model="isModalVisible" width="30%" center :z-index="1000">
+    <el-dialog v-model="isModalVisible" width="40%" center :z-index="1000">
         <ul v-if="runningOutIngredients.length > 0">
             <h4 class="text-center text-black pt-3">推薦購物清單</h4>
             <button @click="addAllToCart" class="add-all-button">全部加入購物車</button>
