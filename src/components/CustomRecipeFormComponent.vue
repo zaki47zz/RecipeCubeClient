@@ -8,7 +8,7 @@ const recipeData = ref({
     restriction: null,
     category: '',
     detailedCategory: '',
-    visibility: null,
+    visibility: 0,
     // time: '',
     selectedIngredients: [],
     ingredientQuantities: [],
@@ -19,6 +19,8 @@ const recipeData = ref({
     status: true,
     westEast: null,
     previewUrl: '',
+    time: '',
+    description: '',
 });
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
@@ -192,6 +194,11 @@ const saveRecipe = async () => {
     formData.append('isCustom', recipeData.value.isCustom);
     formData.append('status', recipeData.value.status);
     formData.append('westEast', recipeData.value.westEast);
+    const timestring = recipeData.value.time + 'm'
+    console.log(timestring)
+    formData.append('time', timestring)
+
+    formData.append('description', recipeData.value.description)
     // 在這裡可以調用 API 來提交食譜資料4
     for (let pair of formData.entries()) {
         console.log(pair[0] + ': ' + pair[1]);
@@ -260,9 +267,9 @@ const saveRecipe = async () => {
                         </div>
                         <div class="col-6">
                             <select class="form-select fs-6 text-center" v-model="recipeData.visibility">
-                                <option :value="null">權限</option>
-                                <option :value="true">群組</option>
-                                <option :value="false">私有</option>
+                                <option :value="0">所有人可見</option>
+                                <option :value="1">群組可見</option>
+                                <option :value="2">私有</option>
                             </select>
                         </div>
                         <div class="col-6">
@@ -291,8 +298,8 @@ const saveRecipe = async () => {
                             </select>
                         </div>
                         <div class="col-6">
-                            <input type="text" v-model="recipeData.time" class="form-control fs-6 text-center"
-                                placeholder="輸入料理所需時間，例如: 30分鐘" />
+                            <input type="number" v-model="recipeData.time" class="form-control fs-6 text-center"
+                                placeholder="料理時間，例如: '30' 代表30分鐘" />
                         </div>
                     </div>
                 </div>
@@ -355,7 +362,16 @@ const saveRecipe = async () => {
 
             </div>
         </div>
-
+        <!-- 描述 -->
+        <div class="row mt-4 g-4">
+            <div class="col-md-12">
+                <h5 class="mb-2">食譜描述</h5>
+                <div class="p-3" style="background-color: rgba(255, 255, 255, 0.5); border-radius: 8px">
+                    <textarea v-model="recipeData.description" class="form-control border-0 w-100"
+                        style="background: transparent" rows="6" placeholder="請輸入描述..."></textarea>
+                </div>
+            </div>
+        </div>
         <!-- 保存按鈕 -->
         <div class="row mt-4">
             <div class="col-12 text-center">
