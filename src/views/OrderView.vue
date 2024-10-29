@@ -4,11 +4,10 @@ import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import Swal from 'sweetalert2';
 import { ref } from 'vue';
 import 'vue3-easy-data-table/dist/style.css';
-import type { Header, Item } from 'vue3-easy-data-table';
+import type { Header } from 'vue3-easy-data-table';
 import { useInventoryStore } from '@/stores/inventoryStore';
 import { usePantryStore } from '@/stores/pantryStore';
 import { useRouter } from 'vue-router';
-import { tr } from 'element-plus/es/locale';
 
 // @ts-ignore
 const BaseURL = import.meta.env.VITE_API_BASEURL; //先忽略對import.meta錯誤檢查
@@ -328,12 +327,6 @@ const openReviewModal = (order) => {
     isReviewModalVisible.value = true;
 };
 
-// 用戶評論表單
-const reviewForm = ref({
-    commentMessage: '',
-    commentStars: 0,
-});
-
 const submitReview = async (item) => {
     // 構建要提交的數據
     const reviewData = {
@@ -360,11 +353,27 @@ const submitReview = async (item) => {
         const result = await response.json();
         console.log('評論提交成功:', result);
 
-        // 可以在這裡進行成功提示或重置評論表單
+        // 成功提示
+        Swal.fire({
+            icon: 'success',
+            title: '提交成功!',
+            text: '感謝您的評論！',
+            confirmButtonText: '確定',
+        });
+
+        // 重置評論表單
         item.commentMessage = '';
         item.commentStars = 0;
     } catch (error) {
         console.error('提交評論出錯:', error);
+
+        // 失敗提示
+        Swal.fire({
+            icon: 'error',
+            title: '提交失敗',
+            text: '請稍後再試一次',
+            confirmButtonText: '確定',
+        });
     }
 };
 </script>
@@ -535,7 +544,13 @@ const submitReview = async (item) => {
                 </el-dialog>
                 <!-- 訂單詳情的 Modal End-->
                 <!-- 評價的 Modal Start -->
-                <el-dialog title="" v-model="isReviewModalVisible" width="75%" @close="closeReviewModal">
+                <el-dialog
+                    title=""
+                    v-model="isReviewModalVisible"
+                    width="75%"
+                    @close="closeReviewModal"
+                    :z-index="1000"
+                >
                     <h3>評論</h3>
                     <hr class="hr-shadow" />
                     <div
