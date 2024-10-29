@@ -389,7 +389,7 @@ function useSelectedRecipe() {
     </section>
     <!-- el-dialog -->
     <el-dialog v-model="recipeStore.dialogVisible" title="食譜詳細資訊" width="75%" @close="recipeStore.closeDialog" center
-        @opended="onDialogOpened">
+        destroy-on-close="true" @opended="onDialogOpened">
         <PerfectScrollbar ref="scrollContainer" class="custom-scroll-container">
             <div class="dialog-content">
                 <RecipeDetailComponent :recipe="recipeStore.selectedRecipe" v-if="recipeStore.selectedRecipe" />
