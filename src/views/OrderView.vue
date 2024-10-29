@@ -100,6 +100,7 @@ const loadTableItems = () => {
             orderStatus: status,
             showCompleteButton: status === '已付款' || status === '訂單確認中' || status === '已出貨', // 狀態為已付款或確認訂單或已出貨時顯示按鈕
             showContinuePay: status === '未付款', //狀態為未付款
+            showEvaluatesButton: status === '訂單完成', // 狀態為完成訂單
         });
         // console.log('Items loaded with showCompleteButton:', items.value);
     });
@@ -309,6 +310,63 @@ const dateTimeOrder = () => {
 };
 
 // 未完成付款訂單 繼續前往綠界付款 End
+
+// 點擊評論
+const isReviewModalVisible = ref(false);
+const handleReview = async (row) => {
+    const orderNum = row.orderNum;
+    const order = orders.value.find((order) => order.orderId === orderNum);
+    console.log('Selected Order:', order); // 檢查找到的訂單是否正確
+    openReviewModal(order);
+};
+const closeReviewModal = () => {
+    isReviewModalVisible.value = false;
+};
+const openReviewModal = (order) => {
+    selectedOrder.value = order;
+
+    isReviewModalVisible.value = true;
+};
+
+// 用戶評論表單
+const reviewForm = ref({
+    commentMessage: '',
+    commentStars: 0,
+});
+
+const submitReview = async (item) => {
+    // 構建要提交的數據
+    const reviewData = {
+        userId: UserId,
+        productId: item.productId,
+        commentMessage: item.commentMessage,
+        commentStars: item.commentStars,
+        date: new Date().toISOString().split('T')[0], // 取得當前日期，格式化為 yyyy-MM-dd
+    };
+
+    try {
+        const response = await fetch(`${BaseURL}/ProductEvaluates`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(reviewData),
+        });
+
+        if (!response.ok) {
+            throw new Error('提交失敗');
+        }
+
+        const result = await response.json();
+        console.log('評論提交成功:', result);
+
+        // 可以在這裡進行成功提示或重置評論表單
+        item.commentMessage = '';
+        item.commentStars = 0;
+    } catch (error) {
+        console.error('提交評論出錯:', error);
+    }
+};
 </script>
 
 <template>
@@ -366,6 +424,19 @@ const dateTimeOrder = () => {
                                 "
                             >
                                 完成訂單
+                            </button>
+                            <button
+                                v-if="item.showEvaluatesButton"
+                                @click.stop="handleReview(item)"
+                                style="
+                                    background-color: #edcfb3;
+                                    color: #ffffff;
+                                    border: none;
+                                    padding: 8px 12px;
+                                    border-radius: 5px;
+                                "
+                            >
+                                評價商品
                             </button>
                             <button
                                 v-if="item.showContinuePay"
@@ -463,6 +534,65 @@ const dateTimeOrder = () => {
                     </div>
                 </el-dialog>
                 <!-- 訂單詳情的 Modal End-->
+                <!-- 評價的 Modal Start -->
+                <el-dialog title="" v-model="isReviewModalVisible" width="75%" @close="closeReviewModal">
+                    <h3>評論</h3>
+                    <hr class="hr-shadow" />
+                    <div
+                        v-for="(item, index) in selectedOrder.getOrderItemProductUnit"
+                        :key="index"
+                        class="review-item"
+                        style="margin-bottom: 20px"
+                    >
+                        <div class="review-header" style="display: flex; align-items: center">
+                            <el-image
+                                style="
+                                    width: 100px;
+                                    height: 100px;
+                                    border-radius: 50%;
+                                    object-fit: cover;
+                                    margin-right: 10px;
+                                "
+                                :src="`${BaseUrlWithoutApi}/images/ingredient/${item.photo}?t=${Date.now()}`"
+                            />
+                            <div>
+                                <h3>{{ item.productName }}</h3>
+                            </div>
+                        </div>
+
+                        <el-form style="margin-top: 10px">
+                            <el-form-item label="評論內容" required>
+                                <el-input
+                                    type="textarea"
+                                    v-model="item.commentMessage"
+                                    placeholder="請輸入您的評論..."
+                                    :rows="4"
+                                    maxlength="200"
+                                    show-word-limit
+                                />
+                            </el-form-item>
+
+                            <div style="display: flex; align-items: center; justify-content: space-between">
+                                <el-form-item label="評分" style="margin: 0">
+                                    <el-rate
+                                        v-model="item.commentStars"
+                                        :texts="['糟透了', '有點失望', '正常', '不錯', '太棒了']"
+                                        show-text
+                                        size="large"
+                                        disabled-void-color="#ebeab7"
+                                        clearable
+                                    />
+                                </el-form-item>
+                                <!-- 個別的提交按鈕 -->
+                                <el-button class="button-85" type="primary" @click="submitReview(item)"
+                                    >提交評論</el-button
+                                >
+                            </div>
+                        </el-form>
+                        <hr class="hr-shadow" />
+                    </div>
+                </el-dialog>
+                <!-- 評價的 Modal End -->
             </div>
         </div>
     </div>
@@ -558,5 +688,69 @@ const dateTimeOrder = () => {
     border: 1px solid #e6b2b2; /* 边框颜色 */
     border-radius: 8px; /* 圆角 */
     padding: 30px 30px 1px; /* 内边距 */
+}
+
+.hr-shadow {
+    border: 0;
+    padding-top: 10px;
+    color: #d0d0d5;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: inset 0 10px 10px -10px;
+}
+
+.button-85 {
+    padding: 0.6em 2em;
+    border: none;
+    outline: none;
+    color: rgb(255, 255, 255);
+    background: #111;
+    cursor: pointer;
+    position: relative;
+    z-index: 0;
+    border-radius: 10px;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+.button-85:before {
+    content: '';
+    background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    background-size: 400%;
+    z-index: -1;
+    filter: blur(5px);
+    -webkit-filter: blur(5px);
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    animation: glowing-button-85 20s linear infinite;
+    transition: opacity 0.3s ease-in-out;
+    border-radius: 10px;
+}
+
+@keyframes glowing-button-85 {
+    0% {
+        background-position: 0 0;
+    }
+    50% {
+        background-position: 400% 0;
+    }
+    100% {
+        background-position: 0 0;
+    }
+}
+
+.button-85:after {
+    z-index: -1;
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #b2d1d3;
+    left: 0;
+    top: 0;
+    border-radius: 10px;
 }
 </style>

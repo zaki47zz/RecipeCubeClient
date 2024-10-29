@@ -260,7 +260,9 @@ const swiperProducts = computed(() => {
         <!-- 輪播 Start -->
         <div
             style="
-                background-color: #c4ebf0;
+                background-image: url('src/assets/img/Store/background-pattern-blue.png');
+                background-size: cover;
+                background-position: center;
                 border-radius: 15px;
                 padding: 20px;
                 box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
