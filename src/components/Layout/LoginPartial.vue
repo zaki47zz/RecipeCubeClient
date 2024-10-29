@@ -29,7 +29,7 @@ function logout() {
     localStorage.removeItem('UserId');
     localStorage.removeItem('GroupId');
     localStorage.removeItem('ExclusiveIngredients');
-    localStorage.removeItem('PreferedIngredients');
+    localStorage.removeItem('PreferIngredients');
 
     // localStorage.clear(); //清空localStorage
     location.reload();  // 刷新頁面以更新登入狀態

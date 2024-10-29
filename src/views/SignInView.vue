@@ -42,6 +42,8 @@ const send = async () => {
                         UserName: decodeURIComponent(escape(decoded.unique_name)),
                         Phone: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/mobilephone'],
                         GroupId: decoded.groupsid,
+                        ExclusiveChecked: decoded.ExclusiveChecked,
+                        PreferredChecked: decoded.PreferredChecked,
                         Exp: decoded.exp, // JWT 過期時間
                         // Email: decoded.email
                     };
@@ -56,27 +58,40 @@ const send = async () => {
                     // console.log("已存入的使用者資料:", UserData);
                     // console.log("UserId:", UserId);
 
-                    const exclusiveingredientsResponse = await fetch(`${import.meta.env.VITE_API_BASEURL}/UserIngredients/ExclusiveIngredientsName?User_Id=${UserData.UserId}`);
+                    // 根據 ExclusiveChecked 呼叫 API
+                    if (UserData.ExclusiveChecked) {
+                        try {
+                            const exclusiveIngredientsResponse = await fetch(`${import.meta.env.VITE_API_BASEURL}/UserIngredients/ExclusiveIngredientsName?User_Id=${UserData.UserId}`);
+                            const exclusiveIngredientsGet = await exclusiveIngredientsResponse.json();
 
-                    const exclusiveingredientsGet = await exclusiveingredientsResponse.json();
-                    if (exclusiveingredientsResponse.ok) {
-                        // 使用 map 方法提取 ID 和名稱，然後將它們轉換為字符串格式
-                        const exclusiveIngredientsFormatted = exclusiveingredientsGet.exclusiveIngredients
-                        .map(ingredient => `${ingredient.exclusiveIngredientId},"${ingredient.exclusiveIngredientName}"`)
-                        .join('\n'); // 每對食材用換行符分隔，根據需要可以修改
-                        // 將格式化的字符串存入 localStorage
-                        localStorage.setItem('ExclusiveIngredients', exclusiveIngredientsFormatted);
+                            if (exclusiveIngredientsResponse.ok && exclusiveIngredientsGet.exclusiveIngredients.length > 0) {
+                                const exclusiveIngredientsFormatted = exclusiveIngredientsGet.exclusiveIngredients
+                                    .map(ingredient => `${ingredient.exclusiveIngredientId},"${ingredient.exclusiveIngredientName}"`)
+                                    .join('\n');
+                                localStorage.setItem('ExclusiveIngredients', exclusiveIngredientsFormatted);
+                            }
+                        } catch (error) {
+                            console.error('獲取專屬食材時出錯:', error);
+                        }
                     }
 
-                    const preferingredientsResponse = await fetch(`${import.meta.env.VITE_API_BASEURL}/UserIngredients/PreferedIngredientsName?User_Id=${UserData.UserId}`);
-                    const preferingredientsGet = await preferingredientsResponse.json();
-                    if (preferingredientsResponse.ok) {
-                        const preferIngredientsFormatted = preferingredientsGet.preferredIngredients
-                        .map(ingredient => `${ingredient.preferIngredientId},"${ingredient.preferIngredientName}"`)
-                        .join('\n'); // 每對食材用換行符分隔，根據需要可以修改
-                        // 將格式化的字符串存入 localStorage
-                        localStorage.setItem('PreferIngredients', preferIngredientsFormatted);
+                    // 根據 PreferredChecked 呼叫 API
+                    if (UserData.PreferredChecked) {
+                        try {
+                            const preferredIngredientsResponse = await fetch(`${import.meta.env.VITE_API_BASEURL}/UserIngredients/PreferedIngredientsName?User_Id=${UserData.UserId}`);
+                            const preferredIngredientsGet = await preferredIngredientsResponse.json();
+
+                            if (preferredIngredientsResponse.ok && preferredIngredientsGet.preferredIngredients.length > 0) {
+                                const preferIngredientsFormatted = preferredIngredientsGet.preferredIngredients
+                                    .map(ingredient => `${ingredient.preferIngredientId},"${ingredient.preferIngredientName}"`)
+                                    .join('\n');
+                                localStorage.setItem('PreferIngredients', preferIngredientsFormatted);
+                            }
+                        } catch (error) {
+                            console.error('獲取偏好食材時出錯:', error);
+                        }
                     }
+
 
 
                 } else {
@@ -115,28 +130,13 @@ const handleLoginClick = async () => {
                     <!-- 修改事件綁定為 handleLoginClick -->
                     <div class="text-danger" role="alert"></div>
                     <div class="form-floating mb-3">
-                        <input
-                            type="email"
-                            class="form-control"
-                            name="email"
-                            v-model.trim="user.email"
-                            id="email"
-                            placeholder="Email"
-                            required
-                        />
+                        <input type="email" class="form-control" name="email" v-model.trim="user.email" id="email"
+                            placeholder="Email" required />
                         <label for="email" class="form-label">Email</label>
                     </div>
                     <div class="form-floating mb-3">
-                        <input
-                            type="password"
-                            class="form-control"
-                            name="password"
-                            v-model.trim="user.password"
-                            id="password"
-                            value=""
-                            placeholder="密碼"
-                            required
-                        />
+                        <input type="password" class="form-control" name="password" v-model.trim="user.password"
+                            id="password" value="" placeholder="密碼" required />
                         <label for="password" class="form-label">密碼</label>
                     </div>
                     <span class="text-danger text-center">{{ loginmessage }}</span>
@@ -154,13 +154,11 @@ const handleLoginClick = async () => {
             <div class="card-footer text-center pt-0 px-lg-2 px-1">
                 <p class="mb-4 text-sm mx-auto">
                     不記得密碼嗎?
-                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'resetpassword' }"
-                        >忘記密碼
+                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'resetpassword' }">忘記密碼
                     </RouterLink>
                     <br />
                     還沒有註冊過會員嗎?
-                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'signup' }"
-                        >註冊
+                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'signup' }">註冊
                     </RouterLink>
                     <br />
                     沒有收到驗證電子郵件嗎?
