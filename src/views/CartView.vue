@@ -195,6 +195,30 @@ const removeFromCart = (product) => {
     });
 };
 
+// 移除購物車所有商品
+const clearAllCart = () => {
+    Swal.fire({
+        title: '確定要移除所有商品嗎?',
+        text: '移除後將無法恢復!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: '是的, 移除所有商品!',
+        cancelButtonText: '取消',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            localStorage.removeItem('productCart');
+            cartProducts.value = [];
+            Swal.fire({
+                title: '已移除!',
+                text: `商品 ${product.productName} 已從購物車移除。`,
+                icon: 'success',
+            });
+        }
+    });
+};
+
 //=========================================================================================================================
 // 導航至結帳頁面
 const router = useRouter();
@@ -372,13 +396,24 @@ onBeforeUnmount(() => {
                             <h5 class="mb-0 ps-4 me-4">總計:</h5>
                             <p class="mb-0 pe-4">${{ totalPrice }}</p>
                         </div>
-                        <button
-                            class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4"
-                            type="button"
-                            @click="goToCheckout"
-                        >
-                            結帳
-                        </button>
+                        <div class="d-flex align-items-center">
+                            <!-- 移除所有商品按鈕 -->
+                            <button
+                                class="btn border-secondary rounded-pill px-4 py-3 text-uppercase ms-7 mb-3"
+                                type="button"
+                                @click="clearAllCart"
+                                style="color: #f4b0a5"
+                            >
+                                移除所有商品
+                            </button>
+                            <button
+                                class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase ms-3 mb-3"
+                                type="button"
+                                @click="goToCheckout"
+                            >
+                                結帳
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
