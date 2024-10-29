@@ -289,7 +289,7 @@ const exportInventories = () => {
     width: 100%;
     padding-top: 5%;
     text-align: center;
-    text-shadow: 0 2px 3px rgba(255, 255, 255, 0.7);
+    text-shadow: 0 2px 3px rgba(255, 255, 255, 0.4);
 }
 /* 上下移動縮放特效 */
 @keyframes grow {
