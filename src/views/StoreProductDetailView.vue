@@ -139,6 +139,39 @@ const incQuantity = (product) => {
             : Swal.fire(`不能超過庫存量，庫存為：${Math.floor(product.stock / product.unitQuantity)} 個單位`);
     }
 };
+
+// 取得評論 Start
+const evaluate = ref([]);
+
+const loadEvaluates = async (productId) => {
+    try {
+        const response = await fetch(`${BaseURL}/ProductEvaluates/GetProductEvaluateWithUserName`);
+        const data = await response.json();
+        evaluate.value = data;
+        // console.log('所有評論', evaluate.value);
+        loadEvaluatesWithProductId(productId);
+    } catch (error) {
+        console.log(`fetch 請求商品評論失敗`, error);
+    }
+};
+
+const evaluateByProductId = ref([]);
+const loadEvaluatesWithProductId = (productId) => {
+    if (evaluate.value && evaluate.value.length > 0) {
+        // console.log('所有評論', evaluate.value);
+        evaluateByProductId.value = evaluate.value.filter((comment) => comment.productId === productId);
+        console.log('單商品評論', evaluateByProductId.value);
+        // console.log('評論的商品ID=', productId);
+        // console.log(`路由参数ID=${route.params.id}`);
+    } else {
+        evaluateByProductId.value = [];
+        console.log('沒有評論');
+    }
+    // console.log(evaluateByProductId.value);
+};
+const productId = Number(route.params.id);
+loadEvaluates(productId);
+// 取得評論 End
 </script>
 
 <template>
@@ -246,6 +279,49 @@ const incQuantity = (product) => {
         </div>
     </div>
     <!-- Single Product End -->
+
+    <!-- Comment Section Start -->
+    <div class="container-fluid py-4 mt-0">
+        <h3 class="text-center mb-4">評論區</h3>
+        <div class="row g-3">
+            <div class="col-12">
+                <div v-if="evaluateByProductId.length > 0">
+                    <div
+                        class="card border-light shadow-sm mb-3"
+                        v-for="evaluate in evaluateByProductId"
+                        :key="evaluate.evaluateId"
+                    >
+                        <div class="card-body">
+                            <!-- 評論者名稱和日期 -->
+                            <div class="d-flex justify-content-between mb-2">
+                                <h5 class="card-title mb-0">{{ evaluate.userName }}</h5>
+                                <small class="text-muted">{{ evaluate.date }}</small>
+                            </div>
+                            <!-- 評論分數 -->
+                            <p class="mb-2">
+                                評分:
+                                <el-rate
+                                    v-model="evaluate.commentStars"
+                                    size="large"
+                                    :texts="['糟透了', '有點失望', '正常', '不錯', '太棒了']"
+                                    show-text
+                                    disabled
+                                    disabled-void-color="#ebeab7"
+                                />
+                            </p>
+                            <!-- 評論內容 -->
+                            <p class="card-text">{{ evaluate.commentMessage }}</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 若無評論時顯示 -->
+                <div v-else class="text-center">
+                    <p class="text-muted">目前沒有評論</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Comment Section End -->
 </template>
 
 <style lang="css" scoped>
