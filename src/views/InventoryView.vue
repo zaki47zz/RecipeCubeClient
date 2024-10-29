@@ -279,8 +279,9 @@ const exportInventories = () => {
     <section class="banner-section">
         <div class="bg-primary-subtle block-2">
             <div class="row banner-content pt-5">
-                <div class="content-wrapper text-center col-md-12">
-                    <h1 class="pb-5">庫存 Inventory</h1>
+                <div class="text-center col-md-12">
+                    <h1 class="pb-1 text-white">庫存</h1>
+                    <h2 class="pb-5 text-white">Inventory</h2>
                 </div>
             </div>
         </div>
