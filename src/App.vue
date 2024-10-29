@@ -23,6 +23,9 @@ body,
     /* 確保 PerfectScrollbar 覆蓋整個視窗 */
     display: flex;
     flex-direction: column;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    background: url('@/assets/img/ForBackground/ad-bg-pattern.png') no-repeat center / cover;
 }
 
 .main-content {

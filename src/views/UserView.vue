@@ -4,8 +4,6 @@ import { ref } from 'vue';
 
 // 定義一個響應式變數 username，儲存使用者名稱
 const username = ref('');
-// 動態修改橫幅標題
-const section = ref('帳戶設定 Account settings');
 
 // 從 localStorage 取得使用者資料並解析為 JSON，儲存到 storedUserData 中
 const storedUserData = JSON.parse(localStorage.getItem('UserData'));
@@ -22,33 +20,31 @@ const setActive = (index) => {
 };
 
 const AccountSettings = ref({
-    "user_Id": storedUserData?.UserId, // 從 localStorage 中取得使用者ID
-    "userName": storedUserData?.UserName || "", // 預設使用者名稱
-    "phone": storedUserData?.Phone || "" // 預設使用者電話
+    user_Id: storedUserData?.UserId, // 從 localStorage 中取得使用者ID
+    userName: storedUserData?.UserName || '', // 預設使用者名稱
+    phone: storedUserData?.Phone || '', // 預設使用者電話
 });
 // 發送請求的函式
 const sendBasic = async () => {
     const response = await fetch(API_URL_AccountSettings, {
         method: 'PUT',
         body: JSON.stringify(AccountSettings.value), // 將 AccountSettings 轉為 JSON 格式
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
     });
 
     if (response.ok) {
         const updatedUserData = {
             ...storedUserData, // 保留其他資料
             UserName: AccountSettings.value.userName, // 更新姓名
-            Phone: AccountSettings.value.phone // 更新電話
-        }
+            Phone: AccountSettings.value.phone, // 更新電話
+        };
 
         // 更新 localStorage
         localStorage.setItem('UserData', JSON.stringify(updatedUserData));
         alert('修改成功！'); // 顯示成功訊息
-
-
     } else {
         const data = await response.json();
-        alert("修改失敗：" + data.Message); // 顯示錯誤訊息
+        alert('修改失敗：' + data.Message); // 顯示錯誤訊息
     }
 };
 
@@ -58,19 +54,23 @@ const exclusiveIngredientsArray = ref([]); // 儲存不可食用食材
 
 const loadPreferIngredients = () => {
     const preferIngredientsString = localStorage.getItem('PreferIngredients');
-    preferIngredientsArray.value = preferIngredientsString ? preferIngredientsString.split('\n').map(item => {
-        const parts = item.split(',');
-        return { id: parts[0], name: parts[1].replace(/"/g, '') };
-    }) : [];
+    preferIngredientsArray.value = preferIngredientsString
+        ? preferIngredientsString.split('\n').map((item) => {
+              const parts = item.split(',');
+              return { id: parts[0], name: parts[1].replace(/"/g, '') };
+          })
+        : [];
 };
 loadPreferIngredients();
 
 const loadExclusiveIngredients = () => {
     const exclusiveIngredientsString = localStorage.getItem('ExclusiveIngredients');
-    exclusiveIngredientsArray.value = exclusiveIngredientsString ? exclusiveIngredientsString.split('\n').map(item => {
-        const parts = item.split(',');
-        return { id: parts[0], name: parts[1].replace(/"/g, '') };
-    }) : [];
+    exclusiveIngredientsArray.value = exclusiveIngredientsString
+        ? exclusiveIngredientsString.split('\n').map((item) => {
+              const parts = item.split(',');
+              return { id: parts[0], name: parts[1].replace(/"/g, '') };
+          })
+        : [];
 };
 loadExclusiveIngredients();
 
@@ -79,27 +79,31 @@ const handleButtonClick = (id) => {
     console.log(`按鈕 ID: ${id} 被點擊`); // 你可以在這裡添加更多處理邏輯
 };
 
-const API_URL_ExclusiveIngredientsDelete = `${import.meta.env.VITE_API_BASEURL}/UserIngredients/ExclusiveIngredientsDelete`;
-const API_URL_PreferedIngredientsDelete = `${import.meta.env.VITE_API_BASEURL}/UserIngredients/PreferedIngrediensDelete`;
+const API_URL_ExclusiveIngredientsDelete = `${
+    import.meta.env.VITE_API_BASEURL
+}/UserIngredients/ExclusiveIngredientsDelete`;
+const API_URL_PreferedIngredientsDelete = `${
+    import.meta.env.VITE_API_BASEURL
+}/UserIngredients/PreferedIngrediensDelete`;
 
 // 刪除 API 呼叫
 const sendDelPreFood = async (ingredientId) => {
     try {
         const response = await fetch(`${API_URL_PreferedIngredientsDelete}?id=${ingredientId}`, {
             method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
         });
 
         if (response.ok) {
             alert('刪除成功！');
-            preferIngredientsArray.value = preferIngredientsArray.value.filter(item => item.id !== ingredientId);
+            preferIngredientsArray.value = preferIngredientsArray.value.filter((item) => item.id !== ingredientId);
             updateLocalStorage(); // 同步更新 localStorage
         } else {
             const data = await response.json();
-            alert("刪除失敗：" + data.Message);
+            alert('刪除失敗：' + data.Message);
         }
     } catch (error) {
-        alert("刪除請求失敗：" + error.message);
+        alert('刪除請求失敗：' + error.message);
     }
 };
 
@@ -107,27 +111,29 @@ const sendDelEXFood = async (ingredientId) => {
     try {
         const response = await fetch(`${API_URL_ExclusiveIngredientsDelete}?id=${ingredientId}`, {
             method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
         });
 
         if (response.ok) {
             alert('刪除成功！');
-            exclusiveIngredientsArray.value = exclusiveIngredientsArray.value.filter(item => item.id !== ingredientId);
+            exclusiveIngredientsArray.value = exclusiveIngredientsArray.value.filter(
+                (item) => item.id !== ingredientId
+            );
             updateLocalStorage(); // 同步更新 localStorage
         } else {
             const data = await response.json();
-            alert("刪除失敗：" + data.Message);
+            alert('刪除失敗：' + data.Message);
         }
     } catch (error) {
-        alert("刪除請求失敗：" + error.message);
+        alert('刪除請求失敗：' + error.message);
     }
 };
 
 // 更新 localStorage 的方法
 const updateLocalStorage = () => {
-    const exingredientsString = exclusiveIngredientsArray.value.map(item => `${item.id},"${item.name}"`).join('\n');
+    const exingredientsString = exclusiveIngredientsArray.value.map((item) => `${item.id},"${item.name}"`).join('\n');
     localStorage.setItem('ExclusiveIngredients', exingredientsString);
-    const preingredientsString = preferIngredientsArray.value.map(item => `${item.id},"${item.name}"`).join('\n');
+    const preingredientsString = preferIngredientsArray.value.map((item) => `${item.id},"${item.name}"`).join('\n');
     localStorage.setItem('PreferIngredients', preingredientsString);
 };
 
@@ -142,16 +148,13 @@ const handlePreDelete = (ingredientId) => {
 };
 </script>
 
-
-
 <template>
     <!-- 橫幅區塊 -->
-    <section class="banner-section">
-        <div class="banner-ad bg-info-subtle block-2">
-            <div class="row banner-content pt-5">
-                <div class="content-wrapper text-center col-md-12">
-                    <h1 class="pb-5">{{ section }}</h1>
-                </div>
+    <section>
+        <div class="header">
+            <div class="title">
+                <h1>帳戶設定</h1>
+                <h1>Account settings</h1>
             </div>
         </div>
     </section>
@@ -163,9 +166,15 @@ const handlePreDelete = (ingredientId) => {
                 <!-- 使用 v-for 迴圈渲染選單項目 -->
                 <!-- 根據activeIndex 動態設定選單項目樣式 -->
                 <!-- ARIA 屬性幫助無障礙性 -->
-                <a v-for="(item, index) in menuItems" :key="index" href="#"
-                    class="list-group-item list-group-item-action" :class="{ active: activeIndex === index }"
-                    :aria-current="activeIndex === index ? 'true' : null" @click="setActive(index)">
+                <a
+                    v-for="(item, index) in menuItems"
+                    :key="index"
+                    href="#"
+                    class="list-group-item list-group-item-action"
+                    :class="{ active: activeIndex === index }"
+                    :aria-current="activeIndex === index ? 'true' : null"
+                    @click="setActive(index)"
+                >
                     <!-- 點擊事件，調用 setActive 函式 -->
                     {{ item }}
                 </a>
@@ -176,13 +185,15 @@ const handlePreDelete = (ingredientId) => {
         <div class="col-12 col-md-9 p-5">
             <!-- 根據 activeIndex 動態顯示對應的內容 -->
             <div v-if="activeIndex === 0">
-                <form @submit.prevent="sendBasic"> <!-- 使用 @submit.prevent 阻止表單的默認提交行為 -->
+                <form @submit.prevent="sendBasic">
+                    <!-- 使用 @submit.prevent 阻止表單的默認提交行為 -->
                     <p>
                         <strong>姓名:</strong>
                         <input type="text" v-model="AccountSettings.userName" placeholder="請輸入姓名" required />
                     </p>
                     <p>
-                        <strong>Email:</strong> {{ storedUserData?.Email }} <!-- Email 不可修改 -->
+                        <strong>Email:</strong> {{ storedUserData?.Email }}
+                        <!-- Email 不可修改 -->
                     </p>
                     <p>
                         <strong>電話:</strong>
@@ -195,23 +206,41 @@ const handlePreDelete = (ingredientId) => {
             <div v-else-if="activeIndex === 1">
                 <p><strong>偏好食材:</strong></p>
                 <div>
-                    <button v-for="(item, index) in preferIngredientsArray" :key="index" :id="item.id"
-                        class="btn btn-info m-1" @click="handleButtonClick(item.id)">
+                    <button
+                        v-for="(item, index) in preferIngredientsArray"
+                        :key="index"
+                        :id="item.id"
+                        class="btn btn-info m-1"
+                        @click="handleButtonClick(item.id)"
+                    >
                         {{ item.name }}
                         <!-- X 按鈕 -->
-                        <button type="button" class="btn-close ms-2" aria-label="Close"
-                            @click="handlePreDelete(item.id)"></button>
+                        <button
+                            type="button"
+                            class="btn-close ms-2"
+                            aria-label="Close"
+                            @click="handlePreDelete(item.id)"
+                        ></button>
                     </button>
                 </div>
 
                 <p><strong>不可食用食材:</strong></p>
                 <div>
-                    <button v-for="(item, index) in exclusiveIngredientsArray" :key="index" :id="item.id"
-                        class="btn btn-danger m-1" @click="handleButtonClick(item.id)">
+                    <button
+                        v-for="(item, index) in exclusiveIngredientsArray"
+                        :key="index"
+                        :id="item.id"
+                        class="btn btn-danger m-1"
+                        @click="handleButtonClick(item.id)"
+                    >
                         {{ item.name }}
                         <!-- X 按鈕 -->
-                        <button type="button" class="btn-close ms-2" aria-label="Close"
-                            @click="handleEXDelete(item.id)"></button>
+                        <button
+                            type="button"
+                            class="btn-close ms-2"
+                            aria-label="Close"
+                            @click="handleEXDelete(item.id)"
+                        ></button>
                     </button>
                 </div>
             </div>
@@ -224,16 +253,57 @@ const handlePreDelete = (ingredientId) => {
 </template>
 
 <style lang="css" scoped>
-/* 橫幅樣式 */
-.banner-section {
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
-    overflow: hidden;
-}
-
-.banner-ad {
+/* header本人 */
+.header {
     position: relative;
     overflow: hidden;
-    background: url('@/assets/img/ForBackground/ad-bg-pattern.png') no-repeat center / cover;
+    height: 40vh;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    color: #eee;
+    z-index: 0;
+}
+/* 背景 */
+.header:before {
+    content: '';
+    width: 100%;
+    height: 200%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateZ(0) scale(1, 1);
+    background: #1b2030 url('src/assets/img/ForBackground/bg-header.jpg') 50% 0 no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    animation: grow 180s linear 10ms infinite;
+    transition: all 0.4s ease-in-out;
+    z-index: -2;
+}
+/* 下方mask */
+.header:after {
+    content: '';
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 40%, rgb(254, 254, 254) 100%);
+}
+/* 文字 */
+.title {
+    width: 100%;
+    padding-top: 5%;
+    text-align: center;
+    text-shadow: 0 2px 3px rgba(255, 255, 255, 0.4);
+}
+/* 上下移動縮放特效 */
+@keyframes grow {
+    0% {
+        transform: scale(1) translateY(0px);
+    }
+    50% {
+        transform: scale(1.2) translateY(-250px);
+    }
 }
 </style>

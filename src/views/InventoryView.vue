@@ -276,12 +276,11 @@ const exportInventories = () => {
 </script>
 
 <template>
-    <section class="banner-section">
-        <div class="banner-ad bg-primary-subtle block-2">
-            <div class="row banner-content pt-5">
-                <div class="content-wrapper text-center col-md-12">
-                    <h1 class="pb-5">庫存 Inventory</h1>
-                </div>
+    <section>
+        <div class="header">
+            <div class="title">
+                <h1>庫存管理</h1>
+                <h1>Inventory</h1>
             </div>
         </div>
     </section>
@@ -363,7 +362,7 @@ const exportInventories = () => {
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="banner-ad p-3">
+                    <div class="p-3">
                         <div class="tabs-header d-flex justify-content-between">
                             <h3>食材列表</h3>
                             <div>
@@ -616,24 +615,58 @@ const exportInventories = () => {
 </template>
 
 <style lang="css" scoped>
-/* General Styles */
-.container-fluid {
-    padding: 0;
-    margin: 0;
-    max-width: 100vw;
-}
-
-/* Banner Styles */
-.banner-section {
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
-    overflow: hidden;
-}
-
-.banner-ad {
+/* header本人 */
+.header {
     position: relative;
     overflow: hidden;
-    background: url('@/assets/img/ForBackground/ad-bg-pattern.png') no-repeat center / cover;
+    height: 40vh;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    color: #eee;
+    z-index: 0;
+}
+/* 背景 */
+.header:before {
+    content: '';
+    width: 100%;
+    height: 200%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateZ(0) scale(1, 1);
+    background: #1b2030 url('src/assets/img/ForBackground/bg-header-food.jpg') 50% 0 no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    animation: grow 180s linear 10ms infinite;
+    transition: all 0.4s ease-in-out;
+    z-index: -2;
+}
+/* 下方mask */
+.header:after {
+    content: '';
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 40%, rgb(254, 254, 254) 100%);
+}
+/* 文字 */
+.title {
+    width: 100%;
+    padding-top: 5%;
+    text-align: center;
+    text-shadow: 0 2px 3px rgba(255, 255, 255, 0.4);
+}
+/* 上下移動縮放特效 */
+@keyframes grow {
+    0% {
+        transform: scale(1) translateY(0px);
+    }
+    50% {
+        transform: scale(1.2) translateY(-250px);
+    }
 }
 
 .card {

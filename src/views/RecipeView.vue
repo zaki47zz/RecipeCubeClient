@@ -29,9 +29,7 @@ const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到�
 // 在組件加載後獲取數據
 
 onMounted(async () => {
-
     await recipeStore.fetchRecipes();
-
 });
 
 const getRecipeImageUrl = (fileName) => {
@@ -148,17 +146,11 @@ watch(totalPages, (newTotalPages) => {
 
 <template>
     <!-- 食譜header start -->
-    <section class="banner-section">
-        <div class="banner-ad bg-warning-subtle block-2">
-            <div class="row banner-content pt-5">
-                <div class="content-wrapper text-center col-md-12">
-                    <h1>食譜 Recipe</h1>
-                    <header>
-                        <div class="container-fluid">
-                            <div class="row py-3"></div>
-                        </div>
-                    </header>
-                </div>
+    <section>
+        <div class="header">
+            <div class="title">
+                <h1>食譜總覽</h1>
+                <h1>Recipe</h1>
             </div>
         </div>
     </section>
@@ -166,13 +158,16 @@ watch(totalPages, (newTotalPages) => {
     <!-- 推薦食譜 start -->
     <section class="pt-5">
         <div class="container-fluid">
-            <div class="pt-5 rounded-4" :style="{
-                width: '100%',
-                height: '100%',
-                backgroundImage: `url(${BannerRecipe})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-            }">
+            <div
+                class="pt-5 rounded-4"
+                :style="{
+                    width: '100%',
+                    height: '100%',
+                    backgroundImage: `url(${BannerRecipe})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                }"
+            >
                 <div class="row p-3">
                     <div class="col-md-6 d-flex flex-column align-items-center">
                         <h2 class="mt-3 text-white">左思右想還是不知道煮什麼嗎?</h2>
@@ -209,18 +204,24 @@ watch(totalPages, (newTotalPages) => {
         <div class="container-fluid mt-3">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="banner-ad bootstrap-tabs product-tabs p-3">
+                    <div class="bootstrap-tabs product-tabs p-3">
                         <div class="tabs-header d-flex justify-content-between">
                             <h3>食譜列表</h3>
                         </div>
                         <div>
                             <!-- 分頁導航 -->
 
-                            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize"
-                                :total="totalRecipes" background layout="sizes, total, ->,prev, pager, next, jumper "
-                                :page-sizes="[8, 12, 16, 20]" @size-change="handlePageSizeChange"
+                            <el-pagination
+                                v-model:current-page="currentPage"
+                                v-model:page-size="pageSize"
+                                :total="totalRecipes"
+                                background
+                                layout="sizes, total, ->,prev, pager, next, jumper "
+                                :page-sizes="[8, 12, 16, 20]"
+                                @size-change="handlePageSizeChange"
                                 @current-change="handleCurrentChange"
-                                class="mt-4 d-flex justify-content-end align-items-center gap-2">
+                                class="mt-4 d-flex justify-content-end align-items-center gap-2"
+                            >
                             </el-pagination>
 
                             <!-- 分頁導航結束 -->
@@ -228,14 +229,20 @@ watch(totalPages, (newTotalPages) => {
 
                         <div class="mt-1 row row-cols-1 row-cols-md-2 g-3">
                             <div v-for="recipe in paginatedRecipes" :key="recipe.recipeId">
-                                <div class="card recipe-card shadow-sm rounded-3 d-flex flex-row align-items-center"
-                                    @click="recipeStore.selectRecipe(recipe)">
+                                <div
+                                    class="card recipe-card shadow-sm rounded-3 d-flex flex-row align-items-center"
+                                    @click="recipeStore.selectRecipe(recipe)"
+                                >
                                     <div class="image-container">
-                                        <img :src="getRecipeImageUrl(recipe.photoName) || 'default_image.jpg'"
-                                            :alt="recipe.recipeName" class="recipe-image" />
+                                        <img
+                                            :src="getRecipeImageUrl(recipe.photoName) || 'default_image.jpg'"
+                                            :alt="recipe.recipeName"
+                                            class="recipe-image"
+                                        />
                                     </div>
                                     <div
-                                        class="recipe-content p-3 w-100 d-flex flex-column justify-content-center align-items-center">
+                                        class="recipe-content p-3 w-100 d-flex flex-column justify-content-center align-items-center"
+                                    >
                                         <h5 class="mb-3">{{ recipe.recipeName }}</h5>
                                         <div class="d-flex gap-2">
                                             <span class="badge bg-secondary" v-if="recipe.restriction">素食</span>
@@ -257,12 +264,21 @@ watch(totalPages, (newTotalPages) => {
     <!-- Recipe Detail Component -->
     <!-- <RecipeDetailComponent v-if="recipeStore.selectedRecipe" :recipe="recipeStore.selectedRecipe">
     </RecipeDetailComponent> -->
-    <el-dialog v-model="recipeStore.dialogVisible" title="食譜詳細資訊" width="75%" @close="recipeStore.closeDialog" center
-        @opened="onDialogOpened">
+    <el-dialog
+        v-model="recipeStore.dialogVisible"
+        title="食譜詳細資訊"
+        width="75%"
+        @close="recipeStore.closeDialog"
+        center
+        @opened="onDialogOpened"
+    >
         <PerfectScrollbar ref="scrollContainer" class="custom-scroll-container">
             <div class="dialog-content">
-                <RecipeDetailComponent :recipe="recipeStore.selectedRecipe" :reset-active-step="resetActiveStep"
-                    v-if="recipeStore.selectedRecipe" />
+                <RecipeDetailComponent
+                    :recipe="recipeStore.selectedRecipe"
+                    :reset-active-step="resetActiveStep"
+                    v-if="recipeStore.selectedRecipe"
+                />
             </div>
         </PerfectScrollbar>
         <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
@@ -272,26 +288,59 @@ watch(totalPages, (newTotalPages) => {
 </template>
 
 <style lang="css" scoped>
-/* General Styles */
-.container-fluid {
-    padding: 0;
-    margin: 0;
-    max-width: 100vw;
-}
-
-/* Banner Styles */
-.banner-section {
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
-    overflow: hidden;
-}
-
-.banner-ad {
+/* header本人 */
+.header {
     position: relative;
     overflow: hidden;
-    background: url('@/assets/img/ForBackground/ad-bg-pattern.png') no-repeat center / cover;
+    height: 40vh;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    color: #eee;
+    z-index: 0;
 }
-
+/* 背景 */
+.header:before {
+    content: '';
+    width: 100%;
+    height: 200%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateZ(0) scale(1, 1);
+    background: #1b2030 url('src/assets/img/ForBackground/bg-header-recipe.jpg') 50% 0 no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    animation: grow 180s linear 10ms infinite;
+    transition: all 0.4s ease-in-out;
+    z-index: -2;
+}
+/* 下方mask */
+.header:after {
+    content: '';
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 40%, rgb(254, 254, 254) 100%);
+}
+/* 文字 */
+.title {
+    width: 100%;
+    padding-top: 5%;
+    text-align: center;
+    text-shadow: 0 2px 3px rgba(255, 255, 255, 0.4);
+}
+/* 上下移動縮放特效 */
+@keyframes grow {
+    0% {
+        transform: scale(1) translateY(0px);
+    }
+    50% {
+        transform: scale(1.2) translateY(-250px);
+    }
+}
 .custom-scroll-container {
     max-height: 350px;
     overflow: hidden;

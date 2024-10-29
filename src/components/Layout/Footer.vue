@@ -5,9 +5,9 @@
             <div class="footer-content">
                 <p class="mb-0 larger copyright">&copy; 2024</p>
                 <ul class="list-inline my-0">
-                    <li class="list-inline-item"><RouterLink to="/">聯絡我們</RouterLink></li>
-                    <li class="list-inline-item"><RouterLink to="/">常見問題</RouterLink></li>
-                    <li class="list-inline-item"><RouterLink to="/">錯誤回報</RouterLink></li>
+                    <li class="list-inline-item"><RouterLink to="/aboutus">關於我們</RouterLink></li>
+                    <li class="list-inline-item"><RouterLink to="/contact">聯絡我們</RouterLink></li>
+                    <li class="list-inline-item"><RouterLink to="/question">常見問題</RouterLink></li>
                 </ul>
                 <RouterLink class="navbar-brand font-weight-bolder" to="/">
                     <img src="@/assets/logo.svg" class="navbar-brand-img" alt="main_logo" />
