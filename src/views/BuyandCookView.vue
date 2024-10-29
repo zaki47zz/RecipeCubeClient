@@ -78,7 +78,7 @@ const exportInventories = () => {
 
 <template>
     <section class="banner-section">
-        <div class="banner-ad bg-danger-subtle block-2">
+        <div class="bg-danger-subtle block-2">
             <div class="row banner-content pt-5">
                 <div class="content-wrapper text-center col-md-12">
                     <h1 class="pb-5">隨買隨煮 Buy & Cook</h1>
@@ -128,7 +128,7 @@ const exportInventories = () => {
     </section>
 
     <section class="py-3 overflow-hidden">
-        <div class="container-fluid banner-ad">
+        <div class="container-fluid">
             <CategorySwiperComponent v-model="selectedIngredients"></CategorySwiperComponent>
         </div>
     </section>
@@ -260,12 +260,6 @@ const exportInventories = () => {
     width: 100vw;
     margin-left: calc(50% - 50vw);
     overflow: hidden;
-}
-
-.banner-ad {
-    position: relative;
-    overflow: hidden;
-    background: url('@/assets/img/ForBackground/ad-bg-pattern.png') no-repeat center / cover;
 }
 
 .switch-set {

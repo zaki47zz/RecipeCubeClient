@@ -241,18 +241,17 @@ function useSelectedRecipe() {
         return;
     }
     // 這裡寫你需要執行的邏輯
-    console.log("使用選定的食譜", recipeId);
+    console.log('使用選定的食譜', recipeId);
     // 比如導航到新的頁面或者呼叫 API
     // 使用 Vue Router 導航到新的頁面
     localStorage.setItem('isFromGenerateRecipe', 'true');
     router.push(`/generaterecipe/recipeDetail/${recipeStore.selectedRecipe.recipeId}`);
 }
-
 </script>
 
 <template>
     <section class="banner-section">
-        <div class="banner-ad bg-warning-subtle block-2">
+        <div class="bg-warning-subtle block-2">
             <div class="row banner-content pt-5">
                 <div class="content-wrapper text-center col-md-12">
                     <h1 class="pb-5">食譜產生 Recipe Generate</h1>
@@ -268,17 +267,19 @@ function useSelectedRecipe() {
                     <h4>
                         您輸入了
                         <span class="text-info text-gradient">{{ cookingInventories.length }}</span>
-                        樣食材<span v-if="isShowingString">，並決定
+                        樣食材<span v-if="isShowingString"
+                            >，並決定
                             <span v-if="isUsingInventory" class="text-info text-gradient">納入</span>
                             <span v-else class="text-info text-gradient">不納入</span>
-                            庫存食材一起檢索</span>
+                            庫存食材一起檢索</span
+                        >
                     </h4>
                 </div>
             </div>
         </div>
         <div class="container-fluid pt-3 pb-5">
             <div class="row justify-content-center">
-                <div class="table-responsive p-1 w-60 banner-ad">
+                <div class="table-responsive p-1 w-60">
                     <table class="table table-borderless text-center align-middle rounded-4">
                         <thead>
                             <tr>
@@ -328,11 +329,16 @@ function useSelectedRecipe() {
             <h3>符合所有食材的食譜</h3>
             <div class="row row-cols-1 row-cols-md-2 g-3">
                 <div v-for="(recipe, index) in completeMatchRecipes" :key="index">
-                    <div class="card recipe-card shadow-sm rounded-3 d-flex flex-row align-items-center p-0"
-                        @click="recipeStore.selectRecipe(recipe)">
+                    <div
+                        class="card recipe-card shadow-sm rounded-3 d-flex flex-row align-items-center p-0"
+                        @click="recipeStore.selectRecipe(recipe)"
+                    >
                         <div class="image-container">
-                            <img :src="getRecipeImageUrl(recipe.photoName)" :alt="recipe.recipeName"
-                                class="recipe-image" />
+                            <img
+                                :src="getRecipeImageUrl(recipe.photoName)"
+                                :alt="recipe.recipeName"
+                                class="recipe-image"
+                            />
                         </div>
                         <div class="p-3 w-100 d-flex flex-column justify-content-start align-items-center">
                             <h5 class="mt-3 text-center">{{ recipe.recipeName }}</h5>
@@ -355,11 +361,16 @@ function useSelectedRecipe() {
             <h3 class="mt-5">缺少某些食材的食譜</h3>
             <div class="row row-cols-1 row-cols-md-2 g-3">
                 <div v-for="(recipe, index) in partialMatchRecipes" :key="index">
-                    <div class="card recipe-card shadow-sm rounded-3 d-flex flex-row align-items-center p-0"
-                        @click="recipeStore.selectRecipe(recipe)">
+                    <div
+                        class="card recipe-card shadow-sm rounded-3 d-flex flex-row align-items-center p-0"
+                        @click="recipeStore.selectRecipe(recipe)"
+                    >
                         <div class="image-container">
-                            <img :src="getRecipeImageUrl(recipe.photoName)" :alt="recipe.recipeName"
-                                class="recipe-image" />
+                            <img
+                                :src="getRecipeImageUrl(recipe.photoName)"
+                                :alt="recipe.recipeName"
+                                class="recipe-image"
+                            />
                         </div>
                         <div class="p-3 w-100 d-flex flex-column justify-content-start align-items-center">
                             <h5 class="mt-3 text-center">{{ recipe.recipeName }}</h5>
@@ -388,8 +399,14 @@ function useSelectedRecipe() {
         </div>
     </section>
     <!-- el-dialog -->
-    <el-dialog v-model="recipeStore.dialogVisible" title="食譜詳細資訊" width="75%" @close="recipeStore.closeDialog" center
-        @opended="onDialogOpened">
+    <el-dialog
+        v-model="recipeStore.dialogVisible"
+        title="食譜詳細資訊"
+        width="75%"
+        @close="recipeStore.closeDialog"
+        center
+        @opended="onDialogOpened"
+    >
         <PerfectScrollbar ref="scrollContainer" class="custom-scroll-container">
             <div class="dialog-content">
                 <RecipeDetailComponent :recipe="recipeStore.selectedRecipe" v-if="recipeStore.selectedRecipe" />
@@ -416,12 +433,6 @@ function useSelectedRecipe() {
     width: 100vw;
     margin-left: calc(50% - 50vw);
     overflow: hidden;
-}
-
-.banner-ad {
-    position: relative;
-    overflow: hidden;
-    background: url('@/assets/img/ForBackground/ad-bg-pattern.png') no-repeat center / cover;
 }
 
 @keyframes fadeIn {

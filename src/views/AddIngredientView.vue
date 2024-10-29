@@ -161,7 +161,7 @@ const addInventories = async () => {
 
 <template>
     <section class="banner-section">
-        <div class="banner-ad bg-primary-subtle block-2">
+        <div class="bg-primary-subtle block-2">
             <div class="row banner-content pt-5">
                 <div class="content-wrapper text-center col-md-12">
                     <h1 class="pb-5">加入食材 Add Ingredient</h1>
@@ -171,7 +171,7 @@ const addInventories = async () => {
     </section>
 
     <section class="pt-5 overflow-hidden">
-        <div class="container-fluid banner-ad">
+        <div class="container-fluid">
             <!-- 在子component用v-model相當於繫結它內部的props.modelValue，後面放什麼就會被傳過去 -->
             <CategorySwiperComponent v-model="selectedIngredients"></CategorySwiperComponent>
         </div>
@@ -275,12 +275,6 @@ const addInventories = async () => {
     width: 100vw;
     margin-left: calc(50% - 50vw);
     overflow: hidden;
-}
-
-.banner-ad {
-    position: relative;
-    overflow: hidden;
-    background: url('@/assets/img/ForBackground/ad-bg-pattern.png') no-repeat center / cover;
 }
 
 .post-it {

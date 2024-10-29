@@ -277,7 +277,7 @@ const exportInventories = () => {
 
 <template>
     <section class="banner-section">
-        <div class="banner-ad bg-primary-subtle block-2">
+        <div class="bg-primary-subtle block-2">
             <div class="row banner-content pt-5">
                 <div class="content-wrapper text-center col-md-12">
                     <h1 class="pb-5">庫存 Inventory</h1>
@@ -363,7 +363,7 @@ const exportInventories = () => {
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="banner-ad p-3">
+                    <div class="p-3">
                         <div class="tabs-header d-flex justify-content-between">
                             <h3>食材列表</h3>
                             <div>
@@ -628,12 +628,6 @@ const exportInventories = () => {
     width: 100vw;
     margin-left: calc(50% - 50vw);
     overflow: hidden;
-}
-
-.banner-ad {
-    position: relative;
-    overflow: hidden;
-    background: url('@/assets/img/ForBackground/ad-bg-pattern.png') no-repeat center / cover;
 }
 
 .card {

@@ -138,7 +138,7 @@ const updateScrollPosition = () => {
     </section>
 
     <section>
-        <div class="container-fluid py-6 banner-ad">
+        <div class="container-fluid py-6">
             <div class="container">
                 <div class="row g-4">
                     <div class="col-lg-3 col-md-6 wow animate__fadeInDown" data-wow-delay="0.1s">
@@ -195,7 +195,7 @@ const updateScrollPosition = () => {
     </section>
 
     <section>
-        <div class="container-fluid py-6 banner-ad">
+        <div class="container-fluid py-6">
             <div class="shop-section rounded-3">
                 <div class="shop-box">
                     <div class="shop-logo">cube</div>
@@ -221,14 +221,6 @@ const updateScrollPosition = () => {
 .banner-section {
     width: 100%;
     position: relative;
-}
-
-.banner-ad {
-    position: relative;
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
-    overflow: hidden;
-    background: url('@/assets/img/ForBackground/ad-bg-pattern.png') no-repeat center / cover;
 }
 
 .hero-bg {

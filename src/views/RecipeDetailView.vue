@@ -105,7 +105,7 @@ const startCooking = () => {
     <div>
         <!-- 食譜header start -->
         <section class="banner-section">
-            <div class="banner-ad bg-warning-subtle block-2">
+            <div class="bg-warning-subtle block-2">
                 <div class="row banner-content pt-5">
                     <div class="content-wrapper text-center col-md-12">
                         <h1 class="pb-5">食譜製作 Recipe Cooking</h1>
@@ -153,9 +153,9 @@ const startCooking = () => {
         <!-- 食材列表 start -->
         <section class="mt-5 text-center">
             <div class="container-fluid">
-                <div class="row g-4">
+                <div class="row g-4 fs-5">
                     <!-- 食材 -->
-                    <div class="col-12">
+                    <div class="col-12 border w-60 mx-auto p-3">
                         <h3 class="text-black">食材</h3>
                         <div class="row g-4">
                             <ul class="list-unstyled">
@@ -169,6 +169,7 @@ const startCooking = () => {
                                             v-model="selectedIngredients"
                                             :label="ingredient.ingredientName"
                                             class="mt-2"
+                                            size="large"
                                         ></el-checkbox>
                                         <span
                                             :style="{
@@ -197,7 +198,7 @@ const startCooking = () => {
                         </div>
                     </div>
                     <!-- 調味料 -->
-                    <div class="col-12">
+                    <div class="col-12 border w-60 mx-auto p-3">
                         <h3 class="text-black">調味料</h3>
                         <div
                             class="seasoning-tags mt-3"
@@ -221,7 +222,7 @@ const startCooking = () => {
         <!-- 食材列表 end -->
 
         <!-- 步驟 start -->
-        <section class="mt-6 text-center">
+        <section class="mt-5 text-center border w-60 mx-auto p-3">
             <h3 class="text-black">烹飪步驟</h3>
             <div
                 class="recipe-steps my-4 wide-steps-container d-flex justify-content-center"
@@ -262,13 +263,6 @@ const startCooking = () => {
     margin-left: calc(50% - 50vw);
     overflow: hidden;
 }
-
-.banner-ad {
-    position: relative;
-    overflow: hidden;
-    background: url('@/assets/img/ForBackground/ad-bg-pattern.png') no-repeat center / cover;
-}
-
 .recipe-title {
     font-weight: bold;
     color: #333;
