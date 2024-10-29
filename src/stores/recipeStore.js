@@ -44,10 +44,19 @@ export const useRecipeStore = defineStore('recipeStore', {
                     throw new Error('Network response was not ok');
                 }
                 const data = await response.json();
-                console.log('獲取到的食譜詳細資料:', data);
+                // console.log('獲取到的食譜詳細資料:', data);
                 this.selectedRecipe = data; // 將返回的詳細食譜資料賦值給 selectedRecipe
+                localStorage.setItem('selectedRecipe', JSON.stringify(data)); // 將詳細食譜保存到 localStorage
             } catch (error) {
                 console.error('There was a problem with the fetch operation:', error);
+            }
+        },
+        saveSelectedRecipe() {
+            // console.log("saveSelectedRecipe");
+            const storedRecipe = localStorage.getItem('selectedRecipe');
+            if (storedRecipe) {
+                this.selectedRecipe = JSON.parse(storedRecipe);
+                // console.log(this.saveSelectedRecipe)
             }
         },
     }

@@ -1,23 +1,34 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useInventoryStore } from '@/stores/inventoryStore';
 import { useRecipeStore } from '@/stores/recipeStore';
-
+import Swal from 'sweetalert2';
 // 使用 Pinia store 來取得庫存與食譜數據
 const inventoryStore = useInventoryStore();
 const recipeStore = useRecipeStore();
+const { updateInventoriesAfterCooking } = inventoryStore;
+//用來追蹤打勾的食材
+const localChecked = ref([]);
 
-// 來追蹤用戶選擇的食材
-const selectedIngredients = ref([]);
-// 檢查 `selectedRecipe` 的初始值
-console.log('selectedRecipe 初始值:', recipeStore.selectedRecipe);
-// 使用 watch 來監聽 `selectedRecipe` 的變化
-watch(
-    () => recipeStore.selectedRecipe,
-    (newVal, oldVal) => {
-        console.log('selectedRecipe 的變化:', oldVal, '=>', newVal);
+// 切換打勾狀態
+const toggleChecked = (ingredientId) => {
+    if (localChecked.value.includes(ingredientId)) {
+        localChecked.value = localChecked.value.filter((id) => id !== ingredientId);
+    } else {
+        localChecked.value.push(ingredientId);
     }
-);
+};
+
+// 檢查是否打勾
+const isChecked = (ingredientId) => {
+    return localChecked.value.includes(ingredientId);
+};
+// 檢查 `selectedRecipe` 的初始值
+// console.log('selectedRecipe 初始值:', recipeStore.selectedRecipe);
+
+onMounted(() => {
+    recipeStore.saveSelectedRecipe();
+});
 // 計算從 recipeStore 中取得的選擇的食譜
 const currentUser = { id: localStorage.getItem('UserId') }; // 這是示例，請根據實際情況設置當前用戶ID
 
@@ -33,18 +44,23 @@ const recipeIngredients = computed(() => {
         const inventoryItem = inventoryStore.inventories.find(
             (item) => item.ingredientId === ingredientId && item.userId === currentUser.id
         );
-        const remainingQuantity = inventoryItem ? inventoryItem.quantity : 0;
+
+        // 找到屬於當前用戶的所有庫存項目並累加數量
+        const totalQuantity = inventoryStore.inventories
+            .filter((item) => item.ingredientId === ingredientId && item.userId === currentUser.id)
+            .reduce((sum, item) => sum + item.quantity, 0); // 計算相同食材的總和
+        // const remainingQuantity = inventoryItem ? inventoryItem.quantity : 0;
 
         return {
             ingredientId,
             ingredientName,
             requiredQuantity,
-            remainingQuantity,
+            remainingQuantity: totalQuantity,
             unit,
         };
     });
 });
-
+//#region 顯示食譜資訊
 // 計算顯示的用戶 ID
 const userIdDisplay = computed(() => {
     return recipeStore.selectedRecipe && recipeStore.selectedRecipe.userId === '0'
@@ -85,19 +101,72 @@ const seasoningList = computed(() => {
     }
     return [];
 });
+//#endregion 顯示食譜資訊
+
 // 當點擊「開始烹飪」時觸發的操作
-const startCooking = () => {
-    if (selectedIngredients.value.length === 0) {
-        return Swal.fire({
+const startCooking = async () => {
+    try {
+        const { deletedIngredients = [], updatedIngredients = [] } = await updateInventoriesAfterCooking(
+            recipeIngredients.value
+        );
+        console.log(deletedIngredients);
+        console.log(updatedIngredients);
+
+        // 用於合併刪除和更新的食材
+        const ingredientChanges = {};
+
+        // 處理刪除的食材
+        deletedIngredients.forEach((ingredientName) => {
+            if (!ingredientChanges[ingredientName]) {
+                ingredientChanges[ingredientName] = { deleted: true, reducedQuantity: 0 };
+            } else {
+                ingredientChanges[ingredientName].deleted = true;
+            }
+        });
+
+        // 處理減少的食材
+        updatedIngredients.forEach((ingredient) => {
+            if (!ingredientChanges[ingredient.name]) {
+                ingredientChanges[ingredient.name] = { deleted: false, reducedQuantity: ingredient.quantity };
+            } else {
+                ingredientChanges[ingredient.name].reducedQuantity += ingredient.quantity;
+            }
+        });
+
+        let message = '烹飪完成。\n';
+
+        // 組合訊息
+        Object.keys(ingredientChanges).forEach((ingredientName) => {
+            const change = ingredientChanges[ingredientName];
+            if (change.deleted && change.reducedQuantity > 0) {
+                message += `${ingredientName} 已全部用完，並從庫存中刪除；之前的剩餘數量已減少了 ${change.reducedQuantity}。\n`;
+            } else if (change.deleted) {
+                message += `${ingredientName} 已全部用完，並從庫存中刪除。\n`;
+            } else if (change.reducedQuantity > 0) {
+                message += `${ingredientName} 已減少了 ${change.reducedQuantity}。\n`;
+            }
+        });
+
+        // 如果沒有任何刪除或減少的情況，也給一個提示
+        if (Object.keys(ingredientChanges).length === 0) {
+            message = '您的庫存沒有變化。';
+        }
+
+        Swal.fire({
+            title: '烹飪狀態更新',
+            html: `<pre>${message}</pre>`,
+            icon: 'info',
+            confirmButtonText: '了解',
+        });
+    } catch (error) {
+        console.error('startCooking 發生錯誤:', error);
+        Swal.fire({
             title: '錯誤',
-            text: '請選擇要使用的食材',
+            text: '更新庫存時發生錯誤，請稍後再試。',
             icon: 'error',
             confirmButtonText: '確定',
         });
     }
-
-    // 這裡你可以根據選擇的食材執行扣庫存等後續邏輯
-    console.log('開始烹飪，選擇的食材:', selectedIngredients.value);
 };
 </script>
 
@@ -142,7 +211,13 @@ const startCooking = () => {
                         </tr>
                         <tr>
                             <th>可見性</th>
-                            <td>{{ recipeStore.selectedRecipe.visibility ? '公開' : '私人' }}</td>
+                            <td>
+                                <span v-if="recipeStore.selectedRecipe.visibility === 0">公開</span>
+                                <span v-else-if="recipeStore.selectedRecipe.visibility === 1">群組公開</span>
+                                <span v-else-if="recipeStore.selectedRecipe.visibility === 2">私人</span>
+                                <span v-else>未知</span>
+                                <!-- 若為意外值，顯示"未知" -->
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -164,24 +239,25 @@ const startCooking = () => {
                                     class="mb-1"
                                 >
                                     <div class="d-flex justify-content-center align-items-center">
+                                        <!-- Checkbox，綁定 checked 狀態和 localChecked 集合 -->
                                         <el-checkbox
-                                            v-model="selectedIngredients"
-                                            :label="ingredient.ingredientName"
+                                            :value="isChecked(ingredient.ingredientId)"
+                                            @change="toggleChecked(ingredient.ingredientId)"
                                             class="mt-2"
-                                            size="large"
-                                        ></el-checkbox>
+                                        >
+                                        </el-checkbox>
+                                        <!-- 顯示食材名稱與數量資訊 -->
                                         <span
                                             :style="{
-                                                'text-decoration-line': selectedIngredients.includes(
-                                                    ingredient.ingredientName
-                                                )
+                                                textDecoration: localChecked.includes(ingredient.ingredientId)
                                                     ? 'line-through'
                                                     : 'none',
                                             }"
                                             class="ms-2"
                                         >
+                                            {{ ingredient.ingredientName }} - 需求數量:
                                             {{ ingredient.requiredQuantity }} {{ ingredient.unit }}
-                                            (庫存數量:
+                                            (庫存總數量:
                                             <span
                                                 :class="{
                                                     'text-danger':
@@ -196,6 +272,7 @@ const startCooking = () => {
                             </ul>
                         </div>
                     </div>
+
                     <!-- 調味料 -->
                     <div class="col-12 border w-60 mx-auto p-3">
                         <h3 class="text-black">調味料</h3>
