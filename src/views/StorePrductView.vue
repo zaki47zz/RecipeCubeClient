@@ -106,6 +106,8 @@ const addToCart = (product) => {
             Swal.fire(`不能超過庫存量，庫存為：${Math.floor(product.stock / product.unitQuantity)} 個單位`);
         }
     }
+
+    window.dispatchEvent(new Event('cart-updated'));
 };
 
 // 分頁功能 Start

@@ -115,6 +115,7 @@ const addToCart = (product) => {
             Swal.fire(`不能超過庫存量，庫存為：${Math.floor(product.stock / product.unitQuantity)} 個單位`);
         }
     }
+    window.dispatchEvent(new Event('cart-updated'));
 };
 
 // 將所有不在購物車中的推薦商品加入購物車
@@ -232,7 +233,7 @@ body {
 
 ul {
     list-style-position: inside;
-    width: 600px;
+    width: 100%;
     max-width: 100%;
     background: white;
     box-shadow: 0.25rem 0.25rem 0.75rem rgb(0 0 0 / 0.15);

@@ -109,6 +109,7 @@ const updateCart = (product) => {
     }
 
     localStorage.setItem('productCart', JSON.stringify(cart)); // 更新 localStorage
+    loadProductCartLocalStorage();
 };
 
 //===========================================================================================================================
@@ -165,19 +166,23 @@ const closeCartSidebar = () => {
     document.body.classList.remove('modal-open'); // 移除 modal-open 類別
 };
 
-//=========================================================================================================================
-// 取得localStorage_productCart的長度
-const getCartlenghtFromLocalStorage = () => {
-    const cart = JSON.parse(localStorage.getItem('productCart')) || [];
-    return cart.length;
-};
-
 //========================================================================================================================
 // 監聽SideBarCartComponent
 window.windowCartComponent = () => {
     const cartData = localStorage.getItem('productCart');
     return cartData ? JSON.parse(cartData) : [];
 };
+
+//======================================================================================================
+// 計算購物車長度
+const cartLength = computed(() => {
+    return cartProducts.value.length;
+});
+
+// 監聽
+window.addEventListener('cart-updated', () => {
+    loadProductCartLocalStorage(); // 重新加載購物車
+});
 </script>
 
 <template>
@@ -203,18 +208,18 @@ window.windowCartComponent = () => {
             </div>
             <div class="offcanvas-body">
                 <!-- localStorage_productCart.length 為 0 顯示 -->
-                <div v-show="getCartlenghtFromLocalStorage() === 0">
+                <div v-show="cartLength === 0">
                     <h4 class="d-flex justify-content-between align-items-center mb-3">
                         <span class="text-primary">我的購物車</span>
-                        <span class="badge custom-badge rounded-pill">{{ getCartlenghtFromLocalStorage() }}</span>
+                        <span class="badge custom-badge rounded-pill">{{ cartLength }}</span>
                     </h4>
                     <p>快買些東西吧，購物車是空的！</p>
                 </div>
                 <!-- localStorage_productCart.length 為 0 隱藏 -->
-                <div class="order-md-last" v-show="getCartlenghtFromLocalStorage() > 0">
+                <div class="order-md-last" v-show="cartLength > 0">
                     <h4 class="d-flex justify-content-between align-items-center mb-3">
                         <span class="text-primary">我的購物車</span>
-                        <span class="badge custom-badge rounded-pill">{{ getCartlenghtFromLocalStorage() }}</span>
+                        <span class="badge custom-badge rounded-pill">{{ cartLength }}</span>
                     </h4>
                     <ul class="list-group mb-3" v-for="product in cartProducts" :key="product.productId">
                         <li class="list-group-item d-flex justify-content-between lh-sm">
@@ -241,11 +246,7 @@ window.windowCartComponent = () => {
                         <strong class="me-3 custom-totalPrice">$ {{ totalPrice }}</strong>
                     </div>
                 </div>
-                <button
-                    class="w-100 custom-btn btn-lg"
-                    @click="goToCheckout"
-                    :disabled="getCartlenghtFromLocalStorage() === 0"
-                >
+                <button class="w-100 custom-btn btn-lg" @click="goToCheckout" :disabled="cartLength === 0">
                     查看我的購物明細並結帳
                 </button>
             </div>
@@ -253,9 +254,7 @@ window.windowCartComponent = () => {
 
         <!-- 開啟購物車 Sidebar 的按鈕 -->
         <button @click="openCartSidebar" class="floating-icon-side-cart">
-            <span class="badge cart-badge" v-show="getCartlenghtFromLocalStorage() > 0">{{
-                getCartlenghtFromLocalStorage()
-            }}</span>
+            <span class="badge cart-badge" v-show="cartLength > 0">{{ cartLength }}</span>
             <i class="fa-solid fa-list-ul"></i>
         </button>
     </div>
