@@ -16,7 +16,7 @@ const username = ref('');
 const storedUserData = JSON.parse(localStorage.getItem('UserData'));
 console.log(storedUserData);
 // 定義選單項目，包含標籤名稱；activeIndex 將會控制選擇的項目
-const menuItems = ref(['基本資料', '飲食偏好', '群組']);
+const menuItems = ref(['基本資料', '飲食偏好', '群組', '自訂食譜']);
 
 const activeIndex = ref(-1);
 
@@ -397,6 +397,9 @@ const sendchangeGroup = async () => {
 
                 <button class="btn btn-outline-primary m-1" data-bs-toggle="modal"
                     data-bs-target="#changeGroupModal">更換群組</button>
+            </div>
+            <div v-if="activeIndex === 3">
+                <h2>自訂食譜</h2>
             </div>
         </div>
     </div>
