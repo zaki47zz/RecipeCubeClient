@@ -183,7 +183,6 @@ const filterIngredientsByCategory = () => {
         filteredIngredients.value = [];
     }
 };
-
 const addFoot = ref({
     "user_Id": "",
     "ingredient_Id": 0
@@ -206,7 +205,6 @@ const exclusiveIngredientModal = (exclusive) => {
     filteredIngredients.value = ""; // 選取分類後過濾的食材
     selectedIngredientId.value = ""; // 儲存選擇的食材 ID
 }
-
 
 
 const sendAddIngredientModal = async () => {
@@ -253,7 +251,32 @@ const sendAddIngredientModal = async () => {
 };
 
 
+const groupName = ref(storedUserData?.UserName + "的群組");
+const CreateGroup = ref({
+    "group_name": groupName.value,
+    "group_Admin_Id": storedUserData?.UserId
+})
 
+const API_URL_CreateGroup = `${import.meta.env.VITE_API_BASEURL
+    }/UserGroups/CreateGroup`;
+
+const sendCreateGroup = async () => {
+    try {
+        const response = await fetch(API_URL_CreateGroup, {
+            method: 'POST',
+            body: JSON.stringify(CreateGroup.value),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        if (response.ok) {
+            alert('新增成功！');
+        } else {
+            const data = await response.json();
+            alert('新增失敗：' + "已有群組");
+        }
+    } catch (error) {
+        alert('新增請求失敗：' + error.message);
+    }
+};
 
 </script>
 
@@ -335,6 +358,8 @@ const sendAddIngredientModal = async () => {
             </div>
             <div v-else-if="activeIndex === 2">
                 <p><strong>群組:</strong> {{ storedUserData?.GroupId }}</p>
+                <button class="btn btn-outline-primary m-1" data-bs-toggle="modal"
+                    data-bs-target="#groupModal">新增群組</button>
             </div>
         </div>
     </div>
@@ -376,6 +401,29 @@ const sendAddIngredientModal = async () => {
                     <button type="submit" class="btn btn-primary" @click="sendAddIngredientModal">加入{{
                         foodtype
                         }}食材</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Launch demo modal
+    </button>
+    <!-- 群組 Modal -->
+    <div class="modal fade" id="groupModal" tabindex="-1" aria-labelledby="groupModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="groupModalLabel">新增群組</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="groupNameInput">群組名稱</label>
+                    <input type="text" id="groupNameInput" v-model="CreateGroup.group_name" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    <button type="button" class="btn btn-primary" @click="sendCreateGroup">創建群組</button>
                 </div>
             </div>
         </div>
