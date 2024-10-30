@@ -195,7 +195,7 @@ const updateScrollPosition = () => {
     </section>
 
     <section>
-        <div class="container-fluid py-6">
+        <div class="container-fluid py-3">
             <div class="shop-section rounded-3">
                 <div class="shop-box">
                     <div class="shop-logo">cube</div>
