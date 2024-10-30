@@ -47,6 +47,7 @@ const loadProducts = async () => {
     products.value = datas;
     // console.log(datas);
     loadProductCartLocalStorage();
+    loadCoupons(userId);
     // console.log('已加載loadProductCartLocalStorage')
 };
 
@@ -81,6 +82,39 @@ const loadProductCartLocalStorage = () => {
         })
         .filter(Boolean); //過濾掉null值
 };
+
+// 讀取優惠券 Start
+const coupons = ref([]);
+
+const loadCoupons = async (userId) => {
+    try {
+        if (userId && userId != null) {
+            const response = await fetch(`${BaseURL}/Coupons/GetCouponsWithUserCoupons`);
+            const data = await response.json();
+            coupons.value = data;
+            loadCouponsByUserId(userId);
+        } else {
+            console.log('使用者未登入或不存在');
+        }
+    } catch (error) {
+        console.log(`fetch 請求優惠券失敗`, error);
+    }
+};
+
+const couponsByUserId = ref([]);
+
+const loadCouponsByUserId = async (userId) => {
+    if (coupons.value && coupons.value.length > 0) {
+        couponsByUserId.value = coupons.value.filter((coupon) => coupon.userId === userId);
+        console.log('該使用者的優惠券', couponsByUserId.value);
+    } else {
+        couponsByUserId.value = [];
+        console.log('沒有優惠券');
+    }
+};
+
+// 讀取優惠券 End
+
 // 載入loadProducts
 loadProducts();
 
@@ -98,10 +132,34 @@ const totalPrice = computed(() => {
     }, 0);
 });
 
+const selectedCoupon = ref(null); //選擇優惠券
+
+// 折扣
+const discount = computed(() => {
+    let discountValue = 0;
+    console.log(discountValue);
+    if (selectedCoupon.value) {
+        // console.log(`哪種折扣`, selectedCoupon.value.discountType);
+        const discountType = Number(selectedCoupon.value.discountType);
+        if (discountType === 1) {
+            // console.log('打折');
+            discountValue =
+                (totalPrice.value + parseInt(selectedShipping.value, 10)) * (1 - selectedCoupon.value.discountValue); //打折
+            // console.log(discountValue);
+        } else if (discountType === 2) {
+            // console.log('折抵');
+            discountValue = selectedCoupon.value.discountValue; // 折抵
+        }
+    }
+    // console.log(discountValue);
+    return Math.round(discountValue); //四捨五入
+});
+
 const selectedShipping = ref(220); //運費
 //計算商品總價 含運費
 const totalPriceShippingFee = computed(() => {
-    return totalPrice.value + parseInt(selectedShipping.value, 10);
+    let lastTotalPrice = totalPrice.value + parseInt(selectedShipping.value, 10) - parseInt(discount.value, 10);
+    return lastTotalPrice <= 1 ? 1 : lastTotalPrice;
 });
 
 // ======================================================================================================================
@@ -423,6 +481,37 @@ const ToOrders = () => {
                                                     v-model="selectedShipping"
                                                 />
                                                 <label class="form-check-label" for="Shipping-2">自取：$ 0</label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row"></th>
+                                        <td class="py-5">
+                                            <p class="mb-0 text-dark py-3">優惠券</p>
+                                        </td>
+                                        <td colspan="3" class="py-5">
+                                            <div class="form-group">
+                                                <select class="form-select" v-model="selectedCoupon">
+                                                    <option value="null">選擇優惠券</option>
+                                                    <option
+                                                        v-for="coupon in couponsByUserId"
+                                                        :key="coupon.couponId"
+                                                        :value="{
+                                                            discountValue: coupon.discountValue,
+                                                            discountType: coupon.discountType,
+                                                        }"
+                                                    >
+                                                        {{ coupon.couponName }}
+                                                    </option>
+                                                </select>
+                                                <div class="text-start mt-3">
+                                                    <p class="mb-0" style="color: red">
+                                                        若訂單折抵後低於 $1 元，訂單仍會以 $1 元計算
+                                                    </p>
+                                                </div>
+                                                <div class="text-start mt-3">
+                                                    <p class="mb-0 text-dark">共省: {{ discount }} 元</p>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
