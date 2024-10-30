@@ -278,6 +278,40 @@ const sendCreateGroup = async () => {
     }
 };
 
+const changeGroup = ref({
+    "change_user_Id": storedUserData?.UserId,
+    "change_Group_Id": storedUserData?.GroupId,
+})
+
+
+
+const API_URL_ChangeGroup = `${import.meta.env.VITE_API_BASEURL
+    }/Users/changeGroup`;
+
+const sendchangeGroup = async () => {
+    try {
+        const response = await fetch(API_URL_ChangeGroup, {
+            method: 'PUT',
+            body: JSON.stringify(changeGroup.value),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        if (response.ok) {
+            const updatedUserData = {
+                ...storedUserData, // 保留其他資料
+                GroupId
+                    : changeGroup.value.change_Group_Id, // 更新群組id
+            };
+            // 更新 localStorage
+            localStorage.setItem('UserData', JSON.stringify(updatedUserData));
+            alert('新增成功！');
+        } else {
+            const data = await response.json();
+            alert('新增失敗：' + data.message);
+        }
+    } catch (error) {
+        alert('新增請求失敗：' + error.message);
+    }
+};
 </script>
 
 <template>
@@ -359,7 +393,10 @@ const sendCreateGroup = async () => {
             <div v-else-if="activeIndex === 2">
                 <p><strong>群組:</strong> {{ storedUserData?.GroupId }}</p>
                 <button class="btn btn-outline-primary m-1" data-bs-toggle="modal"
-                    data-bs-target="#groupModal">新增群組</button>
+                    data-bs-target="#CreateGroupModal">新增群組</button>
+
+                <button class="btn btn-outline-primary m-1" data-bs-toggle="modal"
+                    data-bs-target="#changeGroupModal">更換群組</button>
             </div>
         </div>
     </div>
@@ -409,12 +446,13 @@ const sendCreateGroup = async () => {
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
         Launch demo modal
     </button>
-    <!-- 群組 Modal -->
-    <div class="modal fade" id="groupModal" tabindex="-1" aria-labelledby="groupModalLabel" aria-hidden="true">
+    <!-- 創建群組 Modal -->
+    <div class="modal fade" id="CreateGroupModal" tabindex="-1" aria-labelledby="CreateGroupModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="groupModalLabel">新增群組</h5>
+                    <h5 class="modal-title" id="CreateGroupModalLabel">新增群組</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -424,6 +462,27 @@ const sendCreateGroup = async () => {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
                     <button type="button" class="btn btn-primary" @click="sendCreateGroup">創建群組</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 更換群組 Modal -->
+    <div class="modal fade" id="changeGroupModal" tabindex="-1" aria-labelledby="changeGroupModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changeGroupModalLabel">更換群組</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="groupNameInput">群組Id</label>
+                    <input type="text" id="groupNameInput" v-model="changeGroup.change_Group_Id" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    <button type="button" class="btn btn-primary" @click="sendchangeGroup">確認更換群組</button>
                 </div>
             </div>
         </div>
