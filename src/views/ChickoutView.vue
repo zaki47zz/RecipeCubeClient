@@ -1,7 +1,7 @@
 <script setup>
 import '@/assets/js/store.js';
 import Swal from 'sweetalert2';
-import { ref, computed, reactive, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, reactive, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import CircularJSON from 'circular-json';
 import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
@@ -137,18 +137,26 @@ const selectedCoupon = ref(null); //選擇優惠券
 // 折扣
 const discount = computed(() => {
     let discountValue = 0;
-    console.log(discountValue);
+    // console.log(discountValue);
     if (selectedCoupon.value) {
         // console.log(`哪種折扣`, selectedCoupon.value.discountType);
         const discountType = Number(selectedCoupon.value.discountType);
-        if (discountType === 1) {
-            // console.log('打折');
-            discountValue =
-                (totalPrice.value + parseInt(selectedShipping.value, 10)) * (1 - selectedCoupon.value.discountValue); //打折
-            // console.log(discountValue);
-        } else if (discountType === 2) {
-            // console.log('折抵');
-            discountValue = selectedCoupon.value.discountValue; // 折抵
+        const minSpend = Number(selectedCoupon.value.minSpend);
+        const totalPriceAndShippingFee = totalPrice.value + parseInt(selectedShipping.value, 10);
+        if (minSpend <= totalPriceAndShippingFee) {
+            if (discountType === 1) {
+                // console.log('打折');
+                discountValue =
+                    (totalPrice.value + parseInt(selectedShipping.value, 10)) *
+                    (1 - selectedCoupon.value.discountValue); //打折
+                // console.log(discountValue);
+            } else if (discountType === 2) {
+                // console.log('折抵');
+                discountValue = selectedCoupon.value.discountValue; // 折抵
+            }
+        } else {
+            Swal.fire('該訂單未達此優惠券使用門檻!');
+            selectedCoupon.value = null; //重置所選優惠券
         }
     }
     // console.log(discountValue);
@@ -491,7 +499,11 @@ const ToOrders = () => {
                                         </td>
                                         <td colspan="3" class="py-5">
                                             <div class="form-group">
-                                                <select class="form-select" v-model="selectedCoupon">
+                                                <select
+                                                    class="form-select"
+                                                    v-model="selectedCoupon"
+                                                    :key="selectedCoupon"
+                                                >
                                                     <option value="null">選擇優惠券</option>
                                                     <option
                                                         v-for="coupon in couponsByUserId"
@@ -499,18 +511,22 @@ const ToOrders = () => {
                                                         :value="{
                                                             discountValue: coupon.discountValue,
                                                             discountType: coupon.discountType,
+                                                            minSpend: coupon.minSpend,
                                                         }"
                                                     >
                                                         {{ coupon.couponName }}
                                                     </option>
                                                 </select>
-                                                <div class="text-start mt-3">
-                                                    <p class="mb-0" style="color: red">
-                                                        若訂單折抵後低於 $1 元，訂單仍會以 $1 元計算
-                                                    </p>
-                                                </div>
-                                                <div class="text-start mt-3">
-                                                    <p class="mb-0 text-dark">共省: {{ discount }} 元</p>
+                                                <div class="text-start mt-3 d-flex align-items-center">
+                                                    <p class="mb-0 text-dark me-5">共省: {{ discount }} 元</p>
+                                                    <el-tooltip
+                                                        content="<span>1. 若訂單折抵後低於 $1 元，訂單仍會以 $1 元計算<br>
+                                                                        2. 使用優惠券滿額最低限制以含運輸費用費用計算<br>
+                                                                        3. 優惠券折扣將以整筆訂單(含運費計算)</span>"
+                                                        raw-content
+                                                    >
+                                                        <el-button><i class="fa-solid fa-question"></i></el-button>
+                                                    </el-tooltip>
                                                 </div>
                                             </div>
                                         </td>
