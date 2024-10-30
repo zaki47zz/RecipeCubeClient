@@ -14,7 +14,7 @@ const modules = [EffectCoverflow, Pagination, Autoplay, Navigation];
 
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
-
+const userId = localStorage.getItem('UserId');
 const products = ref([]);
 const filteredProducts = ref([]);
 const selectedCategory = ref(null);
@@ -75,39 +75,41 @@ const addToCart = (product) => {
         // console.log("跟上一個使用者是相同id不清除購物車")
     }
     // ===================================================================================
+    if (userId && userId.length > 0) {
+        // 從 localStorage 取得購物車資料 如果還沒有名為cart的localStorage 則為空陣列
+        let cart = JSON.parse(localStorage.getItem('productCart')) || [];
 
-    // 從 localStorage 取得購物車資料 如果還沒有名為cart的localStorage 則為空陣列
-    let cart = JSON.parse(localStorage.getItem('productCart')) || [];
+        // 檢查是否已經有這商品
+        const existingProduct = cart.find((item) => item.productId === product.productId);
 
-    // 檢查是否已經有這商品
-    const existingProduct = cart.find((item) => item.productId === product.productId);
-
-    if (existingProduct) {
-        // 商品存在 且 目前購物車數量+加入一單位的量<=stock
-        const totalQuantity = (existingProduct.quantity + 1) * product.unitQuantity;
-        if (totalQuantity <= product.stock) {
-            // 如果商品存在購物車數量增加'1'
-            existingProduct.quantity += 1;
-            localStorage.setItem('productCart', JSON.stringify(cart));
-            Swal.fire(`${product.productName} 已加入購物車！`);
+        if (existingProduct) {
+            // 商品存在 且 目前購物車數量+加入一單位的量<=stock
+            const totalQuantity = (existingProduct.quantity + 1) * product.unitQuantity;
+            if (totalQuantity <= product.stock) {
+                // 如果商品存在購物車數量增加'1'
+                existingProduct.quantity += 1;
+                localStorage.setItem('productCart', JSON.stringify(cart));
+                Swal.fire(`${product.productName} 已加入購物車！`);
+            } else {
+                Swal.fire(
+                    `不能超過庫存量，庫存為：${Math.floor(product.stock / product.unitQuantity)}，已經將 ${
+                        existingProduct.quantity
+                    } 個單位加入購物車`
+                );
+            }
         } else {
-            Swal.fire(
-                `不能超過庫存量，庫存為：${Math.floor(product.stock / product.unitQuantity)}，已經將 ${
-                    existingProduct.quantity
-                } 個單位加入購物車`
-            );
+            const totalQuantity = product.unitQuantity;
+            if (totalQuantity <= product.stock) {
+                cart.push({ ...product, quantity: 1 });
+                localStorage.setItem('productCart', JSON.stringify(cart));
+                Swal.fire(`${product.productName} 已加入購物車！`);
+            } else {
+                Swal.fire(`不能超過庫存量，庫存為：${Math.floor(product.stock / product.unitQuantity)} 個單位`);
+            }
         }
     } else {
-        const totalQuantity = product.unitQuantity;
-        if (totalQuantity <= product.stock) {
-            cart.push({ ...product, quantity: 1 });
-            localStorage.setItem('productCart', JSON.stringify(cart));
-            Swal.fire(`${product.productName} 已加入購物車！`);
-        } else {
-            Swal.fire(`不能超過庫存量，庫存為：${Math.floor(product.stock / product.unitQuantity)} 個單位`);
-        }
+        Swal.fire('請先登入或註冊會員！');
     }
-
     window.dispatchEvent(new Event('cart-updated'));
 };
 

@@ -8,7 +8,7 @@ import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import CouponComponent from '@/components/CouponComponent.vue';
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
-
+const userId = localStorage.getItem('UserId');
 // 讀取所有商品
 const ApiURL = `${BaseURL}/Products/ProductsNcategory`;
 
@@ -224,7 +224,11 @@ const clearAllCart = () => {
 // 導航至結帳頁面
 const router = useRouter();
 const goToCheckout = () => {
-    router.push({ name: 'chickout' });
+    if (userId && userId.length > 0) {
+        router.push({ name: 'chickout' });
+    } else {
+        Swal.fire('請先登入或註冊會員');
+    }
 };
 
 // ======================================================================================================================

@@ -8,6 +8,7 @@ import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import CouponComponent from '@/components/CouponComponent.vue';
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
+const userId = localStorage.getItem('UserId');
 
 const route = useRoute(); // 獲取當前路由
 const products = ref([]);
@@ -52,47 +53,50 @@ const addToCart = (product) => {
         // console.log("跟上一個使用者是相同id不清除購物車")
     }
     // ===================================================================================
+    if (userId && userId.length > 0) {
+        // 從 localStorage 取得購物車資料 如果還沒有名為cart的localStorage 則為空陣列
+        let cart = JSON.parse(localStorage.getItem('productCart')) || [];
 
-    // 從 localStorage 取得購物車資料 如果還沒有名為cart的localStorage 則為空陣列
-    let cart = JSON.parse(localStorage.getItem('productCart')) || [];
+        // 檢查是否已經有這商品
+        const existingProduct = cart.find((item) => item.productId === product.productId);
 
-    // 檢查是否已經有這商品
-    const existingProduct = cart.find((item) => item.productId === product.productId);
+        if (existingProduct) {
+            const totalQuantity =
+                existingProduct.quantity * product.unitQuantity + product.unitQuantity * selectQuantity.value;
+            console.log(`商品已存在 判斷式數量 ${totalQuantity}`);
+            if (totalQuantity <= product.stock) {
+                // 如果商品存在購物車數量增加'商品數量選擇input_selectQuantity的value'
+                existingProduct.quantity += selectQuantity.value;
 
-    if (existingProduct) {
-        const totalQuantity =
-            existingProduct.quantity * product.unitQuantity + product.unitQuantity * selectQuantity.value;
-        console.log(`商品已存在 判斷式數量 ${totalQuantity}`);
-        if (totalQuantity <= product.stock) {
-            // 如果商品存在購物車數量增加'商品數量選擇input_selectQuantity的value'
-            existingProduct.quantity += selectQuantity.value;
-
-            // 將購物車內容存進localStorage
-            localStorage.setItem('productCart', JSON.stringify(cart));
-            Swal.fire(`${product.productName} 已加入購物車！`);
-            //加入成功後將 selectQuantity 重設為1
-            selectQuantity.value = 1;
+                // 將購物車內容存進localStorage
+                localStorage.setItem('productCart', JSON.stringify(cart));
+                Swal.fire(`${product.productName} 已加入購物車！`);
+                //加入成功後將 selectQuantity 重設為1
+                selectQuantity.value = 1;
+            } else {
+                Swal.fire(
+                    `不能超過庫存量，庫存為：${Math.floor(product.stock / product.unitQuantity)}，已經將 ${
+                        existingProduct.quantity
+                    } 個單位加入購物車`
+                );
+            }
         } else {
-            Swal.fire(
-                `不能超過庫存量，庫存為：${Math.floor(product.stock / product.unitQuantity)}，已經將 ${
-                    existingProduct.quantity
-                } 個單位加入購物車`
-            );
+            const totalQuantity = product.unitQuantity * selectQuantity.value;
+            console.log(`商品不存在 判斷式數量${totalQuantity}`);
+            if (totalQuantity <= product.stock) {
+                cart.push({ ...product, quantity: selectQuantity.value });
+
+                // 將購物車內容存進localStorage
+                localStorage.setItem('productCart', JSON.stringify(cart));
+                Swal.fire(`${product.productName} 已加入購物車！`);
+                //加入成功後將 selectQuantity 重設為1
+                selectQuantity.value = 1;
+            } else {
+                Swal.fire(`不能超過庫存量，庫存為：${Math.floor(product.stock / product.unitQuantity)} 個單位`);
+            }
         }
     } else {
-        const totalQuantity = product.unitQuantity * selectQuantity.value;
-        console.log(`商品不存在 判斷式數量${totalQuantity}`);
-        if (totalQuantity <= product.stock) {
-            cart.push({ ...product, quantity: selectQuantity.value });
-
-            // 將購物車內容存進localStorage
-            localStorage.setItem('productCart', JSON.stringify(cart));
-            Swal.fire(`${product.productName} 已加入購物車！`);
-            //加入成功後將 selectQuantity 重設為1
-            selectQuantity.value = 1;
-        } else {
-            Swal.fire(`不能超過庫存量，庫存為：${Math.floor(product.stock / product.unitQuantity)} 個單位`);
-        }
+        Swal.fire('請先登入或註冊會員！');
     }
     window.dispatchEvent(new Event('cart-updated'));
 };
