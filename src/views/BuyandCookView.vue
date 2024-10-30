@@ -73,6 +73,7 @@ const exportInventories = () => {
     localStorage.setItem('cookingInventories', JSON.stringify(cookingInventories.value));
     localStorage.setItem('isUsingInventory', useInventory.value);
     localStorage.setItem('isSet', set.value);
+    localStorage.setItem('source', 'buyAndCook'); // 標識來源為隨買隨煮
 };
 </script>
 

@@ -21,7 +21,8 @@ export const useCookingStore = defineStore('cookingStore', () => {
 
     //判斷是不是已經加入過庫存食材了
     const hasAddedInventories = ref(false);
-
+    // 判斷是否來自隨買隨煮
+    const source = ref(''); // 設定來源標識，如 'buyAndCook' 或 'inventory'
     //重設cookingInventories
     const resetCookingInventories = () => {
         cookingInventories.value = [];
@@ -30,13 +31,14 @@ export const useCookingStore = defineStore('cookingStore', () => {
         isUsingInventory.value = false;
         hasAddedInventories.value = false;
         isSet.value = false;
-
+        source.value = '';
         const keysToRemove = [
             'cookingInventories',
             'isShowingString',
             'isUsingInventory',
             'isSet',
             'hasAddedInventories',
+            'source',
         ];
         keysToRemove.forEach((key) => localStorage.removeItem(key));
     };
@@ -77,12 +79,14 @@ export const useCookingStore = defineStore('cookingStore', () => {
                 isUsingInventory: JSON.parse(localStorage.getItem('isUsingInventory')),
                 isSet: JSON.parse(localStorage.getItem('isSet')),
                 hasAddedInventories: JSON.parse(localStorage.getItem('hasAddedInventories')),
+                source: localStorage.getItem('source'),
             };
             if (storedData.cookingInventories) cookingInventories.value = storedData.cookingInventories;
             if (storedData.isShowingString !== null) isShowingString.value = storedData.isShowingString;
             if (storedData.isSet !== null) isSet.value = storedData.isSet;
             if (storedData.hasAddedInventories !== null) hasAddedInventories.value = storedData.hasAddedInventories;
             if (storedData.isUsingInventory !== null) isUsingInventory.value = storedData.isUsingInventory;
+            if (storedData.source) source.value = storedData.source;
         } catch (error) {
             console.error('Error setting cooking inventories:', error);
             resetCookingInventories();
@@ -92,17 +96,51 @@ export const useCookingStore = defineStore('cookingStore', () => {
     //將剩餘食材加入庫存並更新紀錄
     const { postInventory } = inventoryStore;
     const { postPantry } = pantryStore;
-    //還沒寫
-    console.log(leftInventories.value);
+    const saveLeftoverInventories = async () => {
+        // 如果來源不是隨買隨煮，則不需要將剩餘食材加入庫存
+        if (source.value !== 'buyAndCook') {
+            console.log('來源不是隨買隨煮，跳過保存剩餘食材的步驟');
+            return;
+        }
+
+        console.log('保存剩餘食材至庫存中:', leftInventories.value);
+        // 確認 leftInventories.value 是否有元素
+        if (!leftInventories.value || leftInventories.value.length === 0) {
+            console.log('leftInventories 是空的，沒有剩餘食材需要保存');
+            return;
+        }
+        for (const inventory of leftInventories.value) {
+            
+            // 添加到庫存中
+            console.log(`嘗試保存食材: ${inventory.ingredientName}，數量: ${inventory.quantity}`);
+            try {
+                // 添加到庫存中
+                await postInventory(inventory);
+                // 更新 pantry 紀錄
+                await postPantry(inventory.userId, inventory.ingredientId, inventory.quantity, '增加');
+                console.log(`成功保存剩餘食材: ${inventory.ingredientName}`);
+            } catch (error) {
+                console.error(`保存剩餘食材 ${inventory.ingredientName} 時發生錯誤:`, error);
+            }
+        }
+
+        try {
+            await fetchInventories();
+        } catch (error) {
+            console.error('刷新庫存失敗:', error);
+        }
+    };
 
     ////動態操作結束
 
     return {
         cookingInventories,
+        leftInventories,
         isShowingString,
         isUsingInventory,
         isSet,
         resetCookingInventories,
         setCookingInventories,
+        saveLeftoverInventories
     };
 });

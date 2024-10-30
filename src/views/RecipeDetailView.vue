@@ -2,11 +2,14 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useInventoryStore } from '@/stores/inventoryStore';
 import { useRecipeStore } from '@/stores/recipeStore';
+import { useCookingStore } from '@/stores/cookingStore';
 import Swal from 'sweetalert2';
 // 使用 Pinia store 來取得庫存與食譜數據
 const inventoryStore = useInventoryStore();
 const recipeStore = useRecipeStore();
+const cookingStore = useCookingStore();
 const { updateInventoriesAfterCooking } = inventoryStore;
+const source = localStorage.getItem('source') || 'inventoryManagement'; //隨買隨煮or庫存管理
 //用來追蹤打勾的食材
 const localChecked = ref([]);
 
@@ -26,40 +29,54 @@ const isChecked = (ingredientId) => {
 // 檢查 `selectedRecipe` 的初始值
 // console.log('selectedRecipe 初始值:', recipeStore.selectedRecipe);
 
-onMounted(() => {
-    recipeStore.saveSelectedRecipe();
+onMounted(async() => {
+    await recipeStore.saveSelectedRecipe();
 });
 // 計算從 recipeStore 中取得的選擇的食譜
-const currentUser = { id: localStorage.getItem('UserId') }; // 這是示例，請根據實際情況設置當前用戶ID
 
+const currentUser = localStorage.getItem('UserId') ? { id: localStorage.getItem('UserId') } : null; // 這是示例，請根據實際情況設置當前用戶ID
+const isGuest = !currentUser;
 const recipeIngredients = computed(() => {
-    if (!recipeStore.selectedRecipe) return [];
+    if (source === 'buyAndCook') {
+        // 使用隨買隨煮的食材列表，並為每個食材加入需求數量和擁有的數量
+        return cookingStore.cookingInventories.map((inventory) => {
+            const ingredientId = inventory.ingredientId;
+            const ingredientName = inventory.ingredientName;
+            const requiredQuantity = recipeStore.selectedRecipe?.ingredientQuantities[ingredientId] || 0;
+            const unit = inventory.unit || '';
+            const expiryDate = inventory.expiryDate || new Date().toISOString().split('T')[0];
+            return {
+                ingredientId,
+                ingredientName,
+                requiredQuantity,
+                remainingQuantity: parseFloat(inventory.quantity) || 0, // 將庫存中的數量轉為數值
+                unit,
+                expiryDate
+            };
+        });
+    } else {
+        if (!recipeStore.selectedRecipe) return [];
+        return recipeStore.selectedRecipe.selectedIngredients.map((ingredientId, index) => {
+            const ingredientName = recipeStore.selectedRecipe.selectedIngredientNames[index];
+            const requiredQuantity = recipeStore.selectedRecipe.ingredientQuantities[ingredientId] || 0;
+            const unit = recipeStore.selectedRecipe.ingredientUnits[ingredientId] || '';
 
-    return recipeStore.selectedRecipe.selectedIngredients.map((ingredientId, index) => {
-        const ingredientName = recipeStore.selectedRecipe.selectedIngredientNames[index];
-        const requiredQuantity = recipeStore.selectedRecipe.ingredientQuantities[ingredientId] || 0;
-        const unit = recipeStore.selectedRecipe.ingredientUnits[ingredientId] || '';
+            // 找到屬於當前用戶的所有庫存項目並累加數量
+            const totalQuantity = inventoryStore.inventories
+                .filter((item) => item.ingredientId === ingredientId && item.userId === currentUser.id)
+                .reduce((sum, item) => sum + parseFloat(item.quantity), 0); // 確保數值的加總
 
-        // 找到屬於當前用戶的庫存項目
-        const inventoryItem = inventoryStore.inventories.find(
-            (item) => item.ingredientId === ingredientId && item.userId === currentUser.id
-        );
-
-        // 找到屬於當前用戶的所有庫存項目並累加數量
-        const totalQuantity = inventoryStore.inventories
-            .filter((item) => item.ingredientId === ingredientId && item.userId === currentUser.id)
-            .reduce((sum, item) => sum + item.quantity, 0); // 計算相同食材的總和
-        // const remainingQuantity = inventoryItem ? inventoryItem.quantity : 0;
-
-        return {
-            ingredientId,
-            ingredientName,
-            requiredQuantity,
-            remainingQuantity: totalQuantity,
-            unit,
-        };
-    });
+            return {
+                ingredientId,
+                ingredientName,
+                requiredQuantity,
+                remainingQuantity: totalQuantity,
+                unit,
+            };
+        });
+    }
 });
+
 //#region 顯示食譜資訊
 // 計算顯示的用戶 ID
 const userIdDisplay = computed(() => {
@@ -152,11 +169,19 @@ const startCooking = async () => {
             message = '您的庫存沒有變化。';
         }
 
+        // 判斷是否需要將剩餘食材存入資料庫
+        if (source === 'buyAndCook' && !isGuest) {
+            // 如果是 "隨買隨煮" 並且不是訪客，將剩餘食材存入資料庫
+            await cookingStore.saveLeftoverInventories();
+        }
         Swal.fire({
             title: '烹飪狀態更新',
             html: `<pre>${message}</pre>`,
             icon: 'info',
             confirmButtonText: '了解',
+        }).then(() => {
+            // 清除標識以避免影響後續的操作
+            localStorage.removeItem('source');
         });
     } catch (error) {
         console.error('startCooking 發生錯誤:', error);
@@ -165,8 +190,12 @@ const startCooking = async () => {
             text: '更新庫存時發生錯誤，請稍後再試。',
             icon: 'error',
             confirmButtonText: '確定',
+        }).then(() => {
+        // 清除標識以避免影響後續的操作
+        localStorage.removeItem('source');
         });
     }
+
 };
 </script>
 
@@ -257,7 +286,7 @@ const startCooking = async () => {
                                         >
                                             {{ ingredient.ingredientName }} - 需求數量:
                                             {{ ingredient.requiredQuantity }} {{ ingredient.unit }}
-                                            (庫存總數量:
+                                            (總數量:
                                             <span
                                                 :class="{
                                                     'text-danger':
