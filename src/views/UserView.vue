@@ -1,6 +1,13 @@
 <script setup>
 // 引入 ref API，用來管理響應式狀態
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+
+const ingredients = ref([]); // 存儲所有食材資料
+const selectedCategory = ref(''); // 使用者選擇的分類
+const filteredIngredients = ref([]); // 選取分類後過濾的食材
+const selectedIngredientId = ref(null); // 儲存選擇的食材 ID
+const foodtype = ref('');
+
 
 // 定義一個響應式變數 username，儲存使用者名稱
 const username = ref('');
@@ -56,9 +63,9 @@ const loadPreferIngredients = () => {
     const preferIngredientsString = localStorage.getItem('PreferIngredients');
     preferIngredientsArray.value = preferIngredientsString
         ? preferIngredientsString.split('\n').map((item) => {
-              const parts = item.split(',');
-              return { id: parts[0], name: parts[1].replace(/"/g, '') };
-          })
+            const parts = item.split(',');
+            return { id: parts[0], name: parts[1].replace(/"/g, '') };
+        })
         : [];
 };
 loadPreferIngredients();
@@ -67,9 +74,9 @@ const loadExclusiveIngredients = () => {
     const exclusiveIngredientsString = localStorage.getItem('ExclusiveIngredients');
     exclusiveIngredientsArray.value = exclusiveIngredientsString
         ? exclusiveIngredientsString.split('\n').map((item) => {
-              const parts = item.split(',');
-              return { id: parts[0], name: parts[1].replace(/"/g, '') };
-          })
+            const parts = item.split(',');
+            return { id: parts[0], name: parts[1].replace(/"/g, '') };
+        })
         : [];
 };
 loadExclusiveIngredients();
@@ -79,12 +86,10 @@ const handleButtonClick = (id) => {
     console.log(`按鈕 ID: ${id} 被點擊`); // 你可以在這裡添加更多處理邏輯
 };
 
-const API_URL_ExclusiveIngredientsDelete = `${
-    import.meta.env.VITE_API_BASEURL
-}/UserIngredients/ExclusiveIngredientsDelete`;
-const API_URL_PreferedIngredientsDelete = `${
-    import.meta.env.VITE_API_BASEURL
-}/UserIngredients/PreferedIngrediensDelete`;
+const API_URL_ExclusiveIngredientsDelete = `${import.meta.env.VITE_API_BASEURL
+    }/UserIngredients/ExclusiveIngredientsDelete`;
+const API_URL_PreferedIngredientsDelete = `${import.meta.env.VITE_API_BASEURL
+    }/UserIngredients/PreferedIngrediensDelete`;
 
 // 刪除 API 呼叫
 const sendDelPreFood = async (ingredientId) => {
@@ -146,6 +151,110 @@ const handleEXDelete = (ingredientId) => {
 const handlePreDelete = (ingredientId) => {
     sendDelPreFood(ingredientId);
 };
+const API_URL_Ingredients = `${import.meta.env.VITE_API_BASEURL
+    }/Ingredients`;
+
+// 在組件載入時執行 API 呼叫
+onMounted(async () => {
+    try {
+        const response = await fetch(API_URL_Ingredients);
+        if (response.ok) {
+            const data = await response.json();
+            ingredients.value = data.map(item => ({
+                ingredientId: item.ingredientId,
+                ingredientName: item.ingredientName,
+                category: item.category,
+            }));
+        } else {
+            console.error('無法取得資料');
+        }
+    } catch (error) {
+        console.error('API 請求錯誤:', error);
+    }
+});
+
+// 監聽分類選擇，動態更新食材清單
+const filterIngredientsByCategory = () => {
+    if (selectedCategory.value) {
+        filteredIngredients.value = ingredients.value.filter(
+            item => item.category === selectedCategory.value
+        );
+    } else {
+        filteredIngredients.value = [];
+    }
+};
+
+const addFoot = ref({
+    "user_Id": "",
+    "ingredient_Id": 0
+})
+
+const API_URL_IngredientsAdd = ref('');
+
+const preferIngredientModal = (prefer) => {
+    foodtype.value = '偏好食材';
+    API_URL_IngredientsAdd.value = `${import.meta.env.VITE_API_BASEURL}/UserIngredients/PreferedIngredientsAdd`;
+    selectedCategory.value = ""; // 使用者選擇的分類
+    filteredIngredients.value = ""; // 選取分類後過濾的食材
+    selectedIngredientId.value = ""; // 儲存選擇的食材 ID
+}
+
+const exclusiveIngredientModal = (exclusive) => {
+    foodtype.value = '不可食用食材';
+    API_URL_IngredientsAdd.value = `${import.meta.env.VITE_API_BASEURL}/UserIngredients/ExclusiveIngredientsAdd`;
+    selectedCategory.value = ""; // 使用者選擇的分類
+    filteredIngredients.value = ""; // 選取分類後過濾的食材
+    selectedIngredientId.value = ""; // 儲存選擇的食材 ID
+}
+
+
+
+const sendAddIngredientModal = async () => {
+    try {
+        addFoot.value.user_Id = storedUserData?.UserId;
+        addFoot.value.ingredient_Id = selectedIngredientId.value;
+        const response = await fetch(API_URL_IngredientsAdd.value, {
+            method: 'POST',
+            body: JSON.stringify(addFoot.value),
+            headers: { 'Content-Type': 'application/json' }
+        })
+
+        if (response.ok) {
+            alert('新增成功！');
+            if (foodtype.value === '偏好食材') {
+                const preferredIngredientsResponse = await fetch(`${import.meta.env.VITE_API_BASEURL}/UserIngredients/PreferedIngredientsName?User_Id=${storedUserData?.UserId}`);
+                const preferredIngredientsGet = await preferredIngredientsResponse.json();
+
+                if (preferredIngredientsResponse.ok && preferredIngredientsGet.preferredIngredients.length > 0) {
+                    const preferIngredientsFormatted = preferredIngredientsGet.preferredIngredients
+                        .map(ingredient => `${ingredient.preferIngredientId},"${ingredient.preferIngredientName}"`)
+                        .join('\n');
+                    localStorage.setItem('PreferIngredients', preferIngredientsFormatted);
+                }
+            }
+            else if (foodtype.value === '不可食用食材') {
+                const exclusiveIngredientsResponse = await fetch(`${import.meta.env.VITE_API_BASEURL}/UserIngredients/ExclusiveIngredientsName?User_Id=${storedUserData?.UserId}`);
+                const exclusiveIngredientsGet = await exclusiveIngredientsResponse.json();
+
+                if (exclusiveIngredientsResponse.ok && exclusiveIngredientsGet.exclusiveIngredients.length > 0) {
+                    const exclusiveIngredientsFormatted = exclusiveIngredientsGet.exclusiveIngredients
+                        .map(ingredient => `${ingredient.exclusiveIngredientId},"${ingredient.exclusiveIngredientName}"`)
+                        .join('\n');
+                    localStorage.setItem('ExclusiveIngredients', exclusiveIngredientsFormatted);
+                }
+            }
+        } else {
+            const data = await response.json();
+            alert('新增失敗：' + data.Message);
+        }
+    } catch (error) {
+        alert('新增請求失敗：' + error.message);
+    }
+};
+
+
+
+
 </script>
 
 <template>
@@ -166,15 +275,9 @@ const handlePreDelete = (ingredientId) => {
                 <!-- 使用 v-for 迴圈渲染選單項目 -->
                 <!-- 根據activeIndex 動態設定選單項目樣式 -->
                 <!-- ARIA 屬性幫助無障礙性 -->
-                <a
-                    v-for="(item, index) in menuItems"
-                    :key="index"
-                    href="#"
-                    class="list-group-item list-group-item-action"
-                    :class="{ active: activeIndex === index }"
-                    :aria-current="activeIndex === index ? 'true' : null"
-                    @click="setActive(index)"
-                >
+                <a v-for="(item, index) in menuItems" :key="index" href="#"
+                    class="list-group-item list-group-item-action" :class="{ active: activeIndex === index }"
+                    :aria-current="activeIndex === index ? 'true' : null" @click="setActive(index)">
                     <!-- 點擊事件，調用 setActive 函式 -->
                     {{ item }}
                 </a>
@@ -206,47 +309,74 @@ const handlePreDelete = (ingredientId) => {
             <div v-else-if="activeIndex === 1">
                 <p><strong>偏好食材:</strong></p>
                 <div>
-                    <button
-                        v-for="(item, index) in preferIngredientsArray"
-                        :key="index"
-                        :id="item.id"
-                        class="btn btn-info m-1"
-                        @click="handleButtonClick(item.id)"
-                    >
+                    <button v-for="(item, index) in preferIngredientsArray" :key="index" :id="item.id"
+                        class="btn btn-info m-1" @click="handleButtonClick(item.id)">
                         {{ item.name }}
                         <!-- X 按鈕 -->
-                        <button
-                            type="button"
-                            class="btn-close ms-2"
-                            aria-label="Close"
-                            @click="handlePreDelete(item.id)"
-                        ></button>
+                        <button type="button" class="btn-close ms-2" aria-label="Close"
+                            @click="handlePreDelete(item.id)"></button>
                     </button>
+                    <button class="btn btn-outline-primary m-1" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                        @click="preferIngredientModal('prefer')">+</button>
                 </div>
 
                 <p><strong>不可食用食材:</strong></p>
                 <div>
-                    <button
-                        v-for="(item, index) in exclusiveIngredientsArray"
-                        :key="index"
-                        :id="item.id"
-                        class="btn btn-danger m-1"
-                        @click="handleButtonClick(item.id)"
-                    >
+                    <button v-for="(item, index) in exclusiveIngredientsArray" :key="index" :id="item.id"
+                        class="btn btn-danger m-1" @click="handleButtonClick(item.id)">
                         {{ item.name }}
                         <!-- X 按鈕 -->
-                        <button
-                            type="button"
-                            class="btn-close ms-2"
-                            aria-label="Close"
-                            @click="handleEXDelete(item.id)"
-                        ></button>
+                        <button type="button" class="btn-close ms-2" aria-label="Close"
+                            @click="handleEXDelete(item.id)"></button>
                     </button>
+                    <button class="btn btn-outline-primary m-1" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                        @click="exclusiveIngredientModal('exclusive')">+</button>
                 </div>
             </div>
-
             <div v-else-if="activeIndex === 2">
                 <p><strong>群組:</strong> {{ storedUserData?.GroupId }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">新增{{ foodtype }}食材</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <!-- 分類選擇 -->
+                        <label for="categorySelect">選擇類別</label>
+                        <select id="categorySelect" v-model="selectedCategory" @change="filterIngredientsByCategory">
+                            <option value="">選擇類別</option>
+                            <option v-for="category in [...new Set(ingredients.map(i => i.category))]" :key="category"
+                                :value="category">
+                                {{ category }}
+                            </option>
+                        </select>
+
+                        <!-- 食材選擇 -->
+                        <label for="ingredientSelect">選擇食材</label>
+                        <select id="ingredientSelect" v-model="selectedIngredientId">
+                            <option value="">選擇食材</option>
+                            <option v-for="ingredient in filteredIngredients" :key="ingredient.ingredientId"
+                                :value="ingredient.ingredientId">
+                                {{ ingredient.ingredientName }}
+                            </option>
+                        </select>
+
+                        <!-- 顯示選取的食材 ID -->
+                        <p>選取的食材 ID：{{ selectedIngredientId }}</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    <button type="submit" class="btn btn-primary" @click="sendAddIngredientModal">加入{{
+                        foodtype
+                        }}食材</button>
+                </div>
             </div>
         </div>
     </div>
@@ -263,6 +393,7 @@ const handlePreDelete = (ingredientId) => {
     color: #eee;
     z-index: 0;
 }
+
 /* 背景 */
 .header:before {
     content: '';
@@ -279,6 +410,7 @@ const handlePreDelete = (ingredientId) => {
     transition: all 0.4s ease-in-out;
     z-index: -2;
 }
+
 /* 下方mask */
 .header:after {
     content: '';
@@ -290,6 +422,7 @@ const handlePreDelete = (ingredientId) => {
     z-index: -1;
     background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 40%, rgb(254, 254, 254) 100%);
 }
+
 /* 文字 */
 .title {
     width: 100%;
@@ -297,11 +430,13 @@ const handlePreDelete = (ingredientId) => {
     text-align: center;
     text-shadow: 0 2px 3px rgba(255, 255, 255, 0.4);
 }
+
 /* 上下移動縮放特效 */
 @keyframes grow {
     0% {
         transform: scale(1) translateY(0px);
     }
+
     50% {
         transform: scale(1.2) translateY(-250px);
     }

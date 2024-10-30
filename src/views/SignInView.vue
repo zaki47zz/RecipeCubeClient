@@ -71,7 +71,7 @@ const send = async () => {
                                 localStorage.setItem('ExclusiveIngredients', exclusiveIngredientsFormatted);
                             }
                         } catch (error) {
-                            console.error('獲取專屬食材時出錯:', error);
+                            console.error('獲取不可食用食材時出錯:', error);
                         }
                     }
 
