@@ -61,7 +61,10 @@ const openMyCoupon = () => {
                     class="coupon-item"
                     :class="coupon.usedStatus === 1 ? 'unused' : 'used'"
                 >
-                    <p class="coupon-name">{{ coupon.couponName }}</p>
+                    <div class="coupon-info">
+                        <p class="coupon-name">{{ coupon.couponName }}</p>
+                        <p class="coupon-expiry">到期日: {{ coupon.acquireDate }}</p>
+                    </div>
                     <p class="coupon-status">{{ coupon.usedStatus === 1 ? '未使用' : '已使用' }}</p>
                 </div>
             </div>
@@ -107,10 +110,21 @@ const openMyCoupon = () => {
     transform: scale(1.02);
 }
 
+.coupon-info {
+    flex-grow: 1; /* 使信息部分佔據可用空間 */
+    margin-right: 10px; /* 右側留白 */
+}
+
 .coupon-name {
     font-size: 1.2em;
     font-weight: bold;
     margin: 0;
+}
+
+.coupon-expiry {
+    font-size: 0.9em;
+    color: #888; /* 較淡的顏色 */
+    margin: 5px 0 0 0; /* 垂直邊距 */
 }
 
 .coupon-status {
