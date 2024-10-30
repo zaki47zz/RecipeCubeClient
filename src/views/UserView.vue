@@ -437,15 +437,11 @@ const sendchangeGroup = async () => {
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
                     <button type="submit" class="btn btn-primary" @click="sendAddIngredientModal">加入{{
                         foodtype
-                        }}食材</button>
+                    }}食材</button>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-        Launch demo modal
-    </button>
     <!-- 創建群組 Modal -->
     <div class="modal fade" id="CreateGroupModal" tabindex="-1" aria-labelledby="CreateGroupModalLabel"
         aria-hidden="true">
