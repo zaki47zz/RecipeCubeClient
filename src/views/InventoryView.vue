@@ -10,7 +10,7 @@ import { onMounted, ref, computed } from 'vue';
 
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL(抓圖片要用的);
-const userId = localStorage.getItem('UserId');
+const currentUserId = localStorage.getItem('UserId');
 
 const inventoryStore = useInventoryStore();
 const { inventories, ingredientCategory } = storeToRefs(inventoryStore); //解構inventories並轉換成響應式物件
@@ -101,7 +101,8 @@ const filteredInventories = computed(() => {
     return inventories.value.filter((inventory) => {
         //利用filter逐項遍歷每個inventory項目作篩選，利用5個Boolean來決定項目要不要顯示
         //個人項目篩選(只能看到屬於自己或群組公開的食材)
-        const userMatch = inventory.userId === userId || (!inventory.visibility && inventory.userId != userId);
+        const userMatch =
+            inventory.userId === currentUserId || (!inventory.visibility && inventory.userId != currentUserId);
         //分類篩選(用戶沒篩選或篩選符合會回傳true)
         const categoryMatch = !filters.value.category || inventory.category === filters.value.category;
         //權限篩選
@@ -208,7 +209,13 @@ const saveEditedInventory = async () => {
     if (change !== 0) {
         const { userId, ingredientId } = editInventory.value;
         const action = change > 0 ? '增加' : '減少'; //判斷action
-        await postPantry(userId, ingredientId, Math.abs(change), action);
+        await postPantry({
+            userId: currentUserId,
+            ownerId: userId,
+            ingredientId: ingredientId,
+            quantity: Math.abs(change),
+            action: action,
+        });
     }
     isInventoryModalVisible.value = false;
     isLoading.value = false;
@@ -222,7 +229,13 @@ const deleteCard = async (inventory) => {
     await deleteInventory(inventory.inventoryId);
     const { userId, ingredientId, quantity } = inventory;
     const action = '減少';
-    await postPantry(userId, ingredientId, quantity, action);
+    await postPantry({
+        userId: currentUserId,
+        ownerId: userId,
+        ingredientId: ingredientId,
+        quantity: quantity,
+        action: action,
+    });
     isLoading.value = false;
 };
 //群體刪除功能
@@ -236,7 +249,8 @@ const deleteCards = () => {
 ////歷史紀錄功能
 //表頭
 const headers = [
-    { text: '擁有者名稱', value: 'userName', sortable: true },
+    { text: '擁有者名稱', value: 'ownerName', sortable: true },
+    { text: '編輯者名稱', value: 'userName', sortable: true },
     { text: '食材名稱', value: 'ingredientName', sortable: true },
     { text: '數量', value: 'quantity' },
     { text: '動作', value: 'action' },
@@ -246,6 +260,7 @@ const headers = [
 const tableData = computed(() => {
     return pantries.value
         .map((pantry) => ({
+            ownerName: pantry.ownerName,
             userName: pantry.userName,
             ingredientName: pantry.ingredientName,
             quantity: pantry.quantity,
@@ -519,7 +534,7 @@ const exportInventories = () => {
                             :placeholder="editInventory.visibility"
                             name="visibility"
                             class="form-control w-100 text-center"
-                            :disabled="userId !== editInventory.userId"
+                            :disabled="currentUserId !== editInventory.userId"
                         >
                             <option :value="true">私有</option>
                             <option :value="false">群組</option>

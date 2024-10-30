@@ -148,7 +148,13 @@ const addInventories = async () => {
                 expiryDate: expiryDate,
                 visibility: visibility,
             });
-            await postPantry(userId, ingredientId, quantity, action);
+            await postPantry({
+                userId: userId,
+                ownerId: undefined,
+                ingredientId: ingredientId,
+                quantity: quantity,
+                action: action,
+            });
         }
         // 清空已選食材
         selectedIngredients.value = [];

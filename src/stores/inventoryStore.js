@@ -16,7 +16,6 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
 
     const inventories = ref([]); //庫存放這
     const ingredientCategory = ref(new Set()); //分類放這，用Set避免重複
-    
 
     const fetchInventories = async () => {
         try {
@@ -115,7 +114,7 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
     const getRunningOutIngredients = async () => {
         if (!inventories.value.length) await fetchInventories();
 
-        const frequentlyUsedIngredientIds = (await getFrequentlyUsedIngredients(0.05)).map(
+        const frequentlyUsedIngredientIds = (await getFrequentlyUsedIngredients(0.1)).map(
             (ingredient) => ingredient.ingredientId
         );
         const frequentlyUsedIngredients = inventories.value
@@ -152,18 +151,17 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
         const { leftInventories } = storeToRefs(cookingStore);
         try {
             const userId = localStorage.getItem('UserId');
-            const groupId = localStorage.getItem('GroupId')
+            const groupId = localStorage.getItem('GroupId');
             const source = localStorage.getItem('source');
             // console.log('leftInventories before update:', cookingStore.leftInventories);
             // leftInventories.value = [];
             // 遍歷每個需要的食材，從庫存中找到對應的項目
             for (const ingredient of recipeIngredients) {
-                
                 // console.log(`處理食材: ${ingredient.ingredientName}`);
                 // console.log(`日期: ${ingredient.expiryDate}`);
-                
-                if (source === 'buyAndCook') {  
-                                        // 確保 ingredient.quantity 和 ingredient.requiredQuantity 是數字
+
+                if (source === 'buyAndCook') {
+                    // 確保 ingredient.quantity 和 ingredient.requiredQuantity 是數字
                     const quantity = Number(ingredient.remainingQuantity);
                     const requiredQuantity = Number(ingredient.requiredQuantity);
                     // 隨買隨煮的處理方式，這裡不需查找庫存，直接更新數量
@@ -195,35 +193,34 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
                         ];
                     }
                 } else {
-                    console.log("庫存管理的烹飪")
+                    console.log('庫存管理的烹飪');
                     // console.log('庫存數據:', inventories.value);
                     // 正常庫存處理方式
                     let inventoryItems = inventories.value
-                    .filter(item => {
-                        console.log('正在檢查庫存項目:', item);
-                    
-                        // 解析 item.expiryDate 並設置時間為 00:00:00
-                        const expiryDate = new Date(item.expiryDate);
-                        expiryDate.setHours(0, 0, 0, 0);
-                    
-                        // 獲取當前日期並設置時間為 00:00:00
-                        const currentDate = new Date();
-                        currentDate.setHours(0, 0, 0, 0);
-                    
-                        const matchesIngredient = item.ingredientId === ingredient.ingredientId;
-                        const matchesUser = item.userId === userId;
-                        const notExpired = expiryDate >= currentDate && !isNaN(expiryDate);
-                    
-                        console.log(`庫存項目: ${item.ingredientName}, 檢查條件: `);
-                        console.log(`符合食材 ID: ${matchesIngredient}`);
-                        console.log(`符合使用者 ID: ${matchesUser}`);
-                        console.log(`過期日期: ${expiryDate}, 當前日期: ${currentDate}`);
-                        console.log(`未過期且日期有效: ${notExpired}`);
-                    
-                        return matchesIngredient && matchesUser && notExpired;
-                    })
-                    .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
-                    
+                        .filter((item) => {
+                            console.log('正在檢查庫存項目:', item);
+
+                            // 解析 item.expiryDate 並設置時間為 00:00:00
+                            const expiryDate = new Date(item.expiryDate);
+                            expiryDate.setHours(0, 0, 0, 0);
+
+                            // 獲取當前日期並設置時間為 00:00:00
+                            const currentDate = new Date();
+                            currentDate.setHours(0, 0, 0, 0);
+
+                            const matchesIngredient = item.ingredientId === ingredient.ingredientId;
+                            const matchesUser = item.userId === userId;
+                            const notExpired = expiryDate >= currentDate && !isNaN(expiryDate);
+
+                            console.log(`庫存項目: ${item.ingredientName}, 檢查條件: `);
+                            console.log(`符合食材 ID: ${matchesIngredient}`);
+                            console.log(`符合使用者 ID: ${matchesUser}`);
+                            console.log(`過期日期: ${expiryDate}, 當前日期: ${currentDate}`);
+                            console.log(`未過期且日期有效: ${notExpired}`);
+
+                            return matchesIngredient && matchesUser && notExpired;
+                        })
+                        .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
 
                     console.log('過濾後的庫存項目:', inventoryItems);
                     let requiredQuantity = ingredient.requiredQuantity;
@@ -237,7 +234,7 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
                         const quantityToDeduct = Math.min(inventoryItem.quantity, requiredQuantity);
                         inventoryItem.quantity -= quantityToDeduct;
                         requiredQuantity -= quantityToDeduct;
-                        console.log("更新後的庫存項目:", inventoryItem);
+                        console.log('更新後的庫存項目:', inventoryItem);
 
                         if (inventoryItem.quantity <= 0) {
                             console.log(`食材 ${inventoryItem.ingredientName} 的數量不夠或用完，將進行刪除`);
@@ -245,10 +242,17 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
                             await deleteInventory(inventoryItem.inventoryId);
                             deletedIngredients.push(inventoryItem.ingredientName);
 
-                            await pantryStore.postPantry(userId, inventoryItem.ingredientId, remainingQuantityBeforeDelete, '刪除');
+                            await pantryStore.postPantry(
+                                userId,
+                                inventoryItem.ingredientId,
+                                remainingQuantityBeforeDelete,
+                                '刪除'
+                            );
                             console.log(`已記錄刪除的食材: ${inventoryItem.ingredientName}`);
                         } else {
-                            console.log(`更新食材 ${inventoryItem.ingredientName} 的新數量為: ${inventoryItem.quantity}`);
+                            console.log(
+                                `更新食材 ${inventoryItem.ingredientName} 的新數量為: ${inventoryItem.quantity}`
+                            );
                             await putInventory(inventoryItem);
                             updatedIngredients.push({
                                 name: inventoryItem.ingredientName,
@@ -264,19 +268,17 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
                     }
                 }
             }
-                await fetchInventories();
-            } catch (error) {
-                console.error('更新庫存失敗:', error);
-                throw error;
-            }
-    
+            await fetchInventories();
+        } catch (error) {
+            console.error('更新庫存失敗:', error);
+            throw error;
+        }
+
         console.log('刪除的食材列表:', deletedIngredients);
         console.log('更新的食材列表:', updatedIngredients);
-    
+
         return { deletedIngredients, updatedIngredients };
     };
-    
-
 
     return {
         inventories,
@@ -288,8 +290,4 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
         getRunningOutIngredients,
         updateInventoriesAfterCooking,
     };
-
-
-
-
 });

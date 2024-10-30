@@ -24,8 +24,8 @@ const recipeData = ref({
 });
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
-const POSTAPI = `${BaseURL}/Recipes`
-const getIngredientsApi = `${BaseURL}/Ingredients`
+const POSTAPI = `${BaseURL}/Recipes`;
+const getIngredientsApi = `${BaseURL}/Ingredients`;
 const ingredients = ref([]);
 const selectedIngredients = ref([]);
 const groupedIngredients = ref([]);
@@ -34,7 +34,7 @@ const groupedIngredients = ref([]);
 const groupIngredientsByCategory = (data) => {
     const grouped = data.reduce((acc, ingredient) => {
         // 如果該分類不存在，先創建一個分類
-        let category = acc.find(group => group.category === ingredient.category);
+        let category = acc.find((group) => group.category === ingredient.category);
         if (!category) {
             category = { category: ingredient.category, ingredients: [] };
             acc.push(category);
@@ -52,15 +52,15 @@ const fetchIngredients = async () => {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
         }
-        const data = await response.json();  // 只需要調用一次 .json()
+        const data = await response.json(); // 只需要調用一次 .json()
         ingredients.value = data;
-        groupIngredientsByCategory(data);  // 將數據分組
-        console.log("食材data:", data);  // 打印出來檢查
-        // console.log("分組後的食材:", groupedIngredients.value);  // 檢查分組結果 
+        groupIngredientsByCategory(data); // 將數據分組
+        console.log('食材data:', data); // 打印出來檢查
+        // console.log("分組後的食材:", groupedIngredients.value);  // 檢查分組結果
     } catch (error) {
-        console.error("Fetch Fail", error);
+        console.error('Fetch Fail', error);
     }
-}
+};
 onMounted(() => {
     const storedUserId = localStorage.getItem('UserId');
     if (storedUserId) {
@@ -86,7 +86,7 @@ const ingredientQuantities = ref({});
 watchEffect(() => {
     // 清空沒有選中的食材數量
     Object.keys(ingredientQuantities.value).forEach((id) => {
-        if (!selectedIngredients.value.some(ingredient => ingredient.ingredientId === parseInt(id))) {
+        if (!selectedIngredients.value.some((ingredient) => ingredient.ingredientId === parseInt(id))) {
             delete ingredientQuantities.value[id];
         }
     });
@@ -97,7 +97,7 @@ watchEffect(() => {
             ingredientQuantities.value[ingredient.ingredientId] = '';
         }
     });
-    console.log(ingredientQuantities.value)
+    console.log(ingredientQuantities.value);
 });
 const fileName = ref('');
 // 處理圖片上傳
@@ -105,7 +105,7 @@ const handlePhotoUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
         recipeData.value.photo = file; // 保留原始 file
-        console.log("圖片:", recipeData.value.photo);
+        console.log('圖片:', recipeData.value.photo);
         const reader = new FileReader();
         reader.onload = (e) => {
             // 這裡是用於顯示圖片預覽的 URL
@@ -115,16 +115,16 @@ const handlePhotoUpload = (event) => {
     }
 };
 const categoryOptions = {
-    "主餐": ["麵食", "飯食", "粥", "排餐", "鹹派", "火鍋", "焗烤"],
-    "副餐": ["肉類料理", "青菜料理", "海鮮料理"],
-    "湯品": ["無"],
-    "甜點": ["甜", "鹹"]
+    主餐: ['麵食', '飯食', '粥', '排餐', '鹹派', '火鍋', '焗烤'],
+    副餐: ['肉類料理', '青菜料理', '海鮮料理'],
+    湯品: ['無'],
+    甜點: ['甜', '鹹'],
 };
 const subcategoryOptions = ref([]);
 
 // 使用 watchEffect 來自動更新子類別選項
 watchEffect(() => {
-    console.log(recipeData.value.category)
+    console.log(recipeData.value.category);
     if (recipeData.value.category) {
         subcategoryOptions.value = categoryOptions[recipeData.value.category] || [];
     } else {
@@ -158,17 +158,19 @@ const removeSeasoning = (index) => {
 };
 // 保存食譜
 const saveRecipe = async () => {
-    recipeData.value.steps = stepsList.value.map(step => step.description).join('。');
-    recipeData.value.seasoning = seasoningsList.value.map(seasoning => seasoning.description).join(', ');
-    recipeData.value.selectedIngredients = selectedIngredients.value.map(ingredient => parseInt(ingredient.ingredientId));
+    recipeData.value.steps = stepsList.value.map((step) => step.description).join('。');
+    recipeData.value.seasoning = seasoningsList.value.map((seasoning) => seasoning.description).join(', ');
+    recipeData.value.selectedIngredients = selectedIngredients.value.map((ingredient) =>
+        parseInt(ingredient.ingredientId)
+    );
 
     // 儲存食材和對應數量
     // 只儲存每個食材對應的數量
     recipeData.value.ingredientQuantities = Object.fromEntries(
         Object.entries(ingredientQuantities.value).map(([key, value]) => [parseInt(key), parseFloat(value)])
     );
-    console.log("")
-    console.log("保存食譜資料:", recipeData.value);
+    console.log('');
+    console.log('保存食譜資料:', recipeData.value);
     const formData = new FormData();
     // 添加圖片
     if (recipeData.value.photo) {
@@ -194,11 +196,11 @@ const saveRecipe = async () => {
     formData.append('isCustom', recipeData.value.isCustom);
     formData.append('status', recipeData.value.status);
     formData.append('westEast', recipeData.value.westEast);
-    const timestring = recipeData.value.time + 'm'
-    console.log(timestring)
-    formData.append('time', timestring)
+    const timestring = recipeData.value.time + 'm';
+    console.log(timestring);
+    formData.append('time', timestring);
 
-    formData.append('description', recipeData.value.description)
+    formData.append('description', recipeData.value.description);
     // 在這裡可以調用 API 來提交食譜資料4
     for (let pair of formData.entries()) {
         console.log(pair[0] + ': ' + pair[1]);
@@ -217,7 +219,7 @@ const saveRecipe = async () => {
         const data = await response.json();
         console.log('Recipe saved successfully:', data);
     } catch (error) {
-        console.error("error saving recipe:", error)
+        console.error('error saving recipe:', error);
     }
 };
 </script>
@@ -228,31 +230,46 @@ const saveRecipe = async () => {
             <div class="col-12">
                 <div class="mb-3">
                     <div class="d-flex flex-column align-items-center">
-                        <div class="photo-upload-area mb-2 position-relative" style="
-                                            width: 100%;
-                                            height: 400px;
-                                            background-color: #f8f9fa;
-                                            border: 2px dashed #ced4da;
-                                            border-radius: 8px;
-                                            display: flex;
-                                            justify-content: center;
-                                            align-items: center;
-                                            cursor: pointer;
-                                        ">
+                        <div
+                            class="photo-upload-area mb-2 position-relative"
+                            style="
+                                width: 100%;
+                                height: 400px;
+                                background-color: #f8f9fa;
+                                border: 2px dashed #ced4da;
+                                border-radius: 8px;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                cursor: pointer;
+                            "
+                        >
                             <div v-if="!recipeData.previewUrl" class="text-center">
                                 <i class="fas fa-cloud-upload-alt mb-2" style="font-size: 48px; color: #6c757d"></i>
                                 <p class="mb-0 fs-6" style="color: #6c757d">點擊或拖曳上傳食譜照片</p>
                             </div>
-                            <img v-else :src="recipeData.previewUrl" alt="食譜預覽"
-                                style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" />
-                            <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
-                                accept="image/*" @change="handlePhotoUpload" />
+                            <img
+                                v-else
+                                :src="recipeData.previewUrl"
+                                alt="食譜預覽"
+                                style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px"
+                            />
+                            <input
+                                type="file"
+                                class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
+                                accept="image/*"
+                                @change="handlePhotoUpload"
+                            />
                         </div>
                     </div>
                 </div>
                 <div class="mb-4">
-                    <input type="text" v-model="recipeData.recipeName" class="form-control w-100 fs-4 text-center"
-                        placeholder="輸入料理名稱" />
+                    <input
+                        type="text"
+                        v-model="recipeData.recipeName"
+                        class="form-control w-100 fs-4 text-center"
+                        placeholder="輸入料理名稱"
+                    />
                 </div>
 
                 <div class="mb-2">
@@ -275,8 +292,11 @@ const saveRecipe = async () => {
                         <div class="col-6">
                             <select v-model="recipeData.category" class="form-select fs-6 text-center">
                                 <option value="">選擇主類別</option>
-                                <option v-for="(subcategories, category) in categoryOptions" :key="category"
-                                    :value="category">
+                                <option
+                                    v-for="(subcategories, category) in categoryOptions"
+                                    :key="category"
+                                    :value="category"
+                                >
                                     {{ category }}
                                 </option>
                             </select>
@@ -284,8 +304,11 @@ const saveRecipe = async () => {
                         <div class="col-6">
                             <select v-model="recipeData.detailedCategory" class="form-select fs-6 text-center">
                                 <option value="">選擇細部類別</option>
-                                <option v-for="subcategory in subcategoryOptions" :key="subcategory"
-                                    :value="subcategory">
+                                <option
+                                    v-for="subcategory in subcategoryOptions"
+                                    :key="subcategory"
+                                    :value="subcategory"
+                                >
                                     {{ subcategory }}
                                 </option>
                             </select>
@@ -298,8 +321,12 @@ const saveRecipe = async () => {
                             </select>
                         </div>
                         <div class="col-6">
-                            <input type="number" v-model="recipeData.time" class="form-control fs-6 text-center"
-                                placeholder="料理時間，例如: '30' 代表30分鐘" />
+                            <input
+                                type="number"
+                                v-model="recipeData.time"
+                                class="form-control fs-6 text-center"
+                                placeholder="料理時間，例如: '30' 代表30分鐘"
+                            />
                         </div>
                     </div>
                 </div>
@@ -307,18 +334,29 @@ const saveRecipe = async () => {
 
             <h5 class="mb-0">所需食材</h5>
             <div class="my-auto p-3 h-100" style="background-color: rgba(255, 255, 255, 0.5); border-radius: 8px">
-
-                <multiselect v-model="selectedIngredients" :options="groupedIngredients" placeholder="搜尋或選擇食材 (可以多選)"
-                    :multiple="true" :close-on-select="false" group-label="category" group-values="ingredients"
-                    :group-select="false" track-by="ingredientId" :custom-label="customLabel">
+                <multiselect
+                    v-model="selectedIngredients"
+                    :options="groupedIngredients"
+                    placeholder="搜尋或選擇食材 (可以多選)"
+                    :multiple="true"
+                    :close-on-select="false"
+                    group-label="category"
+                    group-values="ingredients"
+                    :group-select="false"
+                    track-by="ingredientId"
+                    :custom-label="customLabel"
+                >
                     <span slot="noResult">找不到該食材</span>
-
                 </multiselect>
                 <div class="selected-ingredients mt-3">
                     <div v-for="ingredient in selectedIngredients" :key="ingredient.ingredientId" class="mb-2">
                         <label>{{ ingredient.ingredientName }} 數量：</label>
-                        <input type="number" v-model="ingredientQuantities[ingredient.ingredientId]"
-                            class="form-control w-50" placeholder="請輸入數量" />
+                        <input
+                            type="number"
+                            v-model="ingredientQuantities[ingredient.ingredientId]"
+                            class="form-control w-50"
+                            placeholder="請輸入數量"
+                        />
                         <label>{{ ingredient.unit }}</label>
                     </div>
                 </div>
@@ -329,11 +367,18 @@ const saveRecipe = async () => {
         <div class="row mt-4 g-4">
             <div class="col-12">
                 <h5 class="mb-2">步驟</h5>
-                <div v-for="(step, index) in stepsList" :key="index"
-                    class="mt-1 d-flex justify-content-between align-items-center gap-3">
+                <div
+                    v-for="(step, index) in stepsList"
+                    :key="index"
+                    class="mt-1 d-flex justify-content-between align-items-center gap-3"
+                >
                     <div class="circle-number">{{ index + 1 }}</div>
-                    <input type="text" v-model="step.description" class="form-control fs-6 text-center"
-                        placeholder="輸入步驟描述" />
+                    <input
+                        type="text"
+                        v-model="step.description"
+                        class="form-control fs-6 text-center"
+                        placeholder="輸入步驟描述"
+                    />
                     <button class="remove-step-button" @click="removeStep(index)">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
@@ -346,11 +391,18 @@ const saveRecipe = async () => {
             <!-- 調味料區域 -->
             <div class="col-12 mt-4">
                 <h5 class="mb-2">調味料</h5>
-                <div v-for="(seasoning, index) in seasoningsList" :key="index"
-                    class="mt-1 d-flex justify-content-between align-items-center gap-3">
+                <div
+                    v-for="(seasoning, index) in seasoningsList"
+                    :key="index"
+                    class="mt-1 d-flex justify-content-between align-items-center gap-3"
+                >
                     <div class="circle-number">{{ index + 1 }}</div>
-                    <input type="text" v-model="seasoning.description" class="form-control fs-6 text-center"
-                        placeholder="輸入調味料 (ex.鹽巴 5克)" />
+                    <input
+                        type="text"
+                        v-model="seasoning.description"
+                        class="form-control fs-6 text-center"
+                        placeholder="輸入調味料 (ex.鹽巴 5克)"
+                    />
                     <button class="remove-step-button" @click="removeSeasoning(index)">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
@@ -359,7 +411,6 @@ const saveRecipe = async () => {
                 <div class="mt-3 d-flex justify-content-center">
                     <div class="step-button" @click="addSeasoning"><i class="fa-solid fa-plus"></i> 調味料</div>
                 </div>
-
             </div>
         </div>
         <!-- 描述 -->
@@ -367,8 +418,13 @@ const saveRecipe = async () => {
             <div class="col-md-12">
                 <h5 class="mb-2">食譜描述</h5>
                 <div class="p-3" style="background-color: rgba(255, 255, 255, 0.5); border-radius: 8px">
-                    <textarea v-model="recipeData.description" class="form-control border-0 w-100"
-                        style="background: transparent" rows="6" placeholder="請輸入描述..."></textarea>
+                    <textarea
+                        v-model="recipeData.description"
+                        class="form-control border-0 w-100"
+                        style="background: transparent"
+                        rows="6"
+                        placeholder="請輸入描述..."
+                    ></textarea>
                 </div>
             </div>
         </div>
@@ -410,9 +466,7 @@ const saveRecipe = async () => {
     cursor: pointer;
     transform: scale(1.1);
     /* 懸停時放大效果 */
-    transition:
-        transform 0.2s,
-        background-color 0.2s;
+    transition: transform 0.2s, background-color 0.2s;
     /* 添加平滑動畫 */
 }
 

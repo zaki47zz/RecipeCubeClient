@@ -110,14 +110,19 @@ export const useCookingStore = defineStore('cookingStore', () => {
             return;
         }
         for (const inventory of leftInventories.value) {
-            
             // 添加到庫存中
             console.log(`嘗試保存食材: ${inventory.ingredientName}，數量: ${inventory.quantity}`);
             try {
                 // 添加到庫存中
                 await postInventory(inventory);
                 // 更新 pantry 紀錄
-                await postPantry(inventory.userId, inventory.ingredientId, inventory.quantity, '增加');
+                await postPantry({
+                    userId: inventory.userId,
+                    ownerId: inventory.userId,
+                    ingredientId: inventory.ingredientId,
+                    quantity: inventory.quantity,
+                    action: '增加',
+                });
                 console.log(`成功保存剩餘食材: ${inventory.ingredientName}`);
             } catch (error) {
                 console.error(`保存剩餘食材 ${inventory.ingredientName} 時發生錯誤:`, error);
@@ -141,6 +146,6 @@ export const useCookingStore = defineStore('cookingStore', () => {
         isSet,
         resetCookingInventories,
         setCookingInventories,
-        saveLeftoverInventories
+        saveLeftoverInventories,
     };
 });

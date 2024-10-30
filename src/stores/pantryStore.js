@@ -27,8 +27,9 @@ export const usePantryStore = defineStore('pantryStore', () => {
         }
     };
 
-    const postPantry = async (userId, ingredientId, quantity, action) => {
+    const postPantry = async ({ userId, ownerId, ingredientId, quantity, action }) => {
         try {
+            const finalOwnerId = ownerId ?? userId;
             const response = await fetch(pantryApiURL, {
                 method: 'POST',
                 headers: {
@@ -38,6 +39,7 @@ export const usePantryStore = defineStore('pantryStore', () => {
                     PantryId: 0,
                     UserId: userId,
                     GroupId: groupId,
+                    OwnerId: finalOwnerId,
                     IngredientId: ingredientId,
                     Quantity: quantity,
                     action: action,

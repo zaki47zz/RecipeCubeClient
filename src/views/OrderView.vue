@@ -209,7 +209,13 @@ const handleCompleteOrder = async (item) => {
                     expiryDate: undefined,
                     visibility: visibilityConvertToBoolean,
                 });
-                await pantryStore.postPantry(UserId, item.ingredientId, item.quantity * item.unitQuantity, action);
+                await pantryStore.postPantry({
+                    userId: UserId,
+                    ownerId: undefined,
+                    ingredientId: item.ingredientId,
+                    quantity: item.quantity * item.unitQuantity,
+                    action: action,
+                });
             }
 
             // 更新訂單狀態為 5，表示訂單已完成
