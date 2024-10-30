@@ -5,6 +5,7 @@ import { ref, computed, reactive, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
 import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
+import CouponComponent from '@/components/CouponComponent.vue';
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
 
@@ -271,6 +272,8 @@ onBeforeUnmount(() => {
     <SideBarCartComponent />
     <!-- 引入購物清單 -->
     <ShoppingListComponent />
+    <!-- 引入我的優惠券 -->
+    <CouponComponent />
 
     <!-- Cart Page Start -->
     <div class="container-fluid py-2">

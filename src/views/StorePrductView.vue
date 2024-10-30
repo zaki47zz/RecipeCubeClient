@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router';
 import { computed, ref, watch } from 'vue';
 import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
 import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
+import CouponComponent from '@/components/CouponComponent.vue';
 // swiper
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { EffectCoverflow, Pagination, Autoplay, Navigation } from 'swiper/modules';
@@ -226,6 +227,8 @@ const swiperProducts = computed(() => {
     <SideBarCartComponent />
     <!-- 引入購物清單 -->
     <ShoppingListComponent />
+    <!-- 引入我的優惠券 -->
+    <CouponComponent />
 
     <div class="p-0 m-0">
         <!-- Single Page Header start -->

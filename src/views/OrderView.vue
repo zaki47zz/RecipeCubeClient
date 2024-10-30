@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
 import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
+import CouponComponent from '@/components/CouponComponent.vue';
 import Swal from 'sweetalert2';
 import { ref } from 'vue';
 import 'vue3-easy-data-table/dist/style.css';
@@ -403,6 +404,8 @@ const submitReview = async (item) => {
             <SideBarCartComponent />
             <!-- 引入購物清單 -->
             <ShoppingListComponent />
+            <!-- 引入我的優惠券 -->
+            <CouponComponent />
         </div>
         <div>
             <!-- EasyDataTable Start -->
