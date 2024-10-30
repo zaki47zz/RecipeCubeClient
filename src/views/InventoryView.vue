@@ -272,6 +272,7 @@ const exportInventories = () => {
     cookingInventories.value = [...selectedInventories.value];
     localStorage.setItem('cookingInventories', JSON.stringify(cookingInventories.value));
     localStorage.setItem('isShowingString', JSON.stringify(isShowingString.value));
+    localStorage.setItem('source', 'inventoryManagement'); // 標識來源為庫存管理
 };
 </script>
 

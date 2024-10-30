@@ -404,6 +404,7 @@ function useSelectedRecipe() {
         width="75%"
         @close="recipeStore.closeDialog"
         center
+        destroy-on-close
         @opended="onDialogOpened"
     >
         <PerfectScrollbar ref="scrollContainer" class="custom-scroll-container">
