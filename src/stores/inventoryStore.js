@@ -53,7 +53,6 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
                     IngredientId: ingredientId,
                     Quantity: quantity,
                     ExpiryDate: finalExpiryDate,
-                    IsExpiring: false,
                     Visibility: finalVisibility,
                 }),
             });

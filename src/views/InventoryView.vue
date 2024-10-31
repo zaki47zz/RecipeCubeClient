@@ -27,6 +27,7 @@ const isLoading = ref(true); //判斷是否還在載入的flag
 const allSelect = ref(false); //判斷全選與否的flag
 const isInventoryModalVisible = ref(false);
 const isPantryModalVisible = ref(false);
+const isDrawerVisible = ref(false);
 
 //當DOM加載完執行fetch
 onMounted(() => {
@@ -550,55 +551,37 @@ const exportInventories = () => {
     </section>
 
     <section>
-        <div
-            class="offcanvas offcanvas-end rounded-3"
-            data-bs-scroll="true"
-            data-bs-backdrop="false"
-            tabindex="-1"
-            id="offcanvasIngredient"
-        >
-            <div class="offcanvas-header justify-content-center">
-                <button
-                    type="button"
-                    class="btn-close rounded-circle bg-dark"
-                    data-bs-dismiss="offcanvas"
-                    aria-label="Close"
-                ></button>
-            </div>
-            <div class="offcanvas-body">
-                <div class="order-md-last">
-                    <h4 class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-dark">您所選的食材</span>
-                        <span class="badge bg-dark rounded-pill">{{ selectedInventories.length }}</span>
-                    </h4>
-                    <ul class="list-group mb-3">
-                        <li
-                            v-for="inventory in selectedInventories"
-                            :key="inventory.inventoryId"
-                            class="list-group-item d-flex justify-content-between lh-sm"
-                        >
-                            <div>
-                                <h6 class="my-0">{{ inventory.ingredientName }}</h6>
-                                <small class="text-body-secondary">{{ inventory.category }}</small>
-                            </div>
-                            <span class="text-body-secondary">到期日: {{ inventory.expiryDate }}</span>
-                        </li>
-                    </ul>
-
-                    <RouterLink
-                        class="w-100 btn shadow fs-5"
-                        :class="selectedInventories.length ? 'bg-gradient-info' : 'bg-secondary disabled-link'"
-                        :to="selectedInventories.length ? { name: 'GenerateRecipe' } : ''"
-                        @click="exportInventories"
+        <el-drawer v-model="isDrawerVisible" title="食材列表" :direction="rtl">
+            <div class="order-md-last">
+                <h4 class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-dark">您所選的食材</span>
+                    <span class="badge bg-dark rounded-pill">{{ selectedInventories.length }}</span>
+                </h4>
+                <ul class="list-group mb-3">
+                    <li
+                        v-for="inventory in selectedInventories"
+                        :key="inventory.inventoryId"
+                        class="list-group-item d-flex justify-content-between lh-sm"
                     >
-                        產生食譜
-                    </RouterLink>
-                    <button class="w-100 btn blur text-danger shadow fs-5" @click="alertClearCheck">
-                        清空所選食材
-                    </button>
-                </div>
+                        <div>
+                            <h6 class="my-0">{{ inventory.ingredientName }}</h6>
+                            <small class="text-body-secondary">{{ inventory.category }}</small>
+                        </div>
+                        <span class="text-body-secondary">到期日: {{ inventory.expiryDate }}</span>
+                    </li>
+                </ul>
+
+                <RouterLink
+                    class="w-100 btn shadow fs-5"
+                    :class="selectedInventories.length ? 'bg-gradient-info' : 'bg-secondary disabled-link'"
+                    :to="selectedInventories.length ? { name: 'GenerateRecipe' } : ''"
+                    @click="exportInventories"
+                >
+                    產生食譜
+                </RouterLink>
+                <button class="w-100 btn blur text-danger shadow fs-5" @click="alertClearCheck">清空所選食材</button>
             </div>
-        </div>
+        </el-drawer>
     </section>
 
     <section class="pt-3">
@@ -615,13 +598,7 @@ const exportInventories = () => {
                     </RouterLink>
                 </div>
                 <div class="col-lg-3">
-                    <button
-                        type="button"
-                        class="btn blur shadow text-dark fs-5 w-100"
-                        data-bs-toggle="offcanvas"
-                        data-bs-target="#offcanvasIngredient"
-                        aria-controls="offcanvasIngredient"
-                    >
+                    <button type="button" class="btn blur shadow text-dark fs-5 w-100" @click="isDrawerVisible = true">
                         查看您選擇的食材
                     </button>
                 </div>
@@ -689,11 +666,23 @@ const exportInventories = () => {
     height: 100%;
     display: flex;
     flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card.active {
-    background-color: rgba(253, 255, 164);
-    opacity: 80%;
+    background-color: rgba(191, 219, 255, 0.8);
+    opacity: 1;
+    box-shadow: 0px 4px 15px rgba(253, 203, 110, 0.6); /* 添加陰影 */
+    animation: blink 1s infinite alternate; /* 閃爍效果 */
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.8;
+    }
 }
 
 .card-body {
