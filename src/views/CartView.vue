@@ -246,14 +246,14 @@ onBeforeUnmount(() => {
 
 <template>
     <!-- Single Page Header start -->
-    <div class="container-fluid page-header py-5">
-        <h1 class="text-center custom-color display-6">購物車</h1>
-        <ol class="breadcrumb justify-content-center mb-0">
-            <!-- <li class="breadcrumb-item"><a href="#">Home</a></li>
-                <li class="breadcrumb-item"><a href="#">Pages</a></li>
-                <li class="breadcrumb-item active text-white">Cart</li> -->
-        </ol>
-    </div>
+    <section>
+        <div class="header">
+            <div class="title">
+                <h1>購物車</h1>
+                <h1>Shopping Cart</h1>
+            </div>
+        </div>
+    </section>
     <!-- Single Page Header End -->
 
     <!-- RouterLink Start -->
@@ -430,6 +430,59 @@ onBeforeUnmount(() => {
 </template>
 
 <style lang="css" scoped>
-@import '@/assets/css/StoreBootstrap.min.css';
 @import '@/assets/css/StoreStyle.css';
+
+/* header本人 */
+.header {
+    position: relative;
+    overflow: hidden;
+    height: 40vh;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    color: #eee;
+    z-index: 0;
+}
+/* 背景 */
+.header:before {
+    content: '';
+    width: 100%;
+    height: 200%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateZ(0) scale(1, 1);
+    background: #1b2030 url('@/assets/img/ForBackground/bg-header.jpg') 50% 0 no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    animation: grow 180s linear 10ms infinite;
+    transition: all 0.4s ease-in-out;
+    z-index: -2;
+}
+/* 下方mask */
+.header:after {
+    content: '';
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 40%, rgb(254, 254, 254) 100%);
+}
+/* 文字 */
+.title {
+    width: 100%;
+    padding-top: 5%;
+    text-align: center;
+    text-shadow: 0 2px 3px rgba(255, 255, 255, 0.4);
+}
+/* 上下移動縮放特效 */
+@keyframes grow {
+    0% {
+        transform: scale(1) translateY(0px);
+    }
+    50% {
+        transform: scale(1.2) translateY(-250px);
+    }
+}
 </style>

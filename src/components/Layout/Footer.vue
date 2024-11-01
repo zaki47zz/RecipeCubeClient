@@ -27,7 +27,7 @@ footer {
     width: 100%;
     margin-top: auto;
     padding: 20px 0;
-    color: #364868 !important;
+    color: #000000 !important;
 }
 
 .footer-content {
@@ -54,7 +54,7 @@ footer ul li {
 
 footer ul li a {
     text-decoration: none;
-    color: #364868;
+    color: #000000;
     white-space: nowrap;
 }
 
@@ -68,7 +68,7 @@ footer p {
 
 footer span {
     font-size: 130% !important;
-    color: #364868;
+    color: #000000;
 }
 
 .navbar-brand-img {

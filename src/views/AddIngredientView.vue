@@ -191,10 +191,7 @@ const addInventories = async () => {
                 <div class="col-md-12">
                     <div class="d-flex justify-content-between mt-2">
                         <h4>您今天買了 {{ selectedIngredients.length }} 樣食材</h4>
-                        <UnitConversionComponent
-                            :addingInventoriesList="addingInventories"
-                            color="primary"
-                        ></UnitConversionComponent>
+                        <UnitConversionComponent :addingInventoriesList="addingInventories"></UnitConversionComponent>
                     </div>
                 </div>
             </div>
@@ -294,7 +291,7 @@ const addInventories = async () => {
     top: 0;
     left: 0;
     transform: translateZ(0) scale(1, 1);
-    background: #1b2030 url('src/assets/img/ForBackground/bg-header-food.jpg') 50% 0 no-repeat;
+    background: #1b2030 url('src/assets/img/ForBackground/bg-header.jpg') 50% 0 no-repeat;
     background-size: cover;
     background-attachment: fixed;
     animation: grow 180s linear 10ms infinite;

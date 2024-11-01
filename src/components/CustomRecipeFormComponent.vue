@@ -333,7 +333,7 @@ const saveRecipe = async () => {
             </div>
 
             <h5 class="mb-0">所需食材</h5>
-            <div class="my-auto p-3 h-100" style="background-color: rgba(255, 255, 255, 0.5); border-radius: 8px">
+            <div class="my-auto p-3 h-100 blur" style="border-radius: 8px">
                 <multiselect
                     v-model="selectedIngredients"
                     :options="groupedIngredients"

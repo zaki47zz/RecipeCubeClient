@@ -28,14 +28,14 @@
     --bs-gray-700: #495057;
     --bs-gray-800: #343a40;
     --bs-gray-900: #212529;
-    --bs-primary: #cb0c9f;
+    --bs-primary: #56c5a9;
     --bs-secondary: #8392ab;
     --bs-success: #82d616;
     --bs-info: #17c1e8;
     --bs-warning: #fbcf33;
     --bs-danger: #ea0606;
     --bs-light: #e9ecef;
-    --bs-dark: #344767;
+    --bs-dark: #000000;
     --bs-white: #fff;
     --bs-primary-rgb: 203, 12, 159;
     --bs-secondary-rgb: 131, 146, 171;
@@ -113,7 +113,7 @@ h1,
     margin-bottom: 0.5rem;
     font-weight: 400;
     line-height: 1.2;
-    color: #344767;
+    color: var(--bs-dark);
 }
 
 h1,
@@ -2365,9 +2365,7 @@ progress {
     -moz-appearance: none;
     appearance: none;
     border-radius: 0.5rem;
-    transition:
-        box-shadow 0.15s ease,
-        border-color 0.15s ease;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 @media (prefers-reduced-motion: reduce) {
     .form-control {
@@ -2544,9 +2542,7 @@ textarea.form-control-lg {
     background-size: 16px 12px;
     border: 1px solid #d2d6da;
     border-radius: 0.5rem;
-    transition:
-        box-shadow 0.15s ease,
-        border-color 0.15s ease;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
@@ -2615,12 +2611,8 @@ textarea.form-control-lg {
     appearance: none;
     -webkit-print-color-adjust: exact;
     color-adjust: exact;
-    transition:
-        background-color 0.25s ease,
-        border-color 0.25s ease,
-        background-position 0.15s ease-in-out,
-        opacity 0.15s ease-out,
-        box-shadow 0.15s ease-in-out;
+    transition: background-color 0.25s ease, border-color 0.25s ease, background-position 0.15s ease-in-out,
+        opacity 0.15s ease-out, box-shadow 0.15s ease-in-out;
 }
 @media (prefers-reduced-motion: reduce) {
     .form-check-input {
@@ -2675,12 +2667,8 @@ textarea.form-control-lg {
     background-image: none;
     background-position: left center;
     border-radius: 2.5rem;
-    transition:
-        background-color 0.25s ease,
-        border-color 0.25s ease,
-        background-position 0.15s ease-in-out,
-        opacity 0.15s ease-out,
-        box-shadow 0.15s ease-in-out;
+    transition: background-color 0.25s ease, border-color 0.25s ease, background-position 0.15s ease-in-out,
+        opacity 0.15s ease-out, box-shadow 0.15s ease-in-out;
 }
 @media (prefers-reduced-motion: reduce) {
     .form-switch .form-check-input {
@@ -2725,14 +2713,10 @@ textarea.form-control-lg {
     outline: 0;
 }
 .form-range:focus::-webkit-slider-thumb {
-    box-shadow:
-        0 0 0 1px #fff,
-        0 0 0 2px #e9aede;
+    box-shadow: 0 0 0 1px #fff, 0 0 0 2px #e9aede;
 }
 .form-range:focus::-moz-range-thumb {
-    box-shadow:
-        0 0 0 1px #fff,
-        0 0 0 2px #e9aede;
+    box-shadow: 0 0 0 1px #fff, 0 0 0 2px #e9aede;
 }
 .form-range::-moz-focus-outer {
     border: 0;
@@ -2744,14 +2728,8 @@ textarea.form-control-lg {
     background-color: #cb0c9f;
     border: 0;
     border-radius: 1rem;
-    -webkit-transition:
-        background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out,
-        box-shadow 0.15s ease-in-out;
-    transition:
-        background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out,
-        box-shadow 0.15s ease-in-out;
+    -webkit-transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     -webkit-appearance: none;
     appearance: none;
 }
@@ -2779,14 +2757,8 @@ textarea.form-control-lg {
     background-color: #cb0c9f;
     border: 0;
     border-radius: 1rem;
-    -moz-transition:
-        background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out,
-        box-shadow 0.15s ease-in-out;
-    transition:
-        background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out,
-        box-shadow 0.15s ease-in-out;
+    -moz-transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     -moz-appearance: none;
     appearance: none;
 }
@@ -2835,9 +2807,7 @@ textarea.form-control-lg {
     pointer-events: none;
     border: 1px solid transparent;
     transform-origin: 0 0;
-    transition:
-        opacity 0.1s ease-in-out,
-        transform 0.1s ease-in-out;
+    transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
 }
 @media (prefers-reduced-motion: reduce) {
     .form-floating > label {
@@ -3029,12 +2999,8 @@ textarea.form-control.is-valid {
     padding-right: 2.875rem;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e"),
         url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 8'%3e%3cpath fill='%2366d432' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
-    background-position:
-        right 0.75rem center,
-        center right 1.75rem;
-    background-size:
-        16px 12px,
-        1rem 1rem;
+    background-position: right 0.75rem center, center right 1.75rem;
+    background-size: 16px 12px, 1rem 1rem;
 }
 .was-validated .form-select:valid:focus,
 .form-select.is-valid:focus {
@@ -3137,12 +3103,8 @@ textarea.form-control.is-invalid {
     padding-right: 2.875rem;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e"),
         url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23fd5c70' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23fd5c70' stroke='none'/%3e%3c/svg%3e");
-    background-position:
-        right 0.75rem center,
-        center right 1.75rem;
-    background-size:
-        16px 12px,
-        1rem 1rem;
+    background-position: right 0.75rem center, center right 1.75rem;
+    background-size: 16px 12px, 1rem 1rem;
 }
 .was-validated .form-select:invalid:focus,
 .form-select.is-invalid:focus {
@@ -3213,9 +3175,7 @@ textarea.form-control.is-invalid {
 .btn-check:focus + .btn,
 .btn:focus {
     outline: 0;
-    box-shadow:
-        0 3px 5px -1px rgba(0, 0, 0, 0.09),
-        0 2px 3px -1px rgba(0, 0, 0, 0.07);
+    box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.09), 0 2px 3px -1px rgba(0, 0, 0, 0.07);
 }
 .btn:disabled,
 .btn.disabled,
@@ -4385,10 +4345,7 @@ fieldset:disabled .btn {
     display: block;
     padding: 0.5rem 1rem;
     color: #cb0c9f;
-    transition:
-        color 0.15s ease-in-out,
-        background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
 }
 @media (prefers-reduced-motion: reduce) {
     .nav-link {
@@ -5130,9 +5087,7 @@ fieldset:disabled .btn {
     border: 0;
     border-radius: 0;
     overflow-anchor: none;
-    transition:
-        all 0.15s ease-in,
-        border-radius 0.15s ease;
+    transition: all 0.15s ease-in, border-radius 0.15s ease;
 }
 @media (prefers-reduced-motion: reduce) {
     .accordion-button {
@@ -5263,10 +5218,7 @@ fieldset:disabled .btn {
     color: #cb0c9f;
     background-color: #fff;
     border: 1px solid #dee2e6;
-    transition:
-        color 0.15s ease-in-out,
-        background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out,
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out,
         box-shadow 0.15s ease-in-out;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -5928,8 +5880,7 @@ fieldset:disabled .btn {
     background-color: rgba(255, 255, 255, 0.85);
     background-clip: padding-box;
     border: 0 solid transparent;
-    box-shadow:
-        0 0.25rem 0.375rem -0.0625rem rgba(20, 20, 20, 0.12),
+    box-shadow: 0 0.25rem 0.375rem -0.0625rem rgba(20, 20, 20, 0.12),
         0 0.125rem 0.25rem -0.0625rem rgba(20, 20, 20, 0.07);
     border-radius: 0.5rem;
 }
@@ -7270,8 +7221,7 @@ fieldset:disabled .btn {
 }
 
 .shadow {
-    box-shadow:
-        0 0.25rem 0.375rem -0.0625rem rgba(20, 20, 20, 0.12),
+    box-shadow: 0 0.25rem 0.375rem -0.0625rem rgba(20, 20, 20, 0.12),
         0 0.125rem 0.25rem -0.0625rem rgba(20, 20, 20, 0.07) !important;
 }
 
@@ -7280,9 +7230,7 @@ fieldset:disabled .btn {
 }
 
 .shadow-lg {
-    box-shadow:
-        0 8px 26px -4px rgba(20, 20, 20, 0.15),
-        0 8px 9px -5px rgba(20, 20, 20, 0.06) !important;
+    box-shadow: 0 8px 26px -4px rgba(20, 20, 20, 0.15), 0 8px 9px -5px rgba(20, 20, 20, 0.06) !important;
 }
 
 .shadow-xl {
@@ -16379,9 +16327,7 @@ fieldset:disabled .btn {
     margin-bottom: 1rem;
     letter-spacing: -0.025rem;
     text-transform: uppercase;
-    box-shadow:
-        0 4px 7px -1px rgba(0, 0, 0, 0.11),
-        0 2px 4px -1px rgba(0, 0, 0, 0.07);
+    box-shadow: 0 4px 7px -1px rgba(0, 0, 0, 0.11), 0 2px 4px -1px rgba(0, 0, 0, 0.07);
     background-size: 150%;
     background-position-x: 25%;
 }
@@ -16391,16 +16337,12 @@ fieldset:disabled .btn {
 .btn:active,
 .btn:active:focus,
 .btn:active:hover {
-    box-shadow:
-        0 3px 5px -1px rgba(0, 0, 0, 0.09),
-        0 2px 3px -1px rgba(0, 0, 0, 0.07);
+    box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.09), 0 2px 3px -1px rgba(0, 0, 0, 0.07);
     transform: scale(1);
     opacity: 0.85;
 }
 .btn:hover:not(.btn-icon-only) {
-    box-shadow:
-        0 3px 5px -1px rgba(0, 0, 0, 0.09),
-        0 2px 3px -1px rgba(0, 0, 0, 0.07);
+    box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.09), 0 2px 3px -1px rgba(0, 0, 0, 0.07);
     transform: scale(1.02);
 }
 .btn.bg-white:hover {
@@ -17033,13 +16975,8 @@ fieldset:disabled .btn {
     .dropup .dropdown-menu,
     .dropstart .dropdown-menu,
     .dropend .dropdown-menu {
-        box-shadow:
-            0 8px 26px -4px rgba(20, 20, 20, 0.15),
-            0 8px 9px -5px rgba(20, 20, 20, 0.06);
-        transition:
-            visibility 0.25s,
-            opacity 0.25s,
-            transform 0.25s;
+        box-shadow: 0 8px 26px -4px rgba(20, 20, 20, 0.15), 0 8px 9px -5px rgba(20, 20, 20, 0.06);
+        transition: visibility 0.25s, opacity 0.25s, transform 0.25s;
         cursor: pointer;
     }
     .dropdown .dropdown-toggle:after,
@@ -17112,9 +17049,7 @@ fieldset:disabled .btn {
         transform: rotate(-90deg);
     }
     .dropdown-item {
-        transition:
-            background-color 0.3s ease,
-            color 0.3s ease;
+        transition: background-color 0.3s ease, color 0.3s ease;
     }
 }
 @media (max-width: 991.98px) {
@@ -17125,15 +17060,10 @@ fieldset:disabled .btn {
         transform-origin: 50% 0;
         pointer-events: none;
         transform: perspective(999px) rotateX(-10deg) translateZ(0) translate3d(0px, 37px, 0px) !important;
-        transition:
-            visibility 0.25s,
-            opacity 0.25s,
-            transform 0.25s;
+        transition: visibility 0.25s, opacity 0.25s, transform 0.25s;
         backface-visibility: hidden;
         will-change: transform, box-shadow;
-        box-shadow:
-            0 8px 26px -4px rgba(20, 20, 20, 0.15),
-            0 8px 9px -5px rgba(20, 20, 20, 0.06);
+        box-shadow: 0 8px 26px -4px rgba(20, 20, 20, 0.15), 0 8px 9px -5px rgba(20, 20, 20, 0.06);
     }
     .navbar-toggler + .navbar-collapse .dropdown:not(.nav-item) .dropdown-menu:before {
         font-family: 'FontAwesome';
@@ -17171,15 +17101,10 @@ fieldset:disabled .btn {
         transform-origin: 50% 0;
         pointer-events: none;
         transform: perspective(999px) rotateX(-10deg) translateZ(0) translate3d(0px, 37px, 0px) !important;
-        transition:
-            visibility 0.25s,
-            opacity 0.25s,
-            transform 0.25s;
+        transition: visibility 0.25s, opacity 0.25s, transform 0.25s;
         backface-visibility: hidden;
         will-change: transform, box-shadow;
-        box-shadow:
-            0 8px 26px -4px rgba(20, 20, 20, 0.15),
-            0 8px 9px -5px rgba(20, 20, 20, 0.06);
+        box-shadow: 0 8px 26px -4px rgba(20, 20, 20, 0.15), 0 8px 9px -5px rgba(20, 20, 20, 0.06);
     }
     .dropdown .dropdown-menu:before {
         font-family: 'FontAwesome';
@@ -17282,13 +17207,8 @@ fieldset:disabled .btn {
     }
 }
 .dropup .dropdown-menu {
-    box-shadow:
-        0 8px 26px -4px rgba(20, 20, 20, 0.15),
-        0 8px 9px -5px rgba(20, 20, 20, 0.06);
-    transition:
-        visibility 0.25s,
-        opacity 0.25s,
-        transform 0.25s;
+    box-shadow: 0 8px 26px -4px rgba(20, 20, 20, 0.15), 0 8px 9px -5px rgba(20, 20, 20, 0.06);
+    transition: visibility 0.25s, opacity 0.25s, transform 0.25s;
     cursor: pointer;
     top: auto !important;
     bottom: 100% !important;
@@ -17405,9 +17325,7 @@ fieldset:disabled .btn {
 }
 .input-group,
 .input-group .input-group-text {
-    transition:
-        box-shadow 0.15s ease,
-        border-color 0.15s ease;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 .input-group > :not(:first-child):not(.dropdown-menu) {
     margin-left: 0;
@@ -17506,9 +17424,7 @@ fieldset:disabled .btn {
     height: 1.25em;
 }
 .form-switch .form-check-input:after {
-    transition:
-        transform 0.25s ease-in-out,
-        background-color 0.25s ease-in-out;
+    transition: transform 0.25s ease-in-out, background-color 0.25s ease-in-out;
     content: '';
     width: 1rem;
     height: 1rem;
@@ -17516,8 +17432,7 @@ fieldset:disabled .btn {
     position: absolute;
     background-color: #fff;
     transform: translateX(1px);
-    box-shadow:
-        0 0.25rem 0.375rem -0.0625rem rgba(20, 20, 20, 0.12),
+    box-shadow: 0 0.25rem 0.375rem -0.0625rem rgba(20, 20, 20, 0.12),
         0 0.125rem 0.25rem -0.0625rem rgba(20, 20, 20, 0.07);
     top: 1px;
 }
@@ -17530,9 +17445,7 @@ fieldset:disabled .btn {
 }
 
 .form-select {
-    transition:
-        box-shadow 0.15s ease,
-        border-color 0.15s ease;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 label,
@@ -17851,9 +17764,7 @@ svg.text-dark .color-background {
 }
 
 .shadow-blur {
-    box-shadow:
-        inset 0 0px 1px 1px rgba(254, 254, 254, 0.9),
-        0 20px 27px 0 rgba(0, 0, 0, 0.05) !important;
+    box-shadow: inset 0 0px 1px 1px rgba(254, 254, 254, 0.9), 0 20px 27px 0 rgba(0, 0, 0, 0.05) !important;
 }
 
 .shadow-card {
@@ -18226,9 +18137,7 @@ hr.horizontal.gray-light {
         flex-direction: row;
     }
     .navbar.navbar-transparent .navbar-collapse {
-        box-shadow:
-            0 8px 26px -4px rgba(20, 20, 20, 0.15),
-            0 8px 9px -5px rgba(20, 20, 20, 0.06);
+        box-shadow: 0 8px 26px -4px rgba(20, 20, 20, 0.15), 0 8px 9px -5px rgba(20, 20, 20, 0.06);
     }
 }
 @media (max-width: 767.98px) {
@@ -18920,9 +18829,7 @@ hr.horizontal.gray-light {
 }
 
 .navbar-main {
-    transition:
-        box-shadow 0.25s ease-in,
-        background-color 0.25s ease-in;
+    transition: box-shadow 0.25s ease-in, background-color 0.25s ease-in;
 }
 .navbar-main.fixed-top {
     width: calc(100% - (15.625rem + 1.5rem * 3));
@@ -19274,9 +19181,7 @@ hr.horizontal.gray-light {
 }
 
 .page-item.active .page-link {
-    box-shadow:
-        0 3px 5px -1px rgba(0, 0, 0, 0.09),
-        0 2px 3px -1px rgba(0, 0, 0, 0.07);
+    box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.09), 0 2px 3px -1px rgba(0, 0, 0, 0.07);
 }
 .page-item .page-link,
 .page-item span {
@@ -20453,9 +20358,7 @@ p {
     box-sizing: border-box;
     touch-action: manipulation;
     background: #fff;
-    -webkit-box-shadow:
-        0 8px 26px -4px rgba(20, 20, 20, 0.15),
-        0 8px 9px -5px rgba(20, 20, 20, 0.06);
+    -webkit-box-shadow: 0 8px 26px -4px rgba(20, 20, 20, 0.15), 0 8px 9px -5px rgba(20, 20, 20, 0.06);
 }
 
 .flatpickr-calendar.open,
@@ -20495,9 +20398,7 @@ p {
 }
 
 .flatpickr-calendar.multiMonth .flatpickr-days .dayContainer:nth-child(n + 2) .flatpickr-day.inRange:nth-child(7n + 1) {
-    box-shadow:
-        -2px 0 0 #e6e6e6,
-        5px 0 0 #e6e6e6;
+    box-shadow: -2px 0 0 #e6e6e6, 5px 0 0 #e6e6e6;
 }
 
 .flatpickr-calendar .hasWeeks .dayContainer,
@@ -21060,9 +20961,7 @@ span.flatpickr-weekday {
 
 .flatpickr-day.inRange {
     border-radius: 0;
-    box-shadow:
-        -5px 0 0 #e6e6e6,
-        5px 0 0 #e6e6e6;
+    box-shadow: -5px 0 0 #e6e6e6, 5px 0 0 #e6e6e6;
 }
 
 .flatpickr-day.flatpickr-disabled,
@@ -21086,9 +20985,7 @@ span.flatpickr-weekday {
 
 .flatpickr-day.week.selected {
     border-radius: 0;
-    box-shadow:
-        -5px 0 0 #569ff7,
-        5px 0 0 #569ff7;
+    box-shadow: -5px 0 0 #569ff7, 5px 0 0 #569ff7;
 }
 
 .flatpickr-day.hidden {
@@ -21287,9 +21184,7 @@ span.flatpickr-weekday {
 .flatpickr-calendar .flatpickr-day.inRange {
     background: rgba(94, 114, 228, 0.28);
     border: none;
-    box-shadow:
-        -5px 0 0 #d7dcf8,
-        5px 0 0 #d7dcf8;
+    box-shadow: -5px 0 0 #d7dcf8, 5px 0 0 #d7dcf8;
 }
 .flatpickr-calendar .flatpickr-day:not(.selected):hover,
 .flatpickr-calendar .flatpickr-day:not(.selected):focus {
@@ -21476,10 +21371,7 @@ span.flatpickr-weekday {
     border-radius: 3px;
     background: #fff;
     cursor: default;
-    box-shadow:
-        inset 0 0 1px #fff,
-        inset 0 1px 7px #ebebeb,
-        0 3px 6px -3px #bbb;
+    box-shadow: inset 0 0 1px #fff, inset 0 1px 7px #ebebeb, 0 3px 6px -3px #bbb;
     webkit-transition: 0.3s ease 0s;
     -moz-transition: 0.3s ease 0s;
     -ms-transition: 0.3s ease 0s;
@@ -21488,10 +21380,7 @@ span.flatpickr-weekday {
 }
 
 .noUi-active {
-    box-shadow:
-        inset 0 0 1px #fff,
-        inset 0 1px 7px #ddd,
-        0 3px 6px -3px #bbb;
+    box-shadow: inset 0 0 1px #fff, inset 0 1px 7px #ddd, 0 3px 6px -3px #bbb;
     transform: scale3d(1.5, 1.5, 1);
 }
 
@@ -21819,12 +21708,8 @@ pre[class*='language-'] {
 .ps__rail-x {
     display: none;
     opacity: 0;
-    transition:
-        background-color 0.2s linear,
-        opacity 0.2s linear;
-    -webkit-transition:
-        background-color 0.2s linear,
-        opacity 0.2s linear;
+    transition: background-color 0.2s linear, opacity 0.2s linear;
+    -webkit-transition: background-color 0.2s linear, opacity 0.2s linear;
     height: 15px;
     /* there must be 'bottom' or 'top' for ps__rail-x */
     bottom: 0px;
@@ -21835,12 +21720,8 @@ pre[class*='language-'] {
 .ps__rail-y {
     display: none;
     opacity: 0;
-    transition:
-        background-color 0.2s linear,
-        opacity 0.2s linear;
-    -webkit-transition:
-        background-color 0.2s linear,
-        opacity 0.2s linear;
+    transition: background-color 0.2s linear, opacity 0.2s linear;
+    -webkit-transition: background-color 0.2s linear, opacity 0.2s linear;
     width: 15px;
     /* there must be 'right' or 'left' for ps__rail-y */
     right: 0;
@@ -21879,12 +21760,8 @@ pre[class*='language-'] {
 .ps__thumb-x {
     background-color: #aaa;
     border-radius: 6px;
-    transition:
-        background-color 0.2s linear,
-        height 0.2s ease-in-out;
-    -webkit-transition:
-        background-color 0.2s linear,
-        height 0.2s ease-in-out;
+    transition: background-color 0.2s linear, height 0.2s ease-in-out;
+    -webkit-transition: background-color 0.2s linear, height 0.2s ease-in-out;
     height: 6px;
     /* there must be 'bottom' for ps__thumb-x */
     bottom: 2px;
@@ -21895,12 +21772,8 @@ pre[class*='language-'] {
 .ps__thumb-y {
     background-color: #aaa;
     border-radius: 6px;
-    transition:
-        background-color 0.2s linear,
-        width 0.2s ease-in-out;
-    -webkit-transition:
-        background-color 0.2s linear,
-        width 0.2s ease-in-out;
+    transition: background-color 0.2s linear, width 0.2s ease-in-out;
+    -webkit-transition: background-color 0.2s linear, width 0.2s ease-in-out;
     width: 6px;
     /* there must be 'right' for ps__thumb-y */
     right: 2px;

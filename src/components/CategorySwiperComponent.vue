@@ -58,10 +58,14 @@ const frequentlyUsedIngredients = ref([]);
 
 const isModalVisible = ref(false);
 
+//控制食材Badge伸縮的boolean陣列
+const isIngredientExpanded = ref([]);
+
 onMounted(async () => {
     await fetchIngredients();
     frequentlyUsedIngredients.value = await getFrequentlyUsedIngredients(0.1);
     //因為裡面是Promise物件要用async/await自動解構(相當於.then(result=>變數=result))
+    isIngredientExpanded.value = [...ingredientCategory.value].map((c) => false);
 });
 
 // Swiper設定
@@ -246,15 +250,46 @@ const handlePhotoUpload = (event) => {
                 >
                     <h6 class="text-center">{{ category }}</h6>
                     <div class="d-flex flex-wrap justify-content-center gap-2">
-                        <span
-                            class="badge food-badge bg-secondary"
-                            :class="{ active: isSelected(ingredient) }"
-                            v-for="ingredient in ingredients.filter((i) => i.category == category)"
-                            :key="ingredient.ingredientId"
-                            :data-ingredientId="ingredient.ingredientId"
-                            @click="activateBadge(ingredient)"
-                            >{{ ingredient.ingredientName }}</span
-                        >
+                        <!-- 當食材數量超過 15 個且未展開時，只顯示前 15 個 -->
+                        <template v-if="!isIngredientExpanded[index]">
+                            <span
+                                class="badge food-badge bg-secondary"
+                                :class="{ active: isSelected(ingredient) }"
+                                v-for="ingredient in ingredients.filter((i) => i.category == category).slice(0, 15)"
+                                :key="ingredient.ingredientId"
+                                :data-ingredientId="ingredient.ingredientId"
+                                @click="activateBadge(ingredient)"
+                            >
+                                {{ ingredient.ingredientName }}
+                            </span>
+                            <!-- 如果食材總數超過 15 個，顯示展開按鈕 -->
+                            <span
+                                v-if="ingredients.filter((i) => i.category == category).length > 15"
+                                class="badge food-badge control"
+                                @click="isIngredientExpanded[index] = true"
+                            >
+                                + {{ ingredients.filter((i) => i.category == category).length - 15 }} 更多食材
+                            </span>
+                        </template>
+
+                        <!-- 展開時顯示所有食材 -->
+                        <template v-else>
+                            <span
+                                class="badge food-badge bg-info"
+                                :class="{ active: isSelected(ingredient) }"
+                                v-for="ingredient in ingredients.filter((i) => i.category == category)"
+                                :key="ingredient.ingredientId"
+                                :data-ingredientId="ingredient.ingredientId"
+                                @click="activateBadge(ingredient)"
+                            >
+                                {{ ingredient.ingredientName }}
+                            </span>
+
+                            <!-- 收起按鈕 -->
+                            <span class="badge food-badge control" @click="isIngredientExpanded[index] = false">
+                                收起食材
+                            </span>
+                        </template>
                     </div>
                 </SwiperSlide>
 
@@ -475,8 +510,12 @@ const handlePhotoUpload = (event) => {
     cursor: pointer;
 }
 .food-badge.active {
-    background-color: #93c759 !important;
+    background-color: #41b883 !important;
     color: #ffffff !important;
+}
+.food-badge.control {
+    background-color: #ffdae5 !important;
+    color: #555556 !important;
 }
 .synonym-adder:hover,
 .synonym-remover:hover {

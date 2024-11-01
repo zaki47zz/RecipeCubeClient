@@ -133,16 +133,13 @@ const exportInventories = () => {
         </div>
     </section>
 
-    <section class="banner-section py-3 overflow-hidden p-5 bg-danger-subtle">
+    <section class="banner-section py-3 overflow-hidden p-5 bg-primary-subtle">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
                     <div class="d-flex justify-content-between mt-1">
                         <h5>您選擇的食材</h5>
-                        <UnitConversionComponent
-                            :addingInventoriesList="cookingInventories"
-                            color="danger"
-                        ></UnitConversionComponent>
+                        <UnitConversionComponent :addingInventoriesList="cookingInventories"></UnitConversionComponent>
                     </div>
                 </div>
             </div>
@@ -230,7 +227,7 @@ const exportInventories = () => {
                 <div class="col-lg-3">
                     <RouterLink
                         class="btn text-dark shadow fs-5 w-100"
-                        :class="selectedIngredients.length ? 'bg-danger-subtle' : 'bg-secondary disabled-link'"
+                        :class="selectedIngredients.length ? 'bg-primary-subtle' : 'bg-secondary disabled-link'"
                         :to="selectedIngredients.length ? { name: 'GenerateRecipe' } : ''"
                         @click="exportInventories"
                     >

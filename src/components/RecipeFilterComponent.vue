@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid filter-container">
-        <div class="row pb-2 px-3 my-3 d-flex bg-warning-subtle rounded-4 shadow justify-content-between">
+        <div class="row pb-2 px-3 my-3 d-flex bg-primary-subtle rounded-4 shadow justify-content-between">
             <!-- 分類欄 -->
             <div class="col-md-2">
                 <p class="fw-bold mt-3 mb-0">分類 CATEGORY</p>
@@ -22,8 +22,11 @@
             <div class="col-md-3 mt-2">
                 <select class="form-select" v-model="filters.category">
                     <option value="">選擇主類別</option>
-                    <option v-for="(subcategories, category) in recipeFilterStore.categoryOptions" :key="category"
-                        :value="category">
+                    <option
+                        v-for="(subcategories, category) in recipeFilterStore.categoryOptions"
+                        :key="category"
+                        :value="category"
+                    >
                         {{ category }}
                     </option>
                 </select>
@@ -31,8 +34,11 @@
             <div class="col-md-3 mt-2">
                 <select class="form-select" v-model="filters.subcategory">
                     <option value="">選擇細部類別</option>
-                    <option v-for="subcategory in recipeFilterStore.subcategoryOptions" :key="subcategory"
-                        :value="subcategory">
+                    <option
+                        v-for="subcategory in recipeFilterStore.subcategoryOptions"
+                        :key="subcategory"
+                        :value="subcategory"
+                    >
                         {{ subcategory }}
                     </option>
                 </select>
@@ -47,14 +53,27 @@
             </div>
 
             <div v-if="showSearchField && filters.searchType === 'recipeName'" class="col-md-9 mx-auto mt-2">
-                <input type="text" v-model="filters.searchWord" class="form-control w-100 rounded-3"
-                    placeholder="輸入食譜名稱" />
+                <input
+                    type="text"
+                    v-model="filters.searchWord"
+                    class="form-control w-100 rounded-3"
+                    placeholder="輸入食譜名稱"
+                />
             </div>
 
             <div v-if="showSearchField && filters.searchType === 'ingredient'" class="col-md-9 mx-auto mt-2">
-                <multiselect v-model="selectedIngredients" :options="groupedIngredients" placeholder="搜尋或選擇食材 (可以多選)"
-                    :multiple="true" :close-on-select="false" group-label="category" group-values="ingredients"
-                    :group-select="false" track-by="ingredientId" :custom-label="customLabel">
+                <multiselect
+                    v-model="selectedIngredients"
+                    :options="groupedIngredients"
+                    placeholder="搜尋或選擇食材 (可以多選)"
+                    :multiple="true"
+                    :close-on-select="false"
+                    group-label="category"
+                    group-values="ingredients"
+                    :group-select="false"
+                    track-by="ingredientId"
+                    :custom-label="customLabel"
+                >
                     <span slot="noResult">找不到該食材</span>
                 </multiselect>
             </div>
@@ -83,9 +102,7 @@ const { filters, selectedIngredients } = storeToRefs(recipeFilterStore);
 const { groupedIngredients } = storeToRefs(ingredientStore);
 const { fetchIngredients } = ingredientStore;
 onMounted(async () => {
-
     await fetchIngredients();
-
 });
 
 function customLabel(option) {

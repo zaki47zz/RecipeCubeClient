@@ -9,6 +9,9 @@ import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch, nextTick, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
+// 設定列表是否展開
+const isListExpanded = ref(true);
+
 const cookingStore = useCookingStore();
 const inventoryStore = useInventoryStore();
 const recipeFilterStore = useRecipeFilterStore();
@@ -85,6 +88,7 @@ const fetchRecipes = async () => {
         console.error('錯誤:', error);
     }
 };
+
 // 在DOM載入後抓食材
 onMounted(async () => {
     console.log('Store values:', {
@@ -100,6 +104,8 @@ onMounted(async () => {
     // 3. fetch推薦食譜 API
     await fetchRecipes();
     setupIntersectionObserver();
+    // 4. 設定列表是否展開
+    if (isUsingInventory.value) isListExpanded.value = false;
 });
 
 watch(cookingInventories, (newInventories) => {
@@ -289,7 +295,20 @@ function useSelectedRecipe() {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(inventory, index) in cookingInventories" :key="cookingInventories.inventoryId">
+                            <tr
+                                v-if="isListExpanded"
+                                v-for="(inventory, index) in cookingInventories"
+                                :key="cookingInventories.inventoryId"
+                            >
+                                <td scope="row" class="text-dark">{{ index + 1 }}</td>
+                                <td class="text-dark">{{ inventory.category }}</td>
+                                <td class="text-dark">{{ inventory.ingredientName }}</td>
+                                <td class="text-dark">
+                                    {{ inventory.quantity }}
+                                    {{ inventory.unit }}
+                                </td>
+                            </tr>
+                            <tr v-else v-for="(inventory, index) in cookingInventories.slice(0, 10)" :key="index">
                                 <td scope="row" class="text-dark">{{ index + 1 }}</td>
                                 <td class="text-dark">{{ inventory.category }}</td>
                                 <td class="text-dark">{{ inventory.ingredientName }}</td>
@@ -299,6 +318,22 @@ function useSelectedRecipe() {
                                 </td>
                             </tr>
                         </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="text-dark">
+                                    <h6 v-if="!isListExpanded" class="collapse-button" @click="isListExpanded = true">
+                                        與其他 {{ cookingInventories.length - 10 }} 個食材...
+                                    </h6>
+                                    <h6
+                                        v-if="isListExpanded && isUsingInventory"
+                                        class="collapse-button"
+                                        @click="isListExpanded = false"
+                                    >
+                                        收起列表
+                                    </h6>
+                                </td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>
@@ -439,7 +474,7 @@ function useSelectedRecipe() {
     top: 0;
     left: 0;
     transform: translateZ(0) scale(1, 1);
-    background: #1b2030 url('src/assets/img/ForBackground/bg-header-recipe.jpg') 50% 0 no-repeat;
+    background: #1b2030 url('src/assets/img/ForBackground/bg-header.jpg') 50% 0 no-repeat;
     background-size: cover;
     background-attachment: fixed;
     animation: grow 180s linear 10ms infinite;
@@ -484,6 +519,14 @@ function useSelectedRecipe() {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.collapse-button {
+    text-decoration: underline;
+}
+.collapse-button:hover {
+    opacity: 0.8;
+    cursor: pointer;
 }
 
 .recipe-card {
