@@ -4,6 +4,8 @@ import { ref, onMounted } from 'vue';
 import { useInventoryStore } from '@/stores/inventoryStore';
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
 
 const inventoryStore = useInventoryStore();
 const { getRunningOutIngredients } = inventoryStore;
@@ -12,6 +14,17 @@ const isModalVisible = ref(false);
 const runningOutIngredients = ref([]);
 const products = ref([]);
 
+onMounted(() => {
+    initTippy();
+});
+
+const initTippy = function () {
+    tippy('#button-shopping-list', {
+        content: '查看推薦的購物清單',
+        placement: 'right-end',
+        animation: 'fade',
+    });
+};
 // 載入組件
 onMounted(async () => {
     runningOutIngredients.value = await getRunningOutIngredients();
@@ -137,7 +150,7 @@ const addAllToCart = () => {
 </script>
 
 <template>
-    <button class="floating-icon-shoppingList" @click="openModal">
+    <button class="floating-icon-shoppingList" @click="openModal" id="button-shopping-list">
         <i class="fa-solid fa-list-check"></i>
     </button>
 

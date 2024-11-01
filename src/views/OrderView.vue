@@ -2,13 +2,16 @@
 import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
 import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import CouponComponent from '@/components/CouponComponent.vue';
+import StoreChatComponent from '@/components/StoreChatComponent.vue';
 import Swal from 'sweetalert2';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import 'vue3-easy-data-table/dist/style.css';
 import type { Header } from 'vue3-easy-data-table';
 import { useInventoryStore } from '@/stores/inventoryStore';
 import { usePantryStore } from '@/stores/pantryStore';
 import { useRouter } from 'vue-router';
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
 
 // @ts-ignore
 const BaseURL = import.meta.env.VITE_API_BASEURL; //先忽略對import.meta錯誤檢查
@@ -25,6 +28,28 @@ console.log(UserId);
 // localStorage.setItem("UserId",testUserId);
 // const UserId = localStorage.getItem("UserId")
 // console.log(UserId);
+
+onMounted(() => {
+    initTippy();
+});
+
+const initTippy = function () {
+    tippy('#store-home', {
+        content: '商店首頁',
+        placement: 'right-end',
+        animation: 'fade',
+    });
+    tippy('#my-order', {
+        content: '查看我的訂單',
+        placement: 'right-end',
+        animation: 'fade',
+    });
+    tippy('#my-cart', {
+        content: '前往我的購物車',
+        placement: 'right-end',
+        animation: 'fade',
+    });
+};
 
 const orders = ref([]);
 // 讀取該userId
@@ -400,13 +425,13 @@ const submitReview = async (item) => {
             <!-- Single Page Header End -->
         </div>
         <div>
-            <RouterLink :to="{ name: 'storeproduct' }" class="floating-icon"
+            <RouterLink :to="{ name: 'storeproduct' }" class="floating-icon" id="store-home"
                 ><i class="fa-solid fa-shop"></i
             ></RouterLink>
-            <RouterLink :to="{ name: 'cart' }" class="floating-icon-cart"
+            <RouterLink :to="{ name: 'cart' }" class="floating-icon-cart" id="my-cart"
                 ><i class="fa-solid fa-cart-shopping"></i
             ></RouterLink>
-            <RouterLink :to="{ name: 'order' }" class="floating-icon-order"
+            <RouterLink :to="{ name: 'order' }" class="floating-icon-order" id="my-order"
                 ><i class="fa-solid fa-clipboard-list"></i
             ></RouterLink>
         </div>
@@ -417,6 +442,8 @@ const submitReview = async (item) => {
             <ShoppingListComponent />
             <!-- 引入我的優惠券 -->
             <CouponComponent />
+            <!-- 引入聊天機器人  -->
+            <StoreChatComponent />
         </div>
         <div>
             <!-- EasyDataTable Start -->

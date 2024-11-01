@@ -6,6 +6,7 @@ import { computed, ref, watch, onMounted, nextTick } from 'vue';
 import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
 import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import CouponComponent from '@/components/CouponComponent.vue';
+import StoreChatComponent from '@/components/StoreChatComponent.vue';
 // swiper
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { EffectCoverflow, Pagination, Autoplay, Navigation } from 'swiper/modules';
@@ -13,6 +14,8 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-coverflow';
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
 const swiperInstance = ref(null);
 const isDataLoaded = ref(false);
 
@@ -26,6 +29,28 @@ const ProductsByPriceRange = ref([]);
 const priceRange = ref(1400); // 預設最大價格
 const searchTerm = ref('');
 const checkFilterProducts = ref(false);
+
+onMounted(() => {
+    initTippy();
+});
+
+const initTippy = function () {
+    tippy('#store-home', {
+        content: '商店首頁',
+        placement: 'right-end',
+        animation: 'fade',
+    });
+    tippy('#my-order', {
+        content: '查看我的訂單',
+        placement: 'right-end',
+        animation: 'fade',
+    });
+    tippy('#my-cart', {
+        content: '前往我的購物車',
+        placement: 'right-end',
+        animation: 'fade',
+    });
+};
 
 // 讀取所有商品
 
@@ -287,6 +312,8 @@ const swiperProducts = computed(() => {
     <ShoppingListComponent />
     <!-- 引入我的優惠券 -->
     <CouponComponent />
+    <!-- 引入聊天機器人 -->
+    <StoreChatComponent />
 
     <div class="p-0 m-0">
         <!-- Single Page Header start -->
@@ -303,13 +330,13 @@ const swiperProducts = computed(() => {
         <!-- RouterLink Start -->
         <ol class="text-center py-0">
             <h4>
-                <RouterLink :to="{ name: 'storeproduct' }" class="floating-icon"
+                <RouterLink :to="{ name: 'storeproduct' }" class="floating-icon" id="store-home"
                     ><i class="fa-solid fa-shop"></i
                 ></RouterLink>
-                <RouterLink :to="{ name: 'cart' }" class="floating-icon-cart"
+                <RouterLink :to="{ name: 'cart' }" class="floating-icon-cart" id="my-cart"
                     ><i class="fa-solid fa-cart-shopping"></i
                 ></RouterLink>
-                <RouterLink :to="{ name: 'order' }" class="floating-icon-order"
+                <RouterLink :to="{ name: 'order' }" class="floating-icon-order" id="my-order"
                     ><i class="fa-solid fa-clipboard-list"></i
                 ></RouterLink>
             </h4>

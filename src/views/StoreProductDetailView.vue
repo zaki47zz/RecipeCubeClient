@@ -1,18 +1,42 @@
 <script setup>
 import '@/assets/js/store.js';
 import Swal from 'sweetalert2';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
 import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import CouponComponent from '@/components/CouponComponent.vue';
 import StoreChatComponent from '@/components/StoreChatComponent.vue';
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
 const userId = localStorage.getItem('UserId');
 
 const route = useRoute(); // 獲取當前路由
 const products = ref([]);
+
+onMounted(() => {
+    initTippy();
+});
+
+const initTippy = function () {
+    tippy('#store-home', {
+        content: '商店首頁',
+        placement: 'right-end',
+        animation: 'fade',
+    });
+    tippy('#my-order', {
+        content: '查看我的訂單',
+        placement: 'right-end',
+        animation: 'fade',
+    });
+    tippy('#my-cart', {
+        content: '前往我的購物車',
+        placement: 'right-end',
+        animation: 'fade',
+    });
+};
 
 // 取得商品id 獲取單一商品
 const loadProductById = async (id) => {
@@ -195,13 +219,13 @@ loadEvaluates(productId);
     <!-- RouterLink Start -->
     <ol class="text-center py-0">
         <h4>
-            <RouterLink :to="{ name: 'storeproduct' }" class="floating-icon"
+            <RouterLink :to="{ name: 'storeproduct' }" class="floating-icon" id="store-home"
                 ><i class="fa-solid fa-shop"></i
             ></RouterLink>
-            <RouterLink :to="{ name: 'cart' }" class="floating-icon-cart"
+            <RouterLink :to="{ name: 'cart' }" class="floating-icon-cart" id="my-cart"
                 ><i class="fa-solid fa-cart-shopping"></i
             ></RouterLink>
-            <RouterLink :to="{ name: 'order' }" class="floating-icon-order"
+            <RouterLink :to="{ name: 'order' }" class="floating-icon-order" id="my-order"
                 ><i class="fa-solid fa-clipboard-list"></i
             ></RouterLink>
         </h4>

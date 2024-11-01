@@ -1,10 +1,12 @@
 <script setup>
-import { ref, computed, reactive } from 'vue';
+import { ref, computed, reactive, onMounted } from 'vue';
 import Swal from 'sweetalert2';
 import { useRouter } from 'vue-router';
 import { Offcanvas } from 'bootstrap'; // 引入 Bootstrap 的 Offcanvas 模塊
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
 
 // offcanvas DOM 元素的引用
 let offcanvasCartRef = ref(null);
@@ -13,6 +15,18 @@ const openCartSidebar = () => {
     loadProducts();
     let offcanvas = new Offcanvas(offcanvasCartRef.value); // 使用引入的 Offcanvas
     offcanvas.show();
+};
+
+onMounted(() => {
+    initTippy();
+});
+
+const initTippy = function () {
+    tippy('#button-sideBar-Cart', {
+        content: '查看我的購物車',
+        placement: 'right-end',
+        animation: 'fade',
+    });
 };
 
 // 讀取所有商品
@@ -253,7 +267,7 @@ window.addEventListener('cart-updated', () => {
         </div>
 
         <!-- 開啟購物車 Sidebar 的按鈕 -->
-        <button @click="openCartSidebar" class="floating-icon-side-cart">
+        <button @click="openCartSidebar" class="floating-icon-side-cart" id="button-sideBar-Cart">
             <span class="badge cart-badge" v-show="cartLength > 0">{{ cartLength }}</span>
             <i class="fa-solid fa-list-ul"></i>
         </button>

@@ -1,12 +1,26 @@
 <script setup>
 import Swal from 'sweetalert2';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
 const isModalVisible = ref(false); // 對話框的顯示狀態
 const coupons = ref([]);
 const couponsByUserId = ref([]);
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
+
+onMounted(() => {
+    initTippy();
+});
+
+const initTippy = function () {
+    tippy('#button-myCoupon', {
+        content: '查看我的優惠券',
+        placement: 'right-end',
+        animation: 'fade',
+    });
+};
 
 // 讀取使用者資料
 const userId = localStorage.getItem('UserId');
@@ -48,7 +62,7 @@ const openMyCoupon = () => {
 <template>
     <div>
         <!-- 開啟我的優惠券的按鈕 -->
-        <button @click="openMyCoupon" class="floating-icon-myCoupon">
+        <button @click="openMyCoupon" class="floating-icon-myCoupon" id="button-myCoupon">
             <i class="fa-solid fa-ticket"></i>
         </button>
 
