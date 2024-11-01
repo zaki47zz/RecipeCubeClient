@@ -13,7 +13,7 @@
     align-items: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加陰影效果 */
     cursor: pointer;
-    z-index: 1000; /* 保證圖標在最上層 */
+    z-index: 900; /* 保證圖標在最上層 */
     color: white !important; /* 圖標顏色 */
     font-size: 25px; /* 控制圖標的大小 */
 }
@@ -34,7 +34,7 @@
     align-items: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加陰影效果 */
     cursor: pointer;
-    z-index: 1000; /* 保證圖標在最上層 */
+    z-index: 900; /* 保證圖標在最上層 */
     color: white !important; /* 圖標顏色 */
     font-size: 25px; /* 控制圖標的大小 */
 }
@@ -56,7 +56,7 @@
     align-items: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加陰影效果 */
     cursor: pointer;
-    z-index: 1000; /* 保證圖標在最上層 */
+    z-index: 900; /* 保證圖標在最上層 */
     color: white !important; /* 圖標顏色 */
     font-size: 25px; /* 控制圖標的大小 */
     border: none;
@@ -79,7 +79,7 @@
     align-items: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加陰影效果 */
     cursor: pointer;
-    z-index: 1000; /* 保證圖標在最上層 */
+    z-index: 900; /* 保證圖標在最上層 */
     color: white !important; /* 圖標顏色 */
     font-size: 25px; /* 控制圖標的大小 */
     border: none;
@@ -102,7 +102,7 @@
     align-items: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加陰影效果 */
     cursor: pointer;
-    z-index: 1000; /* 保證圖標在最上層 */
+    z-index: 900; /* 保證圖標在最上層 */
     color: white !important; /* 圖標顏色 */
     font-size: 25px; /* 控制圖標的大小 */
     border: none;
@@ -125,7 +125,7 @@
     align-items: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加陰影效果 */
     cursor: pointer;
-    z-index: 1000; /* 保證圖標在最上層 */
+    z-index: 900; /* 保證圖標在最上層 */
     color: white !important; /* 圖標顏色 */
     font-size: 25px; /* 控制圖標的大小 */
     border: none;
