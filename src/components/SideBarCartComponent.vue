@@ -187,7 +187,7 @@ window.windowCartComponent = () => {
                                     <p class="item-quantity m-0">數量: {{ product.quantity }}</p>
                                     <div class="item-price">
                                         <span class="me-2">$ {{ product.quantity * product.price }}</span>
-                                        <button @click="removeFromCart(product)" class="remove-button">
+                                        <button @click="removeFromCart(product)" class="remove-button ms-3">
                                             <i class="fa fa-times"></i>
                                         </button>
                                     </div>

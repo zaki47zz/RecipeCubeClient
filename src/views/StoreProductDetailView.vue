@@ -271,26 +271,15 @@ loadEvaluates(productId);
                             <!-- 商品描述 -->
                             <p class="mb-4">{{ product.description }}</p>
                             <!-- 商品數量input btn -->
-                            <div class="input-group quantity mb-5" style="width: 100px">
+                            <div class="quantity-control mb-4" style="width: 100px">
                                 <div class="input-group-btn">
-                                    <button
-                                        class="btn btn-sm btn-minus rounded-circle bg-light border"
-                                        @click="decQuantity(product)"
-                                    >
+                                    <button class="quantity-btn" @click="decQuantity(product)">
                                         <i class="fa fa-minus"></i>
                                     </button>
                                 </div>
-                                <input
-                                    type="text"
-                                    class="form-control form-control-sm text-center border-0"
-                                    :value="selectQuantity"
-                                    readonly
-                                />
+                                <input type="text" class="quantity-input" :value="selectQuantity" readonly />
                                 <div class="input-group-btn">
-                                    <button
-                                        class="btn btn-sm btn-plus rounded-circle bg-light border"
-                                        @click="incQuantity(product)"
-                                    >
+                                    <button class="quantity-btn" @click="incQuantity(product)">
                                         <i class="fa fa-plus"></i>
                                     </button>
                                 </div>
@@ -412,5 +401,37 @@ loadEvaluates(productId);
     50% {
         transform: scale(1.2) translateY(-250px);
     }
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.quantity-btn {
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quantity-btn:hover {
+    background: #e9ecef;
+}
+
+.quantity-input {
+    width: 50px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px;
 }
 </style>

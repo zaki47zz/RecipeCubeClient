@@ -401,7 +401,7 @@ const swiperProducts = computed(() => {
                                 <div
                                     class="bg-light ps-3 p-2 rounded d-flex justify-content-between align-items-center"
                                 >
-                                    <label for="fruitsfruit" class="m-0">預設排序:</label>
+                                    <label for="fruitsfruit" class="m-0">排序:</label>
                                     <select
                                         id="fruits"
                                         name="fruitlist"
