@@ -468,6 +468,13 @@ const swiperProducts = computed(() => {
                                         </div>
                                     </div>
                                     <!-- 價格區間 End -->
+                                    <div>
+                                        <a
+                                            href="https://www.cathaybk.com.tw/cathaybk/personal/product/credit-card/cards/"
+                                            target="_blank"
+                                            ><img src="@/assets/img/Store/廣告01.png" alt="" class="col-lg-12"
+                                        /></a>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-lg-10">
