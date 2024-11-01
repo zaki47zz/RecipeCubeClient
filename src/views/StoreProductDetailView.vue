@@ -332,6 +332,7 @@ loadEvaluates(productId);
 </template>
 
 <style lang="css" scoped>
+@import '@/assets/css/StoreStyle.css';
 /* header本人 */
 .header {
     position: relative;
@@ -351,7 +352,7 @@ loadEvaluates(productId);
     top: 0;
     left: 0;
     transform: translateZ(0) scale(1, 1);
-    background: #1b2030 url('src/assets/img/ForBackground/bg-header.jpg') 50% 0 no-repeat;
+    background: #1b2030 url('@/assets/img/ForBackground/bg-header.jpg') 50% 0 no-repeat;
     background-size: cover;
     background-attachment: fixed;
     animation: grow 180s linear 10ms infinite;
@@ -385,5 +386,4 @@ loadEvaluates(productId);
         transform: scale(1.2) translateY(-250px);
     }
 }
-@import '@/assets/css/StoreStyle.css';
 </style>

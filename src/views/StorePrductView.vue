@@ -2,15 +2,19 @@
 import '@/assets/js/store.js';
 import Swal from 'sweetalert2';
 import { useRouter } from 'vue-router';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onMounted, nextTick } from 'vue';
 import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
 import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import CouponComponent from '@/components/CouponComponent.vue';
 // swiper
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { EffectCoverflow, Pagination, Autoplay, Navigation } from 'swiper/modules';
-import 'swiper/css/bundle';
-const modules = [EffectCoverflow, Pagination, Autoplay, Navigation];
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/effect-coverflow';
+const swiperInstance = ref(null);
+const isDataLoaded = ref(false);
 
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
@@ -28,11 +32,16 @@ const checkFilterProducts = ref(false);
 const ApiURL = `${BaseURL}/Products/ProductsNcategory`;
 
 const loadProducts = async () => {
-    const response = await fetch(`${ApiURL}`);
-    const data = await response.json();
-    products.value = data;
-    filteredProducts.value = data;
-    console.log(data);
+    try {
+        const response = await fetch(`${ApiURL}`);
+        const data = await response.json();
+        products.value = data;
+        filteredProducts.value = data;
+        isDataLoaded.value = true; // 設置數據加載完成標誌
+        console.log('Products loaded successfully');
+    } catch (error) {
+        console.error('Error loading products:', error);
+    }
 };
 
 // 讀取類別
@@ -207,6 +216,53 @@ const loadFilteredProducts = async (category) => {
 };
 
 // swiper
+// 設定
+const swiperOptions = {
+    spaceBetween: 80,
+    initialSlide: 5,
+    effect: 'coverflow',
+    grabCursor: true,
+    centeredSlides: true,
+    slidesPerView: 'auto',
+    coverflowEffect: {
+        rotate: 50,
+        stretch: 0,
+        depth: 100,
+        modifier: 1,
+        slideShadows: true,
+    },
+    navigation: true,
+    pagination: {
+        clickable: true,
+    },
+    autoplay: {
+        delay: 3000,
+        disableOnInteraction: false,
+        pauseOnMouseEnter: true,
+    },
+    modules: [EffectCoverflow, Pagination, Autoplay, Navigation],
+    loop: true,
+};
+
+// Swiper 初始化完成的處理函數
+const onSwiperInit = (swiper) => {
+    if (swiper && products.value.length > 0) {
+        swiperInstance.value = swiper;
+        swiper.update();
+        swiper.autoplay.start();
+        console.log('Swiper initialized successfully');
+    }
+};
+
+// 確保在數據加載完成後再渲染 Swiper
+const shouldRenderSwiper = computed(() => {
+    return isDataLoaded.value && products.value.length > 0;
+});
+
+onMounted(async () => {
+    await loadProducts(); // 等待數據加載完成
+});
+
 const swiperProducts = computed(() => {
     const lengthProducts = products.value.length;
 
@@ -261,69 +317,27 @@ const swiperProducts = computed(() => {
         <!-- RouterLink End -->
 
         <!-- 輪播 Start -->
-        <div
-            style="
-                background-image: url('src/assets/img/Store/background-pattern-blue.png');
-                background-size: cover;
-                background-position: center;
-                border-radius: 15px;
-                padding: 20px;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-                margin: 20px;
-            "
-        >
+        <div class="blur-rounded p-3">
             <div>
-                <h3 class="text-center" style="color: #fb9d9e">
+                <h3 class="text-center mt-3">
                     今日推薦商品<i class="fa-solid fa-carrot" style="margin-left: 6px"></i>
                 </h3>
             </div>
             <div>
-                <swiper
-                    :space-between="80"
-                    :initial-slide="5"
-                    :effect="'coverflow'"
-                    :grabCursor="true"
-                    :centeredSlides="true"
-                    :slidesPerView="'auto'"
-                    :coverflowEffect="{
-                        rotate: 50,
-                        stretch: 0,
-                        depth: 100,
-                        modifier: 1,
-                        slideShadows: true,
-                    }"
-                    :navigation="true"
-                    :pagination="true"
-                    :modules="modules"
-                    :loop="true"
-                    class="mySwiper"
-                >
+                <!-- 使用 v-if 確保只在數據加載完成後渲染 Swiper -->
+                <swiper v-if="shouldRenderSwiper" v-bind="swiperOptions" @swiper="onSwiperInit" class="mySwiper">
                     <swiper-slide
                         v-for="(product, index) in swiperProducts"
-                        :key="index"
+                        :key="product.productId"
                         @click="goToProductDetail(product.productId)"
                         class="swiper-slide"
                     >
                         <img
                             :src="`${BaseUrlWithoutApi}/images/ingredient/${product.photo}?t=${Date.now()}`"
                             alt="Product Image"
+                            class="swiper-img"
                         />
-                        <div
-                            class="product-info"
-                            style="
-                                position: absolute;
-                                bottom: 10px;
-                                width: 80%;
-                                background-color: #f4b0a5;
-                                color: #333;
-                                text-align: center;
-                                padding: 5px;
-                                border-radius: 10px;
-                                font-weight: bold;
-                                font-size: 18px;
-                                opacity: 0.9;
-                            "
-                        >
+                        <div class="product-info">
                             {{ product.productName }}
                         </div>
                     </swiper-slide>
@@ -343,7 +357,7 @@ const swiperProducts = computed(() => {
                                 <div class="input-group w-100 d-flex">
                                     <input
                                         type="search"
-                                        class="form-control p-3"
+                                        class="form-control"
                                         placeholder="請輸入商品名稱"
                                         aria-describedby="search-icon-1"
                                         v-model="searchTerm"
@@ -356,9 +370,11 @@ const swiperProducts = computed(() => {
                             </div>
                             <!-- search End -->
                             <!-- <div class="col-6"></div> -->
-                            <div class="col-xl-2">
-                                <div class="bg-light ps-3 py-3 rounded d-flex justify-content-between mb-4">
-                                    <label for="fruits">預設排序:</label>
+                            <div class="col-xl-2 d-flex align-items-center">
+                                <div
+                                    class="bg-light ps-3 p-2 rounded d-flex justify-content-between align-items-center"
+                                >
+                                    <label for="fruitsfruit" class="m-0">預設排序:</label>
                                     <select
                                         id="fruits"
                                         name="fruitlist"
@@ -373,7 +389,7 @@ const swiperProducts = computed(() => {
                                 </div>
                             </div>
                         </div>
-                        <div class="row g-5">
+                        <div class="row g-5 mt-0">
                             <div class="col-lg-2">
                                 <div class="row g-4">
                                     <div class="col-lg-12">
@@ -449,9 +465,9 @@ const swiperProducts = computed(() => {
                                             </div>
                                             <!-- 商品類別 -->
                                             <div
-                                                class="text-white bg-secondary px-3 py-1 rounded position-absolute click-router"
+                                                class="badge bg-primary px-3 py-1 rounded position-absolute click-router"
                                                 @click="goToProductDetail(product.productId)"
-                                                style="top: 10px; left: 10px; border: 1.3px solid #81c408"
+                                                style="top: 10px; left: 10px"
                                             >
                                                 {{ product.category }}
                                             </div>
@@ -554,7 +570,7 @@ const swiperProducts = computed(() => {
     top: 0;
     left: 0;
     transform: translateZ(0) scale(1, 1);
-    background: #1b2030 url('src/assets/img/ForBackground/bg-header.jpg') 50% 0 no-repeat;
+    background: #1b2030 url('@/assets/img/ForBackground/bg-header.jpg') 50% 0 no-repeat;
     background-size: cover;
     background-attachment: fixed;
     animation: grow 180s linear 10ms infinite;
@@ -609,8 +625,7 @@ const swiperProducts = computed(() => {
     font-size: 1.1rem;
     font-weight: 700;
     color: white;
-    background-color: #f4b0a5;
-    border: 1px solid #ffb524;
+    background-color: #56c5a9;
     border-radius: 1rem;
 }
 
@@ -624,18 +639,43 @@ const swiperProducts = computed(() => {
     background-position: center;
     background-size: cover;
     width: 300px;
-    height: 250px; /* 調整為 250px */
+    height: 250px;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    border-radius: 10px;
 }
 
-.swiper-slide img {
+.swiper-img {
     display: block;
     width: 300px;
-    height: 250px; /* 固定為 300px x 250px */
-    object-fit: cover; /* 防止圖片變形 */
-    border-radius: 10px; /* 添加圓角 */
+    height: 250px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.product-info {
+    position: absolute;
+    bottom: 10px;
+    width: 80%;
+    background-color: #ace4c8;
+    color: #333;
+    text-align: center;
+    padding: 5px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 18px;
+    opacity: 0.9;
+}
+
+/* 導航按鈕樣式 */
+:deep(.swiper-button-next),
+:deep(.swiper-button-prev) {
+    color: #81c408;
+}
+
+:deep(.swiper-pagination-bullet-active) {
+    background: #81c408;
 }
 </style>

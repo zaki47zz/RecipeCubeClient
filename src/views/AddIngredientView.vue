@@ -191,10 +191,7 @@ const addInventories = async () => {
                 <div class="col-md-12">
                     <div class="d-flex justify-content-between mt-2">
                         <h4>您今天買了 {{ selectedIngredients.length }} 樣食材</h4>
-                        <UnitConversionComponent
-                            :addingInventoriesList="addingInventories"
-                            color="primary"
-                        ></UnitConversionComponent>
+                        <UnitConversionComponent :addingInventoriesList="addingInventories"></UnitConversionComponent>
                     </div>
                 </div>
             </div>

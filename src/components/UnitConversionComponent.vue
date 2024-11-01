@@ -9,7 +9,6 @@ const isModalVisible = ref(false);
 const ingredientGram = ref([]);
 
 const props = defineProps({
-    color: String,
     addingInventoriesList: Array,
 });
 
@@ -36,13 +35,7 @@ watchEffect(async () => {
         <i class="fa-solid fa-repeat"></i> 數量換算表
     </p>
 
-    <el-dialog
-        v-model="isModalVisible"
-        title="單位與克數換算表"
-        width="30%"
-        center
-        :class="color === 'primary' ? 'bg-primary-subtle' : 'bg-danger-subtle'"
-    >
+    <el-dialog v-model="isModalVisible" title="單位與克數換算表" width="30%" center class="bg-primary-subtle">
         <ul v-if="ingredientGram.length > 0">
             <li v-for="ingredient in ingredientGram" :key="ingredient.ingredientId" class="fs-5 ps-3 my-2">
                 <strong>{{ ingredient.ingredientName }} 每{{ ingredient.unit }}大約 {{ ingredient.gram }} 克</strong>

@@ -19,7 +19,7 @@ import CustomRecipeFormComponent from '@/components/CustomRecipeFormComponent.vu
                 <div class="col-md-4 col-12 p-4">
                     <CustomRecipeSideBarComponent> </CustomRecipeSideBarComponent>
                 </div>
-                <div class="col-md-8 col-12 p-4 rounded-3 shadow" style="background-color: blanchedalmond">
+                <div class="col-md-8 col-12 p-4 rounded-3 shadow" style="background-color: #ace4c8">
                     <CustomRecipeFormComponent> </CustomRecipeFormComponent>
                 </div>
             </div>

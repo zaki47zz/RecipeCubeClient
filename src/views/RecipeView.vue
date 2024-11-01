@@ -164,15 +164,15 @@ watch(totalPages, (newTotalPages) => {
                     width: '100%',
                     height: '100%',
                     backgroundImage: `url(${BannerRecipe})`,
-                    backgroundSize: 'cover',
+                    backgroundSize: 'fill',
                     backgroundPosition: 'center',
                 }"
             >
                 <div class="row p-3">
-                    <div class="col-md-6 d-flex flex-column align-items-center">
-                        <h2 class="mt-3 text-white">左思右想還是不知道煮什麼嗎?</h2>
+                    <div class="d-flex flex-column align-items-center">
+                        <h2 class="mt-3 text-dark text-gradient">左思右想還是不知道煮什麼嗎?</h2>
                         <div class="d-flex gap-2 flex-wrap mb-5">
-                            <button class="btn btn-lg bg-gradient-warning fs-6">推薦我食譜!</button>
+                            <button class="btn btn-lg bg-gradient-success text-white fs-6">推薦我食譜!</button>
                         </div>
                     </div>
                 </div>
@@ -270,6 +270,7 @@ watch(totalPages, (newTotalPages) => {
         width="75%"
         @close="recipeStore.closeDialog"
         center
+        class="bg-primary-subtle"
         @opened="onDialogOpened"
     >
         <PerfectScrollbar ref="scrollContainer" class="custom-scroll-container">
@@ -281,7 +282,7 @@ watch(totalPages, (newTotalPages) => {
                 />
             </div>
         </PerfectScrollbar>
-        <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
+        <span slot="footer" class="dialog-footer d-flex justify-content-center mt-3">
             <el-button @click="recipeStore.closeDialog" type="danger">關閉</el-button>
         </span>
     </el-dialog>
@@ -342,7 +343,7 @@ watch(totalPages, (newTotalPages) => {
     }
 }
 .custom-scroll-container {
-    max-height: 350px;
+    max-height: 410px;
     overflow: hidden;
 }
 

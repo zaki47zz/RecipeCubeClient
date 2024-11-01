@@ -565,7 +565,7 @@ $text-gradient-bg-info:       linear-gradient(310deg, #2152FF, #21D4FD) !default
 $text-gradient-bg-success:    linear-gradient(310deg, #17AD37, #C1E823) !default;
 $text-gradient-bg-warning:    linear-gradient(310deg, #F53939, #FBCF33) !default;
 $text-gradient-bg-danger:     linear-gradient(310deg, #D60808, #FF6690) !default;
-$text-gradient-bg-dark:     linear-gradient(310deg, #141727, #3A416F) !default;
+$text-gradient-bg-dark:     linear-gradient(180deg, #405b3e, #142715) !default;
 
 $initialism-font-size:        $small-font-size !default;
 
@@ -845,10 +845,10 @@ $input-border-radius-sm:                $border-radius-md !default;
 $input-border-radius-lg:                $border-radius-md !default;
 
 $input-focus-bg:                        $white !default;
-$input-focus-border-color:              #e293d3 !default;
+$input-focus-border-color:              #56C5A9 !default;
 $input-focus-color:                     $input-color !default;
 $input-focus-width:                     2px !default;
-$input-focus-box-shadow:                0 0 0 $input-focus-width #e9aede !default;
+$input-focus-box-shadow:                0 0 0 $input-focus-width #56C5A9 !default;
 
 $input-placeholder-color:               $gray-500 !default;
 $input-plaintext-color:                 $dark !default;

@@ -510,7 +510,7 @@ const handlePhotoUpload = (event) => {
     cursor: pointer;
 }
 .food-badge.active {
-    background-color: #93c759 !important;
+    background-color: #41b883 !important;
     color: #ffffff !important;
 }
 .food-badge.control {

@@ -551,7 +551,7 @@ const exportInventories = () => {
     </section>
 
     <section>
-        <el-drawer v-model="isDrawerVisible" title="食材列表" :direction="rtl">
+        <el-drawer v-model="isDrawerVisible" title="食材列表" :direction="rtl" :zIndex="200">
             <div class="order-md-last">
                 <h4 class="d-flex justify-content-between align-items-center mb-3">
                     <span class="text-dark">您所選的食材</span>
@@ -572,8 +572,8 @@ const exportInventories = () => {
                 </ul>
 
                 <RouterLink
-                    class="w-100 btn shadow fs-5"
-                    :class="selectedInventories.length ? 'bg-gradient-info' : 'bg-secondary disabled-link'"
+                    class="w-100 btn shadow fs-5 text-black"
+                    :class="selectedInventories.length ? 'bg-primary-subtle' : 'bg-secondary disabled-link'"
                     :to="selectedInventories.length ? { name: 'GenerateRecipe' } : ''"
                     @click="exportInventories"
                 >
@@ -670,7 +670,7 @@ const exportInventories = () => {
 }
 
 .card.active {
-    background-color: rgba(191, 219, 255, 0.8);
+    background-color: #d5f5e5;
     opacity: 1;
     box-shadow: 0px 4px 15px rgba(253, 203, 110, 0.6); /* 添加陰影 */
     animation: blink 1s infinite alternate; /* 閃爍效果 */
