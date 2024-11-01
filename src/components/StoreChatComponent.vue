@@ -32,7 +32,7 @@ const sendMessage = () => {
         const botReply = getBotReply(userInput);
         messages.value.push({ text: botReply, sender: 'bot' });
         userMessage.value = ''; // 清空輸入框
-    }, 1000);
+    }, 500);
 };
 
 const getBotReply = (userInput) => {
@@ -41,14 +41,12 @@ const getBotReply = (userInput) => {
     for (const [question, answer] of Object.entries(faq)) {
         const keywords = question.toLowerCase().split(' ');
 
-        // 檢查用戶輸入中是否包含任何關鍵字的子字符串
         if (keywords.some((keyword) => lowerCaseInput.includes(keyword))) {
-            return answer;
+            return `<span class="question-title" style="color: #3498db; font-weight: bold;">${question}</span><br>${answer}`;
         }
 
-        // 也可以檢查用戶輸入是否包含問題的關鍵字
         if (keywords.some((keyword) => keyword.includes(lowerCaseInput))) {
-            return answer;
+            return `<span class="question-title" style="color: #3498db; font-weight: bold;">${question}</span><br>${answer}`;
         }
     }
     return '抱歉，我目前無法回答這個問題。';
@@ -71,14 +69,19 @@ const handleOpen = () => {
 
         <el-dialog title="客服聊天機器人" v-model="dialogVisible" width="40%">
             <div class="chat-container">
-                <div v-for="(message, index) in messages" :key="index" :class="message.sender">
-                    {{ message.text }}
-                </div>
+                <div
+                    v-for="(message, index) in messages"
+                    :key="index"
+                    v-html="message.text"
+                    :class="message.sender"
+                ></div>
             </div>
 
             <div>
                 <el-input v-model="userMessage" placeholder="輸入您的問題..." @keyup.enter="sendMessage" class="mb-4" />
-                <el-button type="success" @click="sendMessage">發送</el-button>
+                <el-button type="success" @click="sendMessage" style="background-color: #9bc8fb; border: none"
+                    >發送</el-button
+                >
             </div>
 
             <template #footer>
@@ -98,10 +101,11 @@ const handleOpen = () => {
 }
 .user {
     text-align: right;
-    color: blue;
+    color: #9bc8fb;
 }
+
 .bot {
     text-align: left;
-    color: green;
+    color: #56c5a9;
 }
 </style>
