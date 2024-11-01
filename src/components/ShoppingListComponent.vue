@@ -141,10 +141,16 @@ const addAllToCart = () => {
         <i class="fa-solid fa-list-check"></i>
     </button>
 
-    <el-dialog v-model="isModalVisible" width="40%" center :z-index="1000">
+    <el-dialog
+        v-model="isModalVisible"
+        title="推薦購物清單"
+        width="40%"
+        center
+        :z-index="1000"
+        class="bg-primary-subtle"
+    >
+        <button @click="addAllToCart" class="add-all-button">全部加入購物車</button>
         <ul v-if="runningOutIngredients.length > 0">
-            <h4 class="text-center text-black pt-3">推薦購物清單</h4>
-            <button @click="addAllToCart" class="add-all-button">全部加入購物車</button>
             <li
                 v-for="(ingredient, index) in runningOutIngredients"
                 :key="ingredient.ingredientId"
@@ -176,16 +182,16 @@ const addAllToCart = () => {
 
 .add-all-button {
     display: block;
-    margin: 10px auto;
+    margin: 10px 0;
     padding: 8px 16px;
-    background-color: #f4b0a5;
+    background-color: #56c5a9;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
 }
 .add-all-button:hover {
-    background-color: #b8f0d3;
+    opacity: 0.7;
 }
 
 .cart-button {
@@ -193,7 +199,7 @@ const addAllToCart = () => {
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    background-color: #b2d1d3;
+    background-color: #56c5a9;
     border: none;
     color: white;
     border-radius: 5px;
@@ -202,12 +208,12 @@ const addAllToCart = () => {
     justify-content: center;
     align-items: center;
     width: 48px;
-    height: 100%; /* 保持寬高相等，讓圖標正中 */
+    height: 80%; /* 保持寬高相等，讓圖標正中 */
     padding: 0; /* 移除 padding */
     margin-right: 5px;
 }
 .cart-button:hover {
-    background-color: #b8f0d3; /* 懸停時變色 */
+    opacity: 0.7;
 }
 
 .in-cart {

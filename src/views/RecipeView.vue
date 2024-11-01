@@ -377,4 +377,8 @@ watch(totalPages, (newTotalPages) => {
     border-top-left-radius: 0.75rem;
     border-bottom-left-radius: 0.75rem;
 }
+
+:deep(.el-pagination.is-background .el-pager li.is-active) {
+    background-color: #41b883 !important;
+}
 </style>

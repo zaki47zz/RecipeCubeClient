@@ -109,7 +109,7 @@
 }
 
 .floating-icon-shoppingList:hover {
-    background-color: #b2d1d3; /* 懸停時變色 */
+    background-color: #ec8404; /* 懸停時變色 */
 }
 
 .floating-icon-myCoupon {
@@ -132,7 +132,7 @@
 }
 
 .floating-icon-myCoupon:hover {
-    background-color: #b2d1d3; /* 懸停時變色 */
+    background-color: #ec8404; /* 懸停時變色 */
 }
 
 /* 右側懸浮storeIcon products End */
@@ -161,8 +161,11 @@
     height: 45px;
     align-items: center;
     justify-content: center;
-    transition: 0.5s;
-    z-index: 99;
+    z-index: 900;
+}
+
+.back-to-top:hover {
+    background-color: #ec8404; /* 懸停時變色 */
 }
 /*** Spinner End ***/
 
@@ -320,35 +323,6 @@
 }
 /*** vesitable End ***/
 
-/*** Banner Section Start ***/
-.banner .banner-btn:hover {
-    background: var(--bs-primary);
-}
-/*** Banner Section End ***/
-
-/*** Facts Start ***/
-.counter {
-    height: 100%;
-    text-align: center;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
-}
-
-.counter i {
-    font-size: 60px;
-    margin-bottom: 25px;
-}
-
-.counter h4 {
-    color: var(--bs-primary);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.counter h1 {
-    margin-bottom: 0;
-}
-/*** Facts End ***/
-
 /*** Single Page Start ***/
 /* 分頁的樣式 */
 .pagination a {
@@ -369,31 +343,3 @@
 .pagination a:hover:not(.active) {
     background-color: #81c408; /* 懸停時改為綠色背景 */
 }
-
-/* 標籤導航的樣式 */
-.nav.nav-tabs .nav-link.active {
-    border-bottom: 2px solid orange !important; /* 改為橘色邊框 */
-}
-/*** Single Page End ***/
-
-/*** Footer Start ***/
-.footer .footer-item .btn-link {
-    line-height: 35px;
-    color: rgba(255, 255, 255, 0.5);
-    transition: 0.5s;
-}
-
-.footer .footer-item .btn-link:hover {
-    color: var(--bs-secondary) !important;
-}
-
-.footer .footer-item p.mb-4 {
-    line-height: 35px;
-}
-/*** Footer End ***/
-
-/* Header Page 顏色 Start*/
-.custom-color {
-    color: #81c408; /* 設定顏色 */
-}
-/* Header Page 顏色 End*/

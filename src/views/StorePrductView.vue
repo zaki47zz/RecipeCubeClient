@@ -465,7 +465,7 @@ const swiperProducts = computed(() => {
                                             </div>
                                             <!-- 商品類別 -->
                                             <div
-                                                class="badge bg-primary-subtle text- px-3 py-1 rounded position-absolute click-router d-flex justify-content-center align-items-center"
+                                                class="badge bg-primary-subtle text-dark px-3 py-1 rounded position-absolute click-router d-flex justify-content-center align-items-center"
                                                 @click="goToProductDetail(product.productId)"
                                                 style="top: 10px; left: 10px; height: 1.8rem"
                                             >
@@ -491,7 +491,7 @@ const swiperProducts = computed(() => {
                                                 <div class="d-flex justify-content-center">
                                                     <div
                                                         @click="addToCart(product)"
-                                                        class="btn border border-secondary rounded-pill px-3 text-primary"
+                                                        class="btn border border-secondary rounded-pill px-3 m-2 text-primary"
                                                     >
                                                         <i class="fa fa-shopping-bag me-2 text-primary"></i> 加入購物車
                                                     </div>
@@ -677,5 +677,9 @@ const swiperProducts = computed(() => {
 
 :deep(.swiper-pagination-bullet-active) {
     background: #41b883;
+}
+
+:deep(.el-pagination.is-background .el-pager li.is-active) {
+    background-color: #41b883 !important;
 }
 </style>

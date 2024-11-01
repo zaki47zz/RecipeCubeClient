@@ -144,7 +144,7 @@ window.windowCartComponent = () => {
             direction="ltr"
             :show-close="false"
             size="25%"
-            :zIndex="900"
+            :zIndex="1000"
         >
             <div class="cart-container">
                 <div class="cart-header">
