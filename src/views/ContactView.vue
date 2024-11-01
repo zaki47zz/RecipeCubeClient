@@ -11,7 +11,7 @@ const contactMessage = ref({
     message: '',
 });
 
-const API_URL = `${import.meta.env.VITE_API_BASEURL}/Email/Send`;
+const API_URL = `${import.meta.env.VITE_API_BASEURL}/Gmail/send`;
 const send = async () => {
     const formattedMessage = `
         姓名: ${contactMessage.value.name}
@@ -21,8 +21,10 @@ const send = async () => {
         訊息: ${contactMessage.value.message}
     `;
     const emailSend = ref({
-        email: authStore.Contact,
-        message: formattedMessage.trim(),
+        toName: "系統",
+        toEmail: authStore.Contact,
+        title: "聯絡我們",
+        body: formattedMessage.trim(),
     });
     const response = await fetch(API_URL, {
         method: 'POST',
