@@ -297,8 +297,8 @@ onBeforeUnmount(() => {
                     />
                 </p>
             </div>
-            <div v-else class="table-responsive">
-                <table class="table">
+            <div v-else class="cart-table-container">
+                <table class="table custom-table">
                     <thead>
                         <tr>
                             <th scope="col">商品</th>
@@ -312,117 +312,62 @@ onBeforeUnmount(() => {
                     </thead>
                     <tbody>
                         <tr v-for="product in cartProducts" :key="product.productId">
-                            <th scope="row">
-                                <!-- 商品圖 -->
-                                <div class="d-flex align-items-center">
+                            <td class="product-image">
+                                <div class="image-container">
                                     <img
                                         :src="`${BaseUrlWithoutApi}/images/ingredient/${product.photo}?t=${Date.now()}`"
-                                        class="img-fluid me-5 rounded-circle"
-                                        style="width: 80px; height: 80px"
+                                        class="product-img"
                                         alt=""
                                     />
                                 </div>
-                            </th>
-                            <!-- 品名 -->
-                            <td>
-                                <p class="mb-0 mt-4">{{ product.productName }}</p>
                             </td>
-                            <!-- 單價 -->
-                            <td>
-                                <p class="mb-0 mt-4">$ {{ product.price }}</p>
+                            <td class="product-name">
+                                <p>{{ product.productName }}</p>
                             </td>
-                            <!-- 數量 -->
-                            <td>
-                                <div class="input-group quantity mt-4" style="width: 100px">
-                                    <div class="input-group-btn">
-                                        <button
-                                            @click="decQuantity(product)"
-                                            class="btn btn-sm btn-minus rounded-circle bg-light border"
-                                        >
-                                            <i class="fa fa-minus"></i>
-                                        </button>
-                                    </div>
-                                    <input
-                                        type="text"
-                                        class="form-control form-control-sm text-center border-0"
-                                        v-model="product.quantity"
-                                        readonly
-                                    />
-                                    <div class="input-group-btn">
-                                        <button
-                                            @click="incQuantity(product)"
-                                            class="btn btn-sm btn-plus rounded-circle bg-light border"
-                                        >
-                                            <i class="fa fa-plus"></i>
-                                        </button>
-                                    </div>
+                            <td class="product-price">
+                                <p>$ {{ product.price }}</p>
+                            </td>
+                            <td class="product-quantity">
+                                <div class="quantity-control">
+                                    <button @click="decQuantity(product)" class="quantity-btn">
+                                        <i class="fa fa-minus"></i>
+                                    </button>
+                                    <input type="text" class="quantity-input" v-model="product.quantity" readonly />
+                                    <button @click="incQuantity(product)" class="quantity-btn">
+                                        <i class="fa fa-plus"></i>
+                                    </button>
                                 </div>
                             </td>
-                            <!-- 單品小計 -->
-                            <td>
-                                <p class="mb-0 mt-4">$ {{ product.price * product.quantity }}</p>
+                            <td class="product-subtotal">
+                                <p>$ {{ product.price * product.quantity }}</p>
                             </td>
-                            <td>
-                                <p class="mb-0 mt-4">
-                                    {{ product.unitQuantity * product.quantity }} {{ product.unit }}
-                                </p>
+                            <td class="product-total-unit">
+                                <p>{{ product.unitQuantity * product.quantity }} {{ product.unit }}</p>
                             </td>
-                            <td>
-                                <button
-                                    @click="removeFromCart(product)"
-                                    class="btn btn-md rounded-circle bg-light border mt-4"
-                                >
-                                    <i class="fa fa-times text-danger"></i>
+                            <td class="product-remove">
+                                <button @click="removeFromCart(product)" class="remove-btn">
+                                    <i class="fa fa-times"></i>
                                 </button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <!-- <div class="mt-5">
-                    <input type="text" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code">
-                    <button class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="button">Apply Coupon</button>
-                </div> -->
-            <div class="row g-4 justify-content-end">
-                <div class="col-8"></div>
-                <div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
-                    <div class="bg-light rounded">
-                        <div class="p-4">
-                            <h1 class="display-6 mb-4">總價</h1>
-                            <div class="d-flex justify-content-between mb-4">
-                                <h5 class="mb-0 me-4">小計:</h5>
-                                <p class="mb-0">${{ totalPrice }}</p>
-                            </div>
-                            <!-- <div class="d-flex justify-content-between">
-                                    <h5 class="mb-0 me-4">Shipping</h5>
-                                    <div class="">
-                                        <p class="mb-0">Flat rate: $3.00</p>
-                                    </div>
-                                </div>
-                                <p class="mb-0 text-end">Shipping to Ukraine.</p> -->
-                        </div>
-                        <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
-                            <h5 class="mb-0 ps-4 me-4">總計:</h5>
-                            <p class="mb-0 pe-4">${{ totalPrice }}</p>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <!-- 移除所有商品按鈕 -->
-                            <button
-                                class="btn border-secondary rounded-pill px-4 py-3 text-uppercase ms-7 mb-3"
-                                type="button"
-                                @click="clearAllCart"
-                                style="color: #f4b0a5"
-                            >
-                                移除所有商品
-                            </button>
-                            <button
-                                class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase ms-3 mb-3"
-                                type="button"
-                                @click="goToCheckout"
-                            >
-                                結帳
-                            </button>
-                        </div>
+
+            <div class="cart-summary">
+                <div class="summary-content">
+                    <h2>購物車總結</h2>
+                    <div class="summary-row">
+                        <span>小計:</span>
+                        <span>${{ totalPrice }}</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>總計:</span>
+                        <span>${{ totalPrice }}</span>
+                    </div>
+                    <div class="summary-actions">
+                        <button class="clear-cart-btn" @click="clearAllCart">移除所有商品</button>
+                        <button class="checkout-btn" @click="goToCheckout">前往結帳</button>
                     </div>
                 </div>
             </div>
@@ -435,6 +380,9 @@ onBeforeUnmount(() => {
 @import '@/assets/css/StoreStyle.css';
 
 /* header本人 */
+* {
+    margin: 0;
+}
 .header {
     position: relative;
     overflow: hidden;
@@ -486,5 +434,199 @@ onBeforeUnmount(() => {
     50% {
         transform: scale(1.2) translateY(-250px);
     }
+}
+
+/* 新增的表格相關樣式 */
+.cart-table-container {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
+    overflow: hidden;
+}
+
+.custom-table {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.custom-table th {
+    background-color: #f8f9fa;
+    color: #666;
+    font-weight: 600;
+    text-align: center;
+    padding: 15px;
+    border-bottom: 2px solid #eee;
+}
+
+.custom-table td {
+    vertical-align: middle;
+    text-align: center;
+    padding: 20px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.product-image {
+    width: 120px;
+}
+
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.product-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product-img:hover {
+    transform: scale(1.1);
+}
+
+.product-name p {
+    margin: 0;
+    font-weight: 500;
+    color: #333;
+}
+.product-remove {
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.quantity-btn {
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quantity-btn:hover {
+    background: #e9ecef;
+}
+
+.quantity-input {
+    width: 50px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px;
+}
+
+.remove-btn {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.remove-btn:hover {
+    background: #dc3545;
+    border-color: #dc3545;
+}
+
+.remove-btn:hover i {
+    color: white;
+}
+
+.remove-btn i {
+    color: #dc3545;
+    transition: color 0.3s ease;
+}
+
+/* 購物車總結樣式 */
+.cart-summary {
+    width: 40%;
+    margin-left: auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+    padding: 20px;
+}
+
+.summary-content {
+    max-width: 500px;
+    margin-left: auto;
+}
+
+.summary-content h2 {
+    color: #333;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #eee;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 1.1rem;
+}
+
+.summary-row.total {
+    border-top: 2px solid #eee;
+    margin-top: 10px;
+    padding-top: 20px;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.summary-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.clear-cart-btn,
+.checkout-btn {
+    padding: 12px 25px;
+    border-radius: 25px;
+    border: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.clear-cart-btn {
+    background: #f8f9fa;
+    color: #dc3545;
+    border: 1px solid #dc3545;
+}
+
+.clear-cart-btn:hover {
+    background: #dc3545;
+    color: white;
+}
+
+.checkout-btn {
+    background: #94ccc3;
+    color: white;
+}
+
+.checkout-btn:hover {
+    opacity: 0.8;
 }
 </style>
