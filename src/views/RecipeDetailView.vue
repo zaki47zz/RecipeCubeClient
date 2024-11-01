@@ -29,7 +29,7 @@ const isChecked = (ingredientId) => {
 // 檢查 `selectedRecipe` 的初始值
 // console.log('selectedRecipe 初始值:', recipeStore.selectedRecipe);
 
-onMounted(async() => {
+onMounted(async () => {
     await recipeStore.saveSelectedRecipe();
 });
 // 計算從 recipeStore 中取得的選擇的食譜
@@ -51,7 +51,7 @@ const recipeIngredients = computed(() => {
                 requiredQuantity,
                 remainingQuantity: parseFloat(inventory.quantity) || 0, // 將庫存中的數量轉為數值
                 unit,
-                expiryDate
+                expiryDate,
             };
         });
     } else {
@@ -191,11 +191,10 @@ const startCooking = async () => {
             icon: 'error',
             confirmButtonText: '確定',
         }).then(() => {
-        // 清除標識以避免影響後續的操作
-        localStorage.removeItem('source');
+            // 清除標識以避免影響後續的操作
+            localStorage.removeItem('source');
         });
     }
-
 };
 </script>
 
@@ -374,7 +373,7 @@ const startCooking = async () => {
     top: 0;
     left: 0;
     transform: translateZ(0) scale(1, 1);
-    background: #1b2030 url('src/assets/img/ForBackground/bg-header-recipe.jpg') 50% 0 no-repeat;
+    background: #1b2030 url('src/assets/img/ForBackground/bg-header.jpg') 50% 0 no-repeat;
     background-size: cover;
     background-attachment: fixed;
     animation: grow 180s linear 10ms infinite;

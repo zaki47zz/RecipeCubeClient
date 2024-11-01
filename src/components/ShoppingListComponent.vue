@@ -173,7 +173,6 @@ const addAllToCart = () => {
 
 <style lang="css" scoped>
 @import '@/assets/css/StoreStyle.css';
-@import '@/assets/css/StoreBootstrap.min.css';
 
 .add-all-button {
     display: block;
