@@ -19,6 +19,8 @@ export const useAuthStore = defineStore('auth', () => {
     const userData = ref(JSON.parse(localStorage.getItem('UserData')) || null); // 初始使用者資料
     const router = useRouter();
     const loginMessage = ref('');
+    // 客服email
+    const Contact = 'shipumofangkefu@gmail.com';
     const checkTokenExpiry = () => {
         const currentTime = Math.floor(Date.now() / 1000) //取的以秒為單位的目前時間
         if (userData.value?.Exp && userData.value.Exp < currentTime) {
@@ -109,6 +111,7 @@ export const useAuthStore = defineStore('auth', () => {
         token,
         userData,
         loginMessage,
+        Contact,
         login,
         checkTokenExpiry,
         logout,

@@ -154,7 +154,7 @@ const handlePreDelete = (ingredientId) => {
 const API_URL_Ingredients = `${import.meta.env.VITE_API_BASEURL
     }/Ingredients`;
 
-// 在組件載入時執行 API 呼叫
+// 在組件載入時執行 API 呼叫取出食材名稱
 onMounted(async () => {
     try {
         const response = await fetch(API_URL_Ingredients);
@@ -173,7 +173,7 @@ onMounted(async () => {
     }
 });
 
-// 監聽分類選擇，動態更新食材清單
+// 取出食材名稱
 const filterIngredientsByCategory = () => {
     if (selectedCategory.value) {
         filteredIngredients.value = ingredients.value.filter(
@@ -183,13 +183,14 @@ const filterIngredientsByCategory = () => {
         filteredIngredients.value = [];
     }
 };
+
+// 取值 (增加群組)
 const addFoot = ref({
     "user_Id": "",
     "ingredient_Id": 0
 })
-
+// 溝通API (增加食材)
 const API_URL_IngredientsAdd = ref('');
-
 const preferIngredientModal = (prefer) => {
     foodtype.value = '偏好食材';
     API_URL_IngredientsAdd.value = `${import.meta.env.VITE_API_BASEURL}/UserIngredients/PreferedIngredientsAdd`;
@@ -197,7 +198,6 @@ const preferIngredientModal = (prefer) => {
     filteredIngredients.value = ""; // 選取分類後過濾的食材
     selectedIngredientId.value = ""; // 儲存選擇的食材 ID
 }
-
 const exclusiveIngredientModal = (exclusive) => {
     foodtype.value = '不可食用食材';
     API_URL_IngredientsAdd.value = `${import.meta.env.VITE_API_BASEURL}/UserIngredients/ExclusiveIngredientsAdd`;
@@ -205,8 +205,6 @@ const exclusiveIngredientModal = (exclusive) => {
     filteredIngredients.value = ""; // 選取分類後過濾的食材
     selectedIngredientId.value = ""; // 儲存選擇的食材 ID
 }
-
-
 const sendAddIngredientModal = async () => {
     try {
         addFoot.value.user_Id = storedUserData?.UserId;
@@ -251,15 +249,15 @@ const sendAddIngredientModal = async () => {
 };
 
 
+// 取值 (建立群組)
 const groupName = ref(storedUserData?.UserName + "的群組");
 const CreateGroup = ref({
     "group_name": groupName.value,
     "group_Admin_Id": storedUserData?.UserId
 })
-
+// 溝通API (建立群組)
 const API_URL_CreateGroup = `${import.meta.env.VITE_API_BASEURL
     }/UserGroups/CreateGroup`;
-
 const sendCreateGroup = async () => {
     try {
         const response = await fetch(API_URL_CreateGroup, {
@@ -278,16 +276,14 @@ const sendCreateGroup = async () => {
     }
 };
 
+// 取值 (更換群組)
 const changeGroup = ref({
     "change_user_Id": storedUserData?.UserId,
     "change_Group_Id": storedUserData?.GroupId,
 })
-
-
-
+// 溝通API (更換群組)
 const API_URL_ChangeGroup = `${import.meta.env.VITE_API_BASEURL
     }/Users/changeGroup`;
-
 const sendchangeGroup = async () => {
     try {
         const response = await fetch(API_URL_ChangeGroup, {
@@ -362,7 +358,7 @@ const sendchangeGroup = async () => {
                     <button class="btn bg-gradient-info w-50 mt-4 mb-0" type="submit">確認修改</button>
                 </form>
             </div>
-
+            <!-- 飲食偏好區塊內容 -->
             <div v-else-if="activeIndex === 1">
                 <p><strong>偏好食材:</strong></p>
                 <div>
@@ -390,6 +386,7 @@ const sendchangeGroup = async () => {
                         @click="exclusiveIngredientModal('exclusive')">+</button>
                 </div>
             </div>
+            <!-- 群組區塊內容 -->
             <div v-else-if="activeIndex === 2">
                 <p><strong>群組:</strong> {{ storedUserData?.GroupId }}</p>
                 <button class="btn btn-outline-primary m-1" data-bs-toggle="modal"
@@ -400,6 +397,7 @@ const sendchangeGroup = async () => {
             </div>
         </div>
     </div>
+    <!-- 食材選擇 -->
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
