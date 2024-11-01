@@ -1,114 +1,24 @@
 <script setup>
 import { ref } from 'vue';
+import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 
-const decodeJWT = (token) => {
-    // 拆分 token 為三部分，取出 payload
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    // Base64 解碼並解析 JSON
-    const jsonPayload = decodeURIComponent(
-        atob(base64)
-            .split('')
-            .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-            .join('')
-    );
-    return JSON.parse(jsonPayload); // 解析為 JavaScript 物件
-};
+const authStore = useAuthStore();
+const router = useRouter();
 
-const router = useRouter(); // 創建 router 實例
-const API_URL = `${import.meta.env.VITE_API_BASEURL}/Users/SignIn`;
 const user = ref({
     // 後續記得帳號功能，可以在按下記住密碼button後，將帳號密碼寫入localStorage，登入時讀取localStorage帳密，在tokin到期時一起清除
     email: 'user18@example.com',
     password: 'Password123!',
 });
-const loginmessage = ref('');
-const send = async () => {
-    const response = await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify(user.value),
-        headers: { 'Content-Type': 'application/json' },
-    });
-
-    const datas = await response.json();
-    if (response.ok) {
-        if (datas.token) {
-            localStorage.setItem('token', datas.token); 
-            try {
-                const decoded = decodeJWT(datas.token); // 手動解碼 JWT
-                if (decoded.certserialnumber) {
-                    const UserData = {
-                        UserId: decoded.certserialnumber,
-                        Email: decoded.email,
-                        UserName: decoded.unique_name,
-                        Phone: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/mobilephone'],
-                        GroupId: decoded.groupsid,
-                        ExclusiveChecked: decoded.ExclusiveChecked,
-                        PreferredChecked: decoded.PreferredChecked,
-                        Exp: decoded.exp, // JWT 過期時間
-                    };
-                    localStorage.setItem('UserId', UserData.UserId);
-                    const UserId = localStorage.getItem('UserId');
-
-                    localStorage.setItem('GroupId', UserData.GroupId);
-                    const GroupId = localStorage.getItem('GroupId');
-
-                    localStorage.setItem('UserData', JSON.stringify(UserData));
-                   
-                    // 根據 ExclusiveChecked 呼叫 API
-                    if (UserData.ExclusiveChecked) {
-                        try {
-                            const exclusiveIngredientsResponse = await fetch(`${import.meta.env.VITE_API_BASEURL}/UserIngredients/ExclusiveIngredientsName?User_Id=${UserData.UserId}`);
-                            const exclusiveIngredientsGet = await exclusiveIngredientsResponse.json();
-
-                            if (exclusiveIngredientsResponse.ok && exclusiveIngredientsGet.exclusiveIngredients.length > 0) {
-                                const exclusiveIngredientsFormatted = exclusiveIngredientsGet.exclusiveIngredients
-                                    .map(ingredient => `${ingredient.exclusiveIngredientId},"${ingredient.exclusiveIngredientName}"`)
-                                    .join('\n');
-                                localStorage.setItem('ExclusiveIngredients', exclusiveIngredientsFormatted);
-                            }
-                        } catch (error) {
-                            console.error('沒有不可食用食材:', error);
-                        }
-                    }
-
-                    // 根據 PreferredChecked 呼叫 API
-                    if (UserData.PreferredChecked) {
-                        try {
-                            const preferredIngredientsResponse = await fetch(`${import.meta.env.VITE_API_BASEURL}/UserIngredients/PreferedIngredientsName?User_Id=${UserData.UserId}`);
-                            const preferredIngredientsGet = await preferredIngredientsResponse.json();
-
-                            if (preferredIngredientsResponse.ok && preferredIngredientsGet.preferredIngredients.length > 0) {
-                                const preferIngredientsFormatted = preferredIngredientsGet.preferredIngredients
-                                    .map(ingredient => `${ingredient.preferIngredientId},"${ingredient.preferIngredientName}"`)
-                                    .join('\n');
-                                localStorage.setItem('PreferIngredients', preferIngredientsFormatted);
-                            }
-                        } catch (error) {
-                            console.error('沒有偏好食材時出錯:', error);
-                        }
-                    }
-                } else {
-                    console.error('找不到 certserialnumber');
-                }
-            } catch (error) {
-                console.error('解碼 JWT 失敗', error);
-            }
-            alert(datas.message);
-            return true; // 表示登入成功
-        }
-    } else {
-        loginmessage.value = datas.message; // 顯示錯誤訊息
-        return false; // 表示登入失敗
-    }
-};
 
 const handleLoginClick = async () => {
-    const loginSuccess = await send(); // 先發送請求
+    const loginSuccess = await authStore.login(user.value.email,user.value.password); // 先發送請求
     if (loginSuccess) {
-        // 只有在登入成功時才刷新頁面並跳轉到 "/"
-        location.assign('/'); // 刷新頁面並跳轉到 "/"
+        authStore.userData.UserName
+        authStore.userData.UserName
+        console.log(authStore.checkTokenExpiry);
+        router.push('/'); // 使用 router 進行導航，不需要刷新頁面
     }
 };
 </script>
@@ -134,7 +44,7 @@ const handleLoginClick = async () => {
                             id="password" value="" placeholder="密碼" required />
                         <label for="password" class="form-label">密碼</label>
                     </div>
-                    <span class="text-danger text-center">{{ loginmessage }}</span>
+                    <span class="text-danger text-center">{{ authStore.loginMessage }}</span>
                     <!-- <div class="form-check form-switch">
                         <input class="form-check-input" />
                         <label class="form-check-label">記住密碼</label>
