@@ -442,10 +442,6 @@ const sendchangeGroup = async () => {
             </div>
         </div>
     </div>
-    <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-        Launch demo modal
-    </button>
     <!-- 創建群組 Modal -->
     <div class="modal fade" id="CreateGroupModal" tabindex="-1" aria-labelledby="CreateGroupModalLabel"
         aria-hidden="true">

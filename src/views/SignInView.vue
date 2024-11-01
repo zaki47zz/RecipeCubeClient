@@ -1,7 +1,21 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import VueJwtDecode from 'vue-jwt-decode'; // 引入 jwt-decode 函式庫
+
+const decodeJWT = (token) => {
+    // 拆分 token 為三部分，取出 payload
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    // Base64 解碼並解析 JSON
+    const jsonPayload = decodeURIComponent(
+        atob(base64)
+            .split('')
+            .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+            .join('')
+    );
+    return JSON.parse(jsonPayload); // 解析為 JavaScript 物件
+};
+
 const router = useRouter(); // 創建 router 實例
 const API_URL = `${import.meta.env.VITE_API_BASEURL}/Users/SignIn`;
 const user = ref({
@@ -19,35 +33,21 @@ const send = async () => {
 
     const datas = await response.json();
     if (response.ok) {
-        const originaltoken = datas.token; //原始JWT
-        console.log('原始jwt', originaltoken);
-        const decoded = VueJwtDecode.decode(originaltoken);
-        console.log('解碼後jwt', decoded);
-        if (originaltoken) {
-            localStorage.setItem('token', originaltoken); // 儲存 JWT
-            /*  解析JWT 取得並將UserId寫入localStorage.getItem('UserId')
-                使用方法 const UserId = localStorage.getItem('UserId');
-            */
+        if (datas.token) {
+            localStorage.setItem('token', datas.token); 
             try {
-                const decoded = VueJwtDecode.decode(originaltoken); // 使用 VueJwtDecode 解碼 JWT
-                console.log(decoded);
+                const decoded = decodeJWT(datas.token); // 手動解碼 JWT
                 if (decoded.certserialnumber) {
-                    // console.log(decoded.unique_name);
-                    // localStorage.setItem('UserId', decoded.certserialnumber);  // 存入登入用戶的 ID
-                    // localStorage.setItem('UserName', username);  // 存入登入用戶的 UserName
-                    // console.log(username);
                     const UserData = {
                         UserId: decoded.certserialnumber,
                         Email: decoded.email,
-                        UserName: decodeURIComponent(escape(decoded.unique_name)),
+                        UserName: decoded.unique_name,
                         Phone: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/mobilephone'],
                         GroupId: decoded.groupsid,
                         ExclusiveChecked: decoded.ExclusiveChecked,
                         PreferredChecked: decoded.PreferredChecked,
                         Exp: decoded.exp, // JWT 過期時間
-                        // Email: decoded.email
                     };
-
                     localStorage.setItem('UserId', UserData.UserId);
                     const UserId = localStorage.getItem('UserId');
 
@@ -55,9 +55,7 @@ const send = async () => {
                     const GroupId = localStorage.getItem('GroupId');
 
                     localStorage.setItem('UserData', JSON.stringify(UserData));
-                    // console.log("已存入的使用者資料:", UserData);
-                    // console.log("UserId:", UserId);
-
+                   
                     // 根據 ExclusiveChecked 呼叫 API
                     if (UserData.ExclusiveChecked) {
                         try {
@@ -71,7 +69,7 @@ const send = async () => {
                                 localStorage.setItem('ExclusiveIngredients', exclusiveIngredientsFormatted);
                             }
                         } catch (error) {
-                            console.error('獲取不可食用食材時出錯:', error);
+                            console.error('沒有不可食用食材:', error);
                         }
                     }
 
@@ -88,12 +86,9 @@ const send = async () => {
                                 localStorage.setItem('PreferIngredients', preferIngredientsFormatted);
                             }
                         } catch (error) {
-                            console.error('獲取偏好食材時出錯:', error);
+                            console.error('沒有偏好食材時出錯:', error);
                         }
                     }
-
-
-
                 } else {
                     console.error('找不到 certserialnumber');
                 }
