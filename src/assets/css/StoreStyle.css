@@ -2,7 +2,7 @@
 
 .floating-icon {
     position: fixed;
-    bottom: 110px;
+    bottom: 50px;
     right: 30px;
     background-color: #56c5a9; /* 背景顏色 */
     border-radius: 15px; /* 圓角 */
@@ -23,7 +23,7 @@
 
 .floating-icon-cart {
     position: fixed;
-    bottom: 170px;
+    bottom: 110px;
     right: 30px;
     background-color: #56c5a9; /* 背景顏色 */
     border-radius: 15px; /* 圓角 */
@@ -45,9 +45,9 @@
 
 .floating-icon-side-cart {
     position: fixed;
-    bottom: 290px;
+    bottom: 230px;
     right: 30px;
-    background-color: #56c5a9; /* 背景顏色 */
+    background-color: #f4b0a5; /* 背景顏色 */
     border-radius: 15px; /* 圓角 */
     width: 45px; /* 控制圖標的寬度 */
     height: 45px; /* 控制圖標的高度 */
@@ -68,7 +68,7 @@
 
 .floating-icon-order {
     position: fixed;
-    bottom: 230px;
+    bottom: 170px;
     right: 30px;
     background-color: #56c5a9; /* 背景顏色 */
     border-radius: 15px; /* 圓角 */
@@ -91,7 +91,7 @@
 
 .floating-icon-shoppingList {
     position: fixed;
-    bottom: 410px;
+    bottom: 350px;
     right: 30px;
     background-color: #f4b0a5; /* 背景顏色 */
     border-radius: 15px; /* 圓角 */
@@ -114,7 +114,7 @@
 
 .floating-icon-myCoupon {
     position: fixed;
-    bottom: 350px;
+    bottom: 290px;
     right: 30px;
     background-color: #f4b0a5; /* 背景顏色 */
     border-radius: 15px; /* 圓角 */
@@ -137,7 +137,7 @@
 
 .floating-icon-bot {
     position: fixed;
-    bottom: 470px;
+    bottom: 410px;
     right: 30px;
     background-color: #f4b0a5; /* 背景顏色 */
     border-radius: 15px; /* 圓角 */
@@ -155,7 +155,7 @@
 }
 
 .floating-icon-bot:hover {
-    background-color: #b2d1d3; /* 懸停時變色 */
+    background-color: #ec8404; /* 懸停時變色 */
 }
 
 /* 右側懸浮storeIcon products End */
@@ -172,23 +172,6 @@
     transition: opacity 0.8s ease-out, visibility 0s linear 0s;
     visibility: visible;
     opacity: 1;
-}
-
-.back-to-top {
-    color: white;
-    position: fixed;
-    right: 30px;
-    bottom: 30px;
-    display: flex;
-    width: 45px;
-    height: 45px;
-    align-items: center;
-    justify-content: center;
-    z-index: 900;
-}
-
-.back-to-top:hover {
-    background-color: #ec8404; /* 懸停時變色 */
 }
 /*** Spinner End ***/
 

@@ -494,6 +494,7 @@ onBeforeUnmount(() => {
     color: #333;
 }
 .product-remove {
+    transform: translate(28%);
 }
 
 .quantity-control {

@@ -209,7 +209,7 @@ window.windowCartComponent = () => {
         </el-drawer>
 
         <!-- 開啟購物車按鈕 -->
-        <button @click="openCartSidebar" class="floating-icon-side-cart">
+        <button @click="openCartSidebar" class="floating-icon-side-cart" id="button-sideBar-Cart">
             <span class="cart-badge" v-show="cartLength > 0">{{ cartLength }}</span>
             <i class="fa-solid fa-list-ul"></i>
         </button>

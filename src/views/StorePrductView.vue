@@ -567,12 +567,6 @@ const swiperProducts = computed(() => {
                 </div>
             </div>
         </div>
-        <!-- Fruits Shop End-->
-
-        <!-- Back to Top -->
-        <a href="#" class="btn btn-primary border-3 border-primary rounded-circle back-to-top"
-            ><i class="fa fa-arrow-up"></i
-        ></a>
     </div>
 </template>
 
