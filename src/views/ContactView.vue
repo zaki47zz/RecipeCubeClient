@@ -1,15 +1,48 @@
 <script setup>
 import { ref } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+
+const authStore = useAuthStore();
 const contactMessage = ref({
-    name: '',
-    phone: '',
-    email: '',
+    name: authStore.userData?.UserName,
+    phone: authStore.userData?.Phone,
+    email: authStore.userData?.Email,
+    title: '',
     message: '',
 });
+
+const API_URL = `${import.meta.env.VITE_API_BASEURL}/Gmail/send`;
+const send = async () => {
+    const formattedMessage = `
+        姓名: ${contactMessage.value.name}
+        聯絡電話: ${contactMessage.value.phone}
+        email: ${contactMessage.value.email}
+        主旨: ${contactMessage.value.title}
+        訊息: ${contactMessage.value.message}
+    `;
+    const emailSend = ref({
+        toName: "系統",
+        toEmail: authStore.Contact,
+        title: "聯絡我們",
+        body: formattedMessage.trim(),
+    });
+    const response = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(emailSend.value), // 將 AccountSettings 轉為 JSON 格式
+        headers: { 'Content-Type': 'application/json' },
+    });
+    console.log("傳送內容",emailSend.value);
+    if (response.ok) {
+        alert('傳送成功！'); // 顯示成功訊息
+    } else {
+        alert('傳送失敗'); // 顯示錯誤訊息
+    }
+};
+
 </script>
 
 <template>
-    <section>
+        <section>
         <div class="container-fluid py-0">
             <div class="contact-section rounded-3">
                 <div class="contact-box">
@@ -88,7 +121,7 @@ const contactMessage = ref({
                                 <div class="mb-3">
                                     <label for="title" class="m-0 p-0 fs-6 text-black">主旨</label>
                                     <input
-                                        v-model="contactMessage.email"
+                                        v-model="contactMessage.title"
                                         name="title"
                                         type="text"
                                         placeholder="請輸入您的主旨"
@@ -105,7 +138,7 @@ const contactMessage = ref({
                                     >
                                     </textarea>
                                 </div>
-                                <el-button type="warning" round>送出</el-button>
+                                <el-button type="warning" @click="send" round>送出</el-button>
                             </div>
                         </div>
                     </div>
