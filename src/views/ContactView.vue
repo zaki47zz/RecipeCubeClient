@@ -4,9 +4,9 @@ import { useAuthStore } from '@/stores/auth';
 
 const authStore = useAuthStore();
 const contactMessage = ref({
-    name: authStore.userData.UserName,
-    phone: authStore.userData.Phone,
-    email: authStore.userData.Email,
+    name: authStore.userData?.UserName,
+    phone: authStore.userData?.Phone,
+    email: authStore.userData?.Email,
     title: '',
     message: '',
 });
