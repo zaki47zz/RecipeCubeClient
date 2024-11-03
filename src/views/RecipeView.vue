@@ -23,7 +23,9 @@ const currentPage = ref(1);
 const pageSize = ref(8);
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
-
+// 需要推薦的食譜數據
+const recommendedRecipe = ref(null);
+const isRandomRecommend = ref(false); // 控制是否顯示重新推薦按鈕
 // 使用fetch獲取數據 (這段寫在recipeStore了)
 
 // 在組件加載後獲取數據
@@ -35,6 +37,40 @@ onMounted(async () => {
 const getRecipeImageUrl = (fileName) => {
     return `${BaseUrlWithoutApi}/images/recipe/${fileName}`;
 };
+
+// 當用戶點擊“推薦我食譜！”按鈕時，調用 API
+const recommendRecipe = async () => {
+    try {
+        const response = await fetch(`${BaseURL}/RecommendRecipe/RandomRecommend`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('無法獲取推薦食譜');
+        }
+
+        recommendedRecipe.value = await response.json();
+        recipeStore.selectRecipe(recommendedRecipe.value); // 使用 Pinia 的 store 設定選中的食譜
+        isRandomRecommend.value = true; // 顯示重新推薦按鈕
+        recipeStore.dialogVisible = true; // 打開對話框以顯示推薦食譜
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: '推薦失敗',
+            text: '無法獲取推薦食譜，請稍後重試',
+        });
+    }
+};
+
+// 當用戶點擊 "重新隨機推薦" 時
+const reRecommendRecipe = async () => {
+    await recommendRecipe(); // 調用推薦函數重新獲取推薦食譜
+    onDialogOpened();
+};
+
 const resetActiveStep = ref(false);
 // Create a ref for the scrollable container
 const scrollContainer = ref(null);
@@ -172,7 +208,9 @@ watch(totalPages, (newTotalPages) => {
                     <div class="d-flex flex-column align-items-center">
                         <h2 class="mt-3 text-dark text-gradient">左思右想還是不知道煮什麼嗎?</h2>
                         <div class="d-flex gap-2 flex-wrap mb-5">
-                            <button class="btn btn-lg bg-gradient-success text-white fs-6">推薦我食譜!</button>
+                            <button class="btn btn-lg bg-gradient-success text-white fs-6" @click="recommendRecipe">
+                                推薦我食譜!
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -283,6 +321,7 @@ watch(totalPages, (newTotalPages) => {
             </div>
         </PerfectScrollbar>
         <span slot="footer" class="dialog-footer d-flex justify-content-center mt-3">
+            <el-button v-if="isRandomRecommend" @click="reRecommendRecipe" type="primary">重新推薦</el-button>
             <el-button @click="recipeStore.closeDialog" type="danger">關閉</el-button>
         </span>
     </el-dialog>

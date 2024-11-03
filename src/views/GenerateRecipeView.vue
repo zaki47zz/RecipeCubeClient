@@ -248,6 +248,8 @@ function useSelectedRecipe() {
     }
     // 這裡寫你需要執行的邏輯
     console.log('使用選定的食譜', recipeId);
+    // 在使用食譜時，關閉 el-dialog
+    recipeStore.dialogVisible = false;
     // 比如導航到新的頁面或者呼叫 API
     // 使用 Vue Router 導航到新的頁面
     localStorage.setItem('isFromGenerateRecipe', 'true');
