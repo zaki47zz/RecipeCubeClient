@@ -1,5 +1,4 @@
 <script setup>
-import '@/assets/js/store.js';
 import Swal from 'sweetalert2';
 import { useRouter } from 'vue-router';
 import { computed, ref, watch, onMounted, nextTick } from 'vue';
@@ -441,8 +440,7 @@ const swiperProducts = computed(() => {
                                                             <button
                                                                 v-if="selectedCategory === category.category"
                                                                 @click.stop="clearCategory"
-                                                                class="btn btn-sm ms-2 animate__animated animate__bounceIn"
-                                                                style="color: #9bc8fb; background-color: #fbeae3"
+                                                                class="cancel-button animate__animated animate__bounceIn"
                                                             >
                                                                 <i class="fa-solid fa-x"></i>
                                                             </button>
@@ -681,6 +679,26 @@ const swiperProducts = computed(() => {
     height: 250px;
     object-fit: cover;
     border-radius: 10px;
+}
+
+.cancel-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 1.25rem;
+    width: 1.25rem;
+    font-size: smaller;
+    border-radius: 50%;
+    border: 1.5px solid red;
+    color: red;
+    margin-left: 0.5rem;
+    background-color: transparent;
+}
+
+.cancel-button:hover {
+    background-color: red;
+    border: none;
+    color: white;
 }
 
 .product-info {

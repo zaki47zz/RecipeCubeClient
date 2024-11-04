@@ -52,8 +52,7 @@ body,
 import Navbar from './components/Layout/Navbar.vue';
 import Footer from './components/Layout/Footer.vue';
 import Loader from './components/Layout/Loader.vue';
-// 引入 PerfectScrollbar 組件
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+
 import { onMounted, ref, provide } from 'vue';
 import { useRouter } from 'vue-router';
 const isMobile = ref(false); // 用來判斷是否為手機裝置
