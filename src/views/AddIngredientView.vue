@@ -221,7 +221,7 @@ const addInventories = async () => {
                                     <input
                                         v-model="inventory.quantity"
                                         type="number"
-                                        class="form-control inline-control w-30"
+                                        class="form-control inline-control text-center w-30"
                                         placeholder="數量必須大於0"
                                     />
                                     {{ inventory.unit }}

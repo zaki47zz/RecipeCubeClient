@@ -1,71 +1,68 @@
 <template>
-
     <div v-if="recipe" class="recipe-detail-container">
-        <h2 class="recipe-title">{{ recipe.recipeName }}</h2>
-        <!-- <img :src="getRecipeImageUrl(recipe.photo)" :alt="recipe.recipeName" class="recipe-image" /> -->
+        <p class="recipe-title text-center">{{ recipe.recipeName }}</p>
 
         <div class="recipe-info">
             <el-descriptions title="" :column="2" border>
                 <el-descriptions-item label="用戶名稱">{{ userIdDisplay }}</el-descriptions-item>
-                <!-- <el-descriptions-item label="是否自定義">{{ recipe.isCustom ? '是' : '否' }}</el-descriptions-item> -->
                 <el-descriptions-item label="葷素限制">{{ recipe.restriction ? '素' : '葷' }}</el-descriptions-item>
                 <el-descriptions-item label="中/西式">{{ recipe.westEast ? '西式' : '中式' }}</el-descriptions-item>
                 <el-descriptions-item label="類別">{{ recipe.category }}</el-descriptions-item>
                 <el-descriptions-item label="細部類別">{{ recipe.detailedCategory }}</el-descriptions-item>
-                <el-descriptions-item label="可見性">{{ recipe.visibility ? '公開' : '私人' }}</el-descriptions-item>
+                <el-descriptions-item label="權限">{{ recipe.visibility ? '群組' : '私人' }}</el-descriptions-item>
             </el-descriptions>
-            <!-- <p><strong>描述:</strong> {{ recipe.steps }}</p> -->
 
-            <!-- <p class="mt-5"><strong>調味料:</strong> {{ recipe.seasoning }}</p> -->
-            <!-- <p><strong>狀態:</strong> {{ recipe.status ? '啟用' : '禁用' }}</p> -->
             <div class="row ingredients-seasoning-section mt-4">
-                <!-- 食材區域 -->
-                <div class="col-9 ingredients-section">
+                <div class="col-md-6 ingredients-section">
                     <h5>食材列表</h5>
-                    <div class="ingredients-container">
-                        <el-card v-for="(ingredientId, index) in recipeStore.selectedRecipe.selectedIngredients"
-                            :key="ingredientId" shadow="hover" class="ingredient-card">
-                            <div class="d-flex align-items-center">
-                                <div class="ingredient-info ms-3">
-                                    <h6>{{ recipeStore.selectedRecipe.selectedIngredientNames[index] }}</h6>
-                                    <p class="quantity-info">
-                                        <strong>數量:</strong> {{
-                                            recipeStore.selectedRecipe.ingredientQuantities[ingredientId] }}
-                                        {{ recipeStore.selectedRecipe.ingredientUnits[ingredientId] || '' }}
-                                    </p>
-                                </div>
-                            </div>
-                        </el-card>
-                    </div>
+                    <ul class="ingredients-list">
+                        <li
+                            v-for="(ingredientId, index) in recipeStore.selectedRecipe.selectedIngredients"
+                            :key="ingredientId"
+                            class="ingredient-item"
+                        >
+                            <span class="ingredient-name">
+                                {{ recipeStore.selectedRecipe.selectedIngredientNames[index] }}
+                            </span>
+                            <span class="quantity-info">
+                                {{ recipeStore.selectedRecipe.ingredientQuantities[ingredientId] }}
+                                {{ recipeStore.selectedRecipe.ingredientUnits[ingredientId] || '' }}
+                            </span>
+                        </li>
+                    </ul>
                 </div>
 
-                <!-- 調味料區域 -->
-                <div class="col-3 seasoning-section mt-4">
+                <div class="col-md-6 seasoning-section">
                     <h5>調味料</h5>
-                    <div class="seasoning-tags" style="display: flex; flex-direction: column;">
-                        <el-tag v-for="(seasoning, index) in seasoningList" :key="index" type="primary" effect="light"
-                            class="mb-2 me-3">
+                    <div class="seasoning-tags">
+                        <el-tag
+                            v-for="(seasoning, index) in seasoningList"
+                            :key="index"
+                            type="primary"
+                            effect="light"
+                            size="large"
+                            class="seasoning-tag"
+                        >
                             {{ seasoning }}
                         </el-tag>
                     </div>
                 </div>
             </div>
-            <div class="recipe-steps my-4 wide-steps-container" :style="{ height: dynamicHeight, maxWidth: '600px' }">
-                <!-- 使用 el-steps 顯示步驟 -->
+
+            <div class="recipe-steps my-4 wide-steps-container" :style="{ height: dynamicHeight }">
                 <h5>烹飪步驟</h5>
                 <el-steps :active="activeStep" direction="vertical">
-                    <el-step v-for="(step, index) in recipeSteps" :key="index" :title="step"
-                        @click="incrementStep(index)"></el-step>
+                    <el-step
+                        v-for="(step, index) in recipeSteps"
+                        :key="index"
+                        :title="step"
+                        @click="incrementStep(index)"
+                    ></el-step>
                 </el-steps>
             </div>
         </div>
     </div>
-
-
-
 </template>
-
-
 
 <script setup>
 import { watch, ref, computed } from 'vue';
@@ -76,7 +73,9 @@ const recipeStore = useRecipeStore();
 let activeStep = ref(1);
 // 計算顯示的用戶 ID
 const userIdDisplay = computed(() => {
-    return recipeStore.selectedRecipe && recipeStore.selectedRecipe.userId === '0' ? '系統預設' : recipeStore.selectedRecipe?.userId;
+    return recipeStore.selectedRecipe && recipeStore.selectedRecipe.userId === '0'
+        ? '系統預設'
+        : recipeStore.selectedRecipe?.userId;
 });
 const props = defineProps({
     recipe: {
@@ -103,15 +102,13 @@ const getRecipeImageUrl = (fileName) => {
     return `${BaseUrlWithoutApi}/images/recipe/${fileName || 'default_image.jpg'}`;
 };
 
-
-
 // 將步驟文字分割為數組，使用中文句號 "。" 作為分隔符，並移除開頭的數字編號
 const recipeSteps = computed(() => {
     if (recipeStore.selectedRecipe?.steps) {
         return recipeStore.selectedRecipe.steps
-            .split('。')  // 按中文句號 "。" 分割步驟
-            .map(step => step.replace(/^\d+\.\s*/, '').trim())  // 移除每個步驟前面的 "1. "、"2. " 等編號
-            .filter(step => step !== '');  // 過濾掉空白步驟
+            .split('。') // 按中文句號 "。" 分割步驟
+            .map((step) => step.replace(/^\d+\.\s*/, '').trim()) // 移除每個步驟前面的 "1. "、"2. " 等編號
+            .filter((step) => step !== ''); // 過濾掉空白步驟
     }
     return [];
 });
@@ -132,7 +129,7 @@ const incrementStep = (index) => {
 // 將調味料字符串分割為列表
 const seasoningList = computed(() => {
     if (props.recipe?.seasoning) {
-        return props.recipe.seasoning.split(',').map(item => item.trim());
+        return props.recipe.seasoning.split(',').map((item) => item.trim());
     }
     return [];
 });
@@ -141,88 +138,96 @@ const seasoningList = computed(() => {
 <style scoped>
 .recipe-detail-container {
     padding: 20px;
-    border: 1px solid #ccc;
     border-radius: 10px;
-    background-color: #f9f9f9;
+    background-color: #ffffff;
 }
 
 .recipe-title {
-    font-size: 24px;
+    font-size: 30px;
+    font-weight: 600;
     margin-bottom: 15px;
+    color: black;
 }
 
-.recipe-image {
-    width: 100%;
-    max-height: 300px;
-    object-fit: cover;
-    border-radius: 10px;
-    margin-bottom: 15px;
-}
-
-.recipe-info p {
-    margin: 5px 0;
-}
-
-.ingredients-section {
+.recipe-info {
     margin-top: 20px;
 }
 
+/* 食材列表樣式 */
+.ingredients-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 80%; /* 控制列表寬度 */
+    max-width: 400px; /* 設置最大寬度 */
+}
+
 .ingredient-item {
-    margin-bottom: 10px;
-}
-
-.ingredients-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    /* 使用網格佈局，每格最小150px */
-    gap: 12px;
-    /* 卡片之間的間距 */
-}
-
-.ingredient-card {
-    margin-bottom: 2px;
-    margin-right: 2px;
-    /* 縮小卡片的內邊距 */
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    text-align: center;
-    background-color: #CFD3DC;
-    /* 使用 Element Plus 的變量設置背景色 */
-    height: 100%;
-    /* 確保卡片占滿容器 */
+    padding: 8px 16px;
+    border-bottom: 1px solid #ebeef5;
+    margin: 0 auto;
 }
 
-.ingredient-image {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 50%;
+.ingredient-item:last-child {
+    border-bottom: none;
 }
 
-.ingredient-info h6 {
-    margin: 8px 0 4px 0;
-    font-size: 0.9rem;
-    /* 調整字體大小 */
-    font-weight: bold;
+.ingredient-name {
+    font-weight: 500;
+    color: #303133;
 }
 
 .quantity-info {
-    margin: 0;
-    font-size: 0.8rem;
-    color: #555;
+    color: #606266;
+    font-size: 0.95rem;
+    margin-left: 16px;
 }
 
-/* 使用 ::v-deep 來覆蓋 Element Plus 默認的樣式，使步驟文字變為黑色 */
-:v-deep .el-step__title {
-    color: #606266 !important;
-    font-weight: bold;
-
+.seasoning-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
-:v-deep .el-step__description {
-    color: #606266 !important;
+.seasoning-tag {
+    margin: 0 !important;
+    padding: 8px 16px;
+    font-size: 1rem;
+}
 
+.wide-steps-container {
+    text-align: center;
+    max-width: 800px;
+    margin: 40px auto;
+}
+
+:deep(.el-step__title) {
+    color: #303133 !important;
+    font-weight: 500;
+}
+
+:deep(.el-step__description) {
+    color: #606266 !important;
+}
+
+:deep(.el-step.is-vertical) {
+    margin-left: 0;
+}
+
+@media (max-width: 768px) {
+    .ingredients-list {
+        grid-template-columns: 1fr;
+    }
+
+    .recipe-title {
+        font-size: 24px;
+    }
+
+    .ingredient-item {
+        margin-bottom: 8px;
+    }
 }
 </style>

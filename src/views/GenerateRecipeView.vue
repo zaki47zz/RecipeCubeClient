@@ -441,6 +441,7 @@ function useSelectedRecipe() {
         width="75%"
         @close="recipeStore.closeDialog"
         center
+        class="bg-primary-subtle"
         destroy-on-close
         @opended="onDialogOpened"
     >
@@ -449,7 +450,7 @@ function useSelectedRecipe() {
                 <RecipeDetailComponent :recipe="recipeStore.selectedRecipe" v-if="recipeStore.selectedRecipe" />
             </div>
         </PerfectScrollbar>
-        <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
+        <span slot="footer" class="dialog-footer d-flex justify-content-center mt-3">
             <el-button @click="useSelectedRecipe" type="primary">使用該食譜</el-button>
             <el-button @click="recipeStore.closeDialog" type="danger">關閉</el-button>
         </span>
