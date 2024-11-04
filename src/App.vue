@@ -36,7 +36,7 @@ body,
 </style>
 
 <template>
-    <component :is="isMobile ? 'div' : 'PerfectScrollbar'" id="scroll-container" ref="scrollContainer">
+    <component :is="isMobile ? 'div' : 'PerfectScrollbar'" id="scroll-container" ref="appScrollContainer">
         <!-- <PerfectScrollbar id="scroll-container" ref="scrollContainer"> -->
         <Loader />
         <Navbar />
@@ -54,10 +54,10 @@ import Footer from './components/Layout/Footer.vue';
 import Loader from './components/Layout/Loader.vue';
 // 引入 PerfectScrollbar 組件
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, provide } from 'vue';
 import { useRouter } from 'vue-router';
 const isMobile = ref(false); // 用來判斷是否為手機裝置
-const scrollContainer = ref(null); // Ref to access PerfectScrollbar instance
+const appScrollContainer = ref(null); // Ref to access PerfectScrollbar instance
 const router = useRouter(); // Access Vue Router instance
 const checkIfMobile = () => {
     isMobile.value = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -65,10 +65,10 @@ const checkIfMobile = () => {
 // Listen for route changes and reset the scroll position to top
 onMounted(() => {
     checkIfMobile(); // 檢查裝置類型
-
+    provide('appScrollContainer', appScrollContainer);
     router.afterEach(() => {
-        if (scrollContainer.value && !isMobile.value) {
-            const psInstance = scrollContainer.value.$el;
+        if (appScrollContainer.value && !isMobile.value) {
+            const psInstance = appScrollContainer.value.$el;
             psInstance.scrollTop = 0; // 如果不是手機，重設滾動條到頂部
         }
     });
