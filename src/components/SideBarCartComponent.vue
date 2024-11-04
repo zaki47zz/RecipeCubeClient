@@ -288,6 +288,11 @@ window.windowCartComponent = () => {
     cursor: pointer;
 }
 
+.remove-button:hover {
+    background-color: red;
+    color: white;
+}
+
 .remove-button i {
     color: #dc3545;
 }
