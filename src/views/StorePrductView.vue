@@ -79,10 +79,6 @@ const loadCategories = async () => {
     console.log(BaseUrlWithoutApi);
 };
 
-// 呼叫方法
-loadProducts();
-loadCategories();
-
 // 跳轉至商品明細頁面
 const router = useRouter();
 const goToProductDetail = (id) => {
@@ -180,7 +176,8 @@ watch(totalPages, (newTotalPages) => {
 
 // 篩選功能
 
-const clickCategory = (category) => {
+const clickCategory = (category, event) => {
+    event.preventDefault(); // 阻止預設滾動行為
     currentPage.value = 1; // 篩選後重設頁碼為第一頁
     loadFilteredProducts(category);
 };
@@ -284,7 +281,7 @@ const shouldRenderSwiper = computed(() => {
 });
 
 onMounted(async () => {
-    await loadProducts(); // 等待數據加載完成
+    await Promise.all([loadProducts(), loadCategories()]);
 });
 
 const swiperProducts = computed(() => {
@@ -427,7 +424,7 @@ const swiperProducts = computed(() => {
                                                         class="d-flex justify-content-between fruite-name"
                                                         v-for="category in categories"
                                                         :key="category.category"
-                                                        @click="clickCategory(category.category)"
+                                                        @click="(event) => clickCategory(category.category, event)"
                                                     >
                                                         <a href="#"
                                                             ><i class="fas fa-apple-alt me-2"></i
