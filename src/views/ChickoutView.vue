@@ -1,8 +1,7 @@
 <script setup>
 import Swal from 'sweetalert2';
-import { ref, computed, reactive, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { ref, computed, reactive, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
-import CircularJSON from 'circular-json';
 import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
 import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import CouponComponent from '@/components/CouponComponent.vue';

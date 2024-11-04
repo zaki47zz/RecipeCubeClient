@@ -14,7 +14,6 @@
   "dependencies": {
     "animate.css": "^4.1.1",
     "circular-json": "^0.5.9",
-    "ecpay_aio_nodejs": "^1.2.2",
     "element-plus": "^2.8.6",
     "pinia": "^2.2.4",
     "soft-ui-dashboard": "^1.0.1",
