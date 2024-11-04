@@ -397,7 +397,11 @@ const ListClose = async () => {
                         <tfoot>
                             <tr>
                                 <td colspan="4" class="text-dark">
-                                    <h6 v-if="!isListExpanded" class="collapse-button" @click="isListExpanded = true">
+                                    <h6
+                                        v-if="!isListExpanded && cookingInventories.length > 10"
+                                        class="collapse-button"
+                                        @click="isListExpanded = true"
+                                    >
                                         與其他 {{ cookingInventories.length - 10 }} 個食材...
                                     </h6>
                                     <h6
@@ -451,10 +455,22 @@ const ListClose = async () => {
                             />
                         </div>
                         <div class="p-3 w-100 d-flex flex-column justify-content-start align-items-center">
-                            <h5 class="mt-3 text-center position-relative">
+                            <h5 class="mt-3 text-center">
                                 {{ recipe.recipeName }}
-                                <el-tag v-if="recipe.hasExclusive" type="danger" class="ms-2"> 包含禁忌食材 </el-tag>
-                                <el-tag v-else-if="recipe.hasPreferred" type="success" class="ms-2">
+                                <el-tag
+                                    v-if="recipe.hasExclusive"
+                                    size="large"
+                                    type="danger"
+                                    class="position-absolute top-3 end-1"
+                                >
+                                    包含禁忌食材
+                                </el-tag>
+                                <el-tag
+                                    v-else-if="recipe.hasPreferred"
+                                    type="success"
+                                    size="large"
+                                    class="position-absolute top-3 end-1"
+                                >
                                     包含偏好食材
                                 </el-tag>
                             </h5>
@@ -494,14 +510,16 @@ const ListClose = async () => {
                                 <el-tag
                                     v-if="recipe.hasExclusive"
                                     type="danger"
-                                    class="ms-2 position-absolute top-0 end-0"
+                                    size="large"
+                                    class="position-absolute top-3 end-1"
                                 >
                                     包含禁忌食材
                                 </el-tag>
                                 <el-tag
                                     v-else-if="recipe.hasPreferred"
                                     type="success"
-                                    class="ms-2 position-absolute top-0 end-0"
+                                    size="large"
+                                    class="position-absolute top-3 end-1"
                                 >
                                     包含偏好食材
                                 </el-tag>
@@ -510,7 +528,7 @@ const ListClose = async () => {
                             <div class="d-flex flex-wrap gap-2 mb-1 mx-auto">
                                 <div class="d-flex gap-2">
                                     <span class="text-secondary">#{{ recipe.restriction ? '素' : '葷' }}</span>
-                                    <span class="text-secondary">#{{ recipe.westEast ? '西式' : '中式' }}</span>
+                                    <span class="text-secondary">#{{ recipe.westEast ? '中式' : '西式' }}</span>
                                 </div>
                                 <div class="d-flex gap-2">
                                     <span class="text-secondary">#{{ recipe.category }}</span>
@@ -673,5 +691,13 @@ const ListClose = async () => {
     font-size: 0.8rem; /* 調整標籤的字體大小 */
     line-height: 1.2; /* 控制標籤的行高，減少標籤占用的垂直空間 */
     padding: 2px 6px; /* 調整標籤內部的間距 */
+}
+
+:deep(.el-tag) {
+    font-size: 0.8rem;
+    line-height: 1.2;
+    padding: 2px 6px;
+    border: none;
+    background-color: transparent;
 }
 </style>

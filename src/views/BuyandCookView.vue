@@ -211,18 +211,6 @@ const exportInventories = () => {
         <div class="container-fluid">
             <div class="row justify-content-center">
                 <div class="col-lg-3">
-                    <ElCheckbox v-model="set" name="set" id="set" class="switch-set">
-                        <span class="fs-6">
-                            套餐
-                            <span id="tooltip-wrapper-set">
-                                <i class="fa-solid fa-circle-question"></i>
-                            </span>
-                        </span>
-                    </ElCheckbox>
-                </div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-lg-3">
                     <ElCheckbox v-model="useInventory" name="inventory" id="inventory" class="switch-inventory">
                         <span class="fs-6">
                             使用庫存食材

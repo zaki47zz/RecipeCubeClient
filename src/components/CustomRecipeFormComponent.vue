@@ -316,8 +316,8 @@ const saveRecipe = async () => {
                         <div class="col-6">
                             <select class="form-select fs-6 text-center" v-model="recipeData.westEast">
                                 <option :value="null">中式/西式</option>
-                                <option :value="true">西式</option>
-                                <option :value="false">中式</option>
+                                <option :value="false">西式</option>
+                                <option :value="true">中式</option>
                             </select>
                         </div>
                         <div class="col-6">
@@ -466,7 +466,9 @@ const saveRecipe = async () => {
     cursor: pointer;
     transform: scale(1.1);
     /* 懸停時放大效果 */
-    transition: transform 0.2s, background-color 0.2s;
+    transition:
+        transform 0.2s,
+        background-color 0.2s;
     /* 添加平滑動畫 */
 }
 

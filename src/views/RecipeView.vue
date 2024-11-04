@@ -285,8 +285,8 @@ watch(totalPages, (newTotalPages) => {
                                         <div class="d-flex gap-2">
                                             <span class="badge bg-secondary" v-if="recipe.restriction">素食</span>
                                             <span class="badge bg-secondary" v-else>葷食</span>
-                                            <span class="badge bg-secondary" v-if="recipe.westEast">西式</span>
-                                            <span class="badge bg-secondary" v-else>中式</span>
+                                            <span class="badge bg-secondary" v-if="recipe.westEast">中式</span>
+                                            <span class="badge bg-secondary" v-else>西式</span>
                                             <span class="badge bg-secondary">{{ recipe.category }}</span>
                                         </div>
                                     </div>
