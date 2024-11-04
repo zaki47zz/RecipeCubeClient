@@ -38,7 +38,7 @@
                         <el-tag
                             v-for="(seasoning, index) in seasoningList"
                             :key="index"
-                            type="primary"
+                            type="success"
                             effect="light"
                             size="large"
                             class="seasoning-tag"
@@ -50,7 +50,7 @@
             </div>
 
             <div class="recipe-steps my-4 wide-steps-container" :style="{ height: dynamicHeight }">
-                <h5>烹飪步驟</h5>
+                <h5 class="mb-3">烹飪步驟</h5>
                 <el-steps :active="activeStep" direction="vertical">
                     <el-step
                         v-for="(step, index) in recipeSteps"
@@ -139,27 +139,30 @@ const seasoningList = computed(() => {
 .recipe-detail-container {
     padding: 20px;
     border-radius: 10px;
-    background-color: #ffffff;
+    background-color: #f5f5f5;
 }
 
 .recipe-title {
-    font-size: 30px;
+    font-size: 32px;
     font-weight: 600;
     margin-bottom: 15px;
-    color: black;
+    color: #333;
 }
 
 .recipe-info {
     margin-top: 20px;
+    padding-bottom: 10px;
 }
 
 /* 食材列表樣式 */
+
 .ingredients-list {
     list-style: none;
     padding: 0;
-    margin: 0;
-    width: 80%; /* 控制列表寬度 */
-    max-width: 400px; /* 設置最大寬度 */
+    margin: 0 auto;
+    width: 70%;
+    max-width: 400px;
+    font-size: 1rem;
 }
 
 .ingredient-item {
@@ -167,12 +170,13 @@ const seasoningList = computed(() => {
     justify-content: space-between;
     align-items: center;
     padding: 8px 16px;
-    border-bottom: 1px solid #ebeef5;
     margin: 0 auto;
 }
-
-.ingredient-item:last-child {
-    border-bottom: none;
+.ingredient-item:before {
+    content: '\f0da';
+    font-family: FontAwesome;
+    color: #ccc;
+    margin-right: 10px;
 }
 
 .ingredient-name {

@@ -693,7 +693,7 @@ const ListClose = async () => {
     padding: 2px 6px; /* 調整標籤內部的間距 */
 }
 
-:deep(.el-tag) {
+:deep(.card .el-tag) {
     font-size: 0.8rem;
     line-height: 1.2;
     padding: 2px 6px;
