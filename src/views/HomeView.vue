@@ -4,7 +4,6 @@ import WOW from 'wow.js';
 import 'wow.js/css/libs/animate.css';
 import { ref, onMounted, watch } from 'vue';
 import PerfectScrollbar from 'perfect-scrollbar';
-import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 
 // 用於儲存 perfect-scrollbar 實例和滾動位置
 const scrollPosition = ref(0);
