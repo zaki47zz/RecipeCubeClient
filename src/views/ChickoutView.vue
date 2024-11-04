@@ -105,7 +105,10 @@ const couponsByUserId = ref([]);
 
 const loadCouponsByUserId = async (userId) => {
     if (coupons.value && coupons.value.length > 0) {
-        couponsByUserId.value = coupons.value.filter((coupon) => coupon.userId === userId);
+        if (coupons.value)
+            couponsByUserId.value = coupons.value.filter(
+                (coupon) => coupon.userId === userId && coupon.couponStatus === 1 && coupon.usedStatus === 1
+            );
         console.log('該使用者的優惠券', couponsByUserId.value);
     } else {
         couponsByUserId.value = [];
