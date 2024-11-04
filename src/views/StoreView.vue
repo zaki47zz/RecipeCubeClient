@@ -1,6 +1,4 @@
-<script setup>
-import '@/assets/js/store.js';
-</script>
+<script setup></script>
 
 <template>
     <RouterView></RouterView>
