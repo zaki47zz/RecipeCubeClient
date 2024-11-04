@@ -24,10 +24,20 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
                 throw new Error('網路連線有異常');
             }
             const data = await response.json();
-            inventories.value = data.map((inventory) => ({
-                ...inventory,
-                synonymArray: inventory.synonym?.split(',').map((synonym) => synonym.trim()) || [],
-            }));
+
+            inventories.value = data
+                .map((inventory) => {
+                    // 檢查條件，只有符合條件的項目才會返回轉換後的對象
+                    if (inventory.userId === userId || (!inventory.visibility && inventory.userId !== userId)) {
+                        return {
+                            ...inventory,
+                            synonymArray: inventory.synonym?.split(',').map((synonym) => synonym.trim()) || [],
+                        };
+                    }
+                    return null; // 如果不符合條件，返回 null
+                })
+                .filter((inventory) => inventory !== null); // 過濾掉 null 值
+
             ingredientCategory.value = new Set(inventories.value.map((i) => i.category));
         } catch (error) {
             console.error('獲取庫存資料失敗:', error);

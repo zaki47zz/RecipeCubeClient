@@ -79,7 +79,7 @@ const handleOpen = () => {
 
             <div>
                 <el-input v-model="userMessage" placeholder="輸入您的問題..." @keyup.enter="sendMessage" class="mb-4" />
-                <el-button type="success" @click="sendMessage" style="background-color: #9bc8fb; border: none"
+                <el-button type="success" @click="sendMessage" style="background-color: #3498db; border: none"
                     >發送</el-button
                 >
             </div>

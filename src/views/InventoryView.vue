@@ -100,10 +100,7 @@ const filters = ref({
 //利用computed的監測特性來實時更改篩選庫存
 const filteredInventories = computed(() => {
     return inventories.value.filter((inventory) => {
-        //利用filter逐項遍歷每個inventory項目作篩選，利用5個Boolean來決定項目要不要顯示
-        //個人項目篩選(只能看到屬於自己或群組公開的食材)
-        const userMatch =
-            inventory.userId === currentUserId || (!inventory.visibility && inventory.userId != currentUserId);
+        //利用filter逐項遍歷每個inventory項目作篩選，利用4個Boolean來決定項目要不要顯示
         //分類篩選(用戶沒篩選或篩選符合會回傳true)
         const categoryMatch = !filters.value.category || inventory.category === filters.value.category;
         //權限篩選
@@ -127,7 +124,7 @@ const filteredInventories = computed(() => {
             );
 
         //因為filter只會傳回結果是true的項目回陣列，所以可以這樣回傳Boolean來控制
-        return userMatch && categoryMatch && visibilityMatch && expiryMatch && searchMatch;
+        return categoryMatch && visibilityMatch && expiryMatch && searchMatch;
     });
 });
 ////篩選功能結束
@@ -517,6 +514,7 @@ const exportInventories = () => {
                             />
                             <span>{{ editInventory.unit }}</span>
                         </div>
+                        <span v-if="editInventory.quantity <= 0" class="m-0 p-0 text-danger">數量不可小於或等於0</span>
                     </div>
                     <div class="mb-3">
                         <label for="expiryDate" class="m-0 p-0 fs-6">到期日</label>
@@ -544,7 +542,9 @@ const exportInventories = () => {
                 </div>
             </div>
             <span slot="footer" class="dialog-footer d-flex justify-content-center mt-3">
-                <el-button type="info" @click="saveEditedInventory">儲存</el-button>
+                <el-button v-if="editInventory.quantity > 0" type="primary" @click="saveEditedInventory"
+                    >儲存</el-button
+                >
                 <el-button type="danger" @click="isInventoryModalVisible = false">關閉</el-button>
             </span>
         </el-dialog>
@@ -666,7 +666,9 @@ const exportInventories = () => {
     height: 100%;
     display: flex;
     flex-direction: column;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
 }
 
 .card.active {
@@ -755,7 +757,9 @@ const exportInventories = () => {
 }
 
 .driver {
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px !important;
+    box-shadow:
+        rgba(0, 0, 0, 0.16) 0px 10px 36px 0px,
+        rgba(0, 0, 0, 0.06) 0px 0px 0px 1px !important;
     cursor: pointer;
 }
 
