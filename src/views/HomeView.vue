@@ -4,7 +4,6 @@ import WOW from 'wow.js';
 import 'wow.js/css/libs/animate.css';
 import { ref, onMounted, watch } from 'vue';
 import PerfectScrollbar from 'perfect-scrollbar';
-import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import { useAuthStore } from '@/stores/auth';
 const authStore = useAuthStore();
 
@@ -64,8 +63,14 @@ const updateScrollPosition = () => {
                                                 試用隨買隨煮
                                             </button></RouterLink
                                         >
-                                        <RouterLink v-if="!authStore.token || !authStore.checkTokenExpiry" :to="{ name: 'signup' }"><button class="btn btn-outline-warning">註冊會員</button></RouterLink>
-                                        <RouterLink v-else to="/store"><button class="btn btn-outline-warning">立即採購食材</button></RouterLink>
+                                        <RouterLink
+                                            v-if="!authStore.token || !authStore.checkTokenExpiry"
+                                            :to="{ name: 'signup' }"
+                                            ><button class="btn btn-outline-warning">註冊會員</button></RouterLink
+                                        >
+                                        <RouterLink v-else to="/store"
+                                            ><button class="btn btn-outline-warning">立即採購食材</button></RouterLink
+                                        >
                                     </div>
                                 </div>
                             </div>
