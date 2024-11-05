@@ -22,6 +22,9 @@ import OrderView from '@/views/OrderView.vue';
 import HomeView from '@/views/HomeView.vue';
 import RecipeDetailView from '@/views/RecipeDetailView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
+import oAuthGoogle from '@/views/oAuthGoogleView.vue';
+
+
 
 import { createRouter, createWebHistory } from 'vue-router';
 
@@ -67,6 +70,12 @@ const router = createRouter({
             path: '/signin',
             name: 'signin',
             component: SignIn,
+        },
+        {
+            // 第三方登入
+            path: '/oAuthGoogle',
+            name: 'oAuthGoogle',
+            component: oAuthGoogle,
         },
         {
             // 註冊

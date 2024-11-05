@@ -20,6 +20,9 @@ import vueSmoothScroll from 'vue-smooth-scroll';
 // 引入 animate.css
 import 'animate.css/animate.min.css';
 
+// 引入 Google oAuth Google第三方登入用
+import vue3GoogleLogin from 'vue3-google-login'
+
 const app = createApp(App);
 
 app.use(createPinia());
@@ -29,4 +32,8 @@ app.use(ElementPlus);
 app.component('EasyDataTable', Vue3EasyDataTable);
 app.use(PerfectScrollbarPlugin);
 app.use(vueSmoothScroll);
+// OAuth 2.0 用戶端 ID
+app.use(vue3GoogleLogin, {
+    clientId: '925872879369-bn925g9150fm8dlkkip5n3cfd61cb3tb.apps.googleusercontent.com'
+})
 app.mount('#app');
