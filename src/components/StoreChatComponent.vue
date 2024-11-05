@@ -16,7 +16,7 @@ onMounted(() => {
 
 const initTippy = function () {
     tippy('#button-chat-bot', {
-        content: '聯絡商店客服',
+        content: '聯絡商店智能客服',
         placement: 'right-end',
         animation: 'fade',
     });
@@ -67,7 +67,7 @@ const handleOpen = () => {
             ><i class="fa-solid fa-headset"></i
         ></el-button>
 
-        <el-dialog title="客服聊天機器人" v-model="dialogVisible" width="40%">
+        <el-dialog title="智能客服" v-model="dialogVisible" width="40%">
             <div class="chat-container">
                 <div
                     v-for="(message, index) in messages"
