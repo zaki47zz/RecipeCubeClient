@@ -303,15 +303,13 @@ const exportInventories = () => {
         <div class="container-fluid">
             <div class="row justify-content-center">
                 <div class="text-center">
-                    <h4>
-                        在下方食材列表，您可以看到您所屬群組的庫存食材，您可以進行兩種操作(這裡之後用driver.js做導覽)
-                    </h4>
+                    <h4>在下方食材列表，您可以看到您所屬群組的庫存食材，您可以進行兩種操作</h4>
                 </div>
             </div>
             <div class="row justify-content-center my-5">
                 <div class="col-lg-3">
                     <div class="d-flex gap-4 justify-content-center align-items-center">
-                        <div class="driver text-center px-3 m-1 rounded-3">
+                        <div class="driver text-center px-3 m-1 rounded-3" @click="startEditTutorial">
                             <h5><i class="fa-solid fa-box-open mt-3"></i> 管理食材</h5>
                             <p>對個別食材進行數量的修改或刪除</p>
                         </div>
@@ -319,7 +317,7 @@ const exportInventories = () => {
                 </div>
                 <div class="col-lg-3">
                     <div class="d-flex gap-4 justify-content-center align-items-center">
-                        <div class="driver text-center px-3 m-1 rounded-3">
+                        <div class="driver text-center px-3 m-1 rounded-3" @click="startCookTutorial">
                             <h5><i class="fa-solid fa-utensils mt-3"></i> 產生食譜</h5>
                             <p>選取食材讓我們為您自動生成食譜</p>
                         </div>
@@ -380,7 +378,7 @@ const exportInventories = () => {
                         <div class="tabs-header d-flex justify-content-between">
                             <h3>食材列表</h3>
                             <div>
-                                <button class="btn blur shadow fs-6 me-1" @click="showPantryDialog">
+                                <button class="btn blur shadow fs-6 me-1" id="historyButton" @click="showPantryDialog">
                                     歷史編輯紀錄
                                 </button>
                                 <button v-if="allSelect" class="btn blur shadow fs-6 me-1" @click="deselectAllCard">
@@ -760,10 +758,5 @@ const exportInventories = () => {
     box-shadow:
         rgba(0, 0, 0, 0.16) 0px 10px 36px 0px,
         rgba(0, 0, 0, 0.06) 0px 0px 0px 1px !important;
-    cursor: pointer;
-}
-
-.driver:hover {
-    transform: scale(1.05);
 }
 </style>

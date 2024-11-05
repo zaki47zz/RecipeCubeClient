@@ -1,7 +1,8 @@
 <script setup>
 import CategorySwiperComponent from '@/components/CategorySwiperComponent.vue';
 import Swal from 'sweetalert2';
-import { ref, watch, computed } from 'vue';
+import PerfectScrollbar from 'perfect-scrollbar';
+import { ref, watch, computed, onMounted } from 'vue';
 import UnitConversionComponent from '@/components/UnitConversionComponent.vue';
 import { useInventoryStore } from '@/stores/inventoryStore';
 import { usePantryStore } from '@/stores/pantryStore';
@@ -14,9 +15,18 @@ const { postPantry } = pantryStore;
 const selectedIngredients = ref([]); //用一個selectedIngredients當作子組建的同名物件供操作
 const addingInventories = ref([]); //定義要加入庫存的食材
 
+//建立一個參考來存放 perfect-scrollbar instance
+let psInstance;
+
 const isValidated = computed(() => {
     //所有食材的數量都必須大於0
     return !addingInventories.value.some((inventory) => inventory.quantity <= 0);
+});
+
+//mounted後初始化perfectScrollbar
+onMounted(() => {
+    const container = document.querySelector('#scroll-container');
+    psInstance = new PerfectScrollbar(container);
 });
 
 //利用watch監測selectedIngredients，即時更新addingInventories
@@ -166,6 +176,11 @@ const addInventories = async () => {
     } catch (error) {
         console.error('新增庫存時出錯:', error);
         swalAlert('發生錯誤，請稍後再試');
+    }
+    const container = document.querySelector('#scroll-container');
+    if (container) {
+        container.scrollTop = 0; // 將 scrollTop 設置為 0，即移動到頂部
+        psInstance.update(); // 更新 perfect-scrollbar 的視覺效果
     }
 };
 </script>
