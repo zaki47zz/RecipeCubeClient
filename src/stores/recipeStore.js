@@ -6,6 +6,8 @@ export const useRecipeStore = defineStore('recipeStore', {
         recipes: [],
         selectedRecipe: null,
         dialogVisible: false, // 新增這個狀態來控制 Dialog 是否顯示
+        editingRecipe: null, // 用於保存當前編輯的食譜
+        isEditMode: false, // 用於區分新增或編輯模式
     }),
     actions: {
         async fetchRecipes() {
@@ -57,6 +59,44 @@ export const useRecipeStore = defineStore('recipeStore', {
             if (storedRecipe) {
                 this.selectedRecipe = JSON.parse(storedRecipe);
                 // console.log(this.saveSelectedRecipe)
+            }
+        },
+        setEditMode(isEditMode) {
+            this.isEditMode = isEditMode; // 設置是否為編輯模式
+        },
+        setEditingRecipe(recipe) {
+            this.editingRecipe = recipe; // 設置當前正在編輯的食譜
+        },
+        clearEditingRecipe() {
+            this.editingRecipe = null; // 清除編輯中的食譜
+            this.isEditMode = false; // 重置編輯模式狀態
+        },
+        async saveRecipe() {
+            const BaseURL = import.meta.env.VITE_API_BASEURL;
+            const ApiURL = `${BaseURL}/Recipes`;
+            const method = this.isEditMode ? 'PUT' : 'POST'; // 根據模式確定使用 POST 或 PUT
+            const url = this.isEditMode ? `${ApiURL}/${this.editingRecipe.recipeId}` : ApiURL;
+
+            const formData = new FormData();
+            Object.entries(this.editingRecipe).forEach(([key, value]) => {
+                formData.append(key, value);
+            });
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    body: formData,
+                });
+                if (!response.ok) {
+                    throw new Error('儲存食譜失敗');
+                }
+                const data = await response.json();
+                console.log('Recipe saved successfully:', data);
+                // 更新 recipes 列表
+                await this.fetchRecipes();
+                this.clearEditingRecipe();
+            } catch (error) {
+                console.error('Error saving recipe:', error);
             }
         },
     }

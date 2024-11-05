@@ -1,14 +1,38 @@
 <script setup>
 import CustomRecipeSideBarComponent from '@/components/CustomRecipeSideBarComponent.vue';
 import CustomRecipeFormComponent from '@/components/CustomRecipeFormComponent.vue';
+import { useRouter } from 'vue-router';
+import { useRecipeStore } from '@/stores/recipeStore';
+import { storeToRefs } from 'pinia';
+import { onMounted, watchEffect } from 'vue';
+
+const router = useRouter();
+const recipeStore = useRecipeStore();
+const { editingRecipe, isEditMode } = storeToRefs(recipeStore);
+
+onMounted(() => {
+    const recipeId = router.currentRoute.value.params.id;
+    if (recipeId) {
+        isEditMode.value = true;
+        recipeStore.fetchRecipeDetail(recipeId);
+    } else {
+        isEditMode.value = false; // 新增模式
+    }
+});
+
+watchEffect(() => {
+    if (isEditMode.value) {
+        console.log('編輯模式');
+    }
+});
 </script>
 
 <template>
     <section>
         <div class="header">
             <div class="title">
-                <h1>自訂食譜</h1>
-                <h1>Custom Recipe</h1>
+                <h1>{{ isEditMode ? '編輯自訂食譜' : '自訂食譜' }}</h1>
+                <h1>{{ isEditMode ? 'Edit Custom Recipe' : 'Custom Recipe' }}</h1>
             </div>
         </div>
     </section>
