@@ -6,6 +6,9 @@ import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引
 import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import CouponComponent from '@/components/CouponComponent.vue';
 import StoreChatComponent from '@/components/StoreChatComponent.vue';
+import { Vue3Lottie } from 'vue3-lottie';
+import addToCartJson from '@/assets/lottie/cart.json';
+
 // swiper
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { EffectCoverflow, Pagination, Autoplay, Navigation } from 'swiper/modules';
@@ -17,6 +20,7 @@ import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 const swiperInstance = ref(null);
 const isDataLoaded = ref(false);
+const lottieRef = ref(null);
 
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
@@ -517,12 +521,29 @@ const swiperProducts = computed(() => {
                                                         $ {{ product.price }} 元
                                                     </p>
                                                 </div>
+                                                <!-- 加入購物車按鈕 -->
                                                 <div class="d-flex justify-content-center">
                                                     <div
                                                         @click="addToCart(product)"
-                                                        class="btn border border-secondary rounded-pill px-3 m-2 text-primary"
+                                                        class="btn border border-secondary rounded-pill d-flex align-items-center px-3 m-2 text-primary"
                                                     >
-                                                        <i class="fa fa-shopping-bag me-2 text-primary"></i> 加入購物車
+                                                        <div class="lottie-container">
+                                                            <Vue3Lottie
+                                                                ref="lottieRef"
+                                                                :animationData="addToCartJson"
+                                                                :height="120"
+                                                                :width="120"
+                                                                :loop="true"
+                                                                :auto-play="true"
+                                                                :no-margin="true"
+                                                            />
+                                                        </div>
+                                                        <span
+                                                            class="d-flex align-items-center"
+                                                            style="display: inline-block; white-space: nowrap"
+                                                        >
+                                                            加入購物車
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -724,5 +745,14 @@ const swiperProducts = computed(() => {
 
 :deep(.el-pagination.is-background .el-pager li.is-active) {
     background-color: #41b883 !important;
+}
+
+.lottie-container {
+    width: 50px; /* 設定你想要的寬度 */
+    height: 11px; /* 設定你想要的高度 */
+    display: flex; /*使容器使用 flexbox */
+    align-items: center;
+    transform: translate(-12%, -80%);
+    justify-content: center; /* 水平居中動畫 */
 }
 </style>
