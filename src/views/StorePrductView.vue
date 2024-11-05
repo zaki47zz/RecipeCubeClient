@@ -6,6 +6,7 @@ import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引
 import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import CouponComponent from '@/components/CouponComponent.vue';
 import StoreChatComponent from '@/components/StoreChatComponent.vue';
+import StoreChartComponent from '@/components/StoreChartComponent.vue';
 import { Vue3Lottie } from 'vue3-lottie';
 import addToCartJson from '@/assets/lottie/cart.json';
 
@@ -314,7 +315,8 @@ const swiperProducts = computed(() => {
     <CouponComponent />
     <!-- 引入聊天機器人 -->
     <StoreChatComponent />
-
+    <!-- 引入消費統計圖表 -->
+    <StoreChartComponent />
     <div class="p-0 m-0">
         <!-- Single Page Header start -->
         <section>
