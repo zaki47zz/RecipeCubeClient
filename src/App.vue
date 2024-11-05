@@ -37,14 +37,12 @@ body,
 
 <template>
     <component :is="isMobile ? 'div' : 'PerfectScrollbar'" id="scroll-container" ref="appScrollContainer">
-        <!-- <PerfectScrollbar id="scroll-container" ref="scrollContainer"> -->
         <Loader />
         <Navbar />
         <main class="main-content container position-relative">
             <RouterView />
             <Footer></Footer>
         </main>
-        <!-- </PerfectScrollbar> -->
     </component>
 </template>
 
