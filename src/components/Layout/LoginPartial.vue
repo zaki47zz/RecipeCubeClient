@@ -7,7 +7,7 @@ const oauthStore = useOAuthStore();
 </script>
 
 <template>
-    <template v-if="!authStore.token || !authStore.checkTokenExpiry || !oauthStore.token">
+    <template v-if="!authStore.token || !authStore.checkTokenExpiry">
         <ul class="navbar-nav ms-auto text-center">
             <li class="nav-item">
                 <RouterLink class="nav-link me-2" :to="{ name: 'signup' }">
@@ -26,7 +26,7 @@ const oauthStore = useOAuthStore();
             <li class="nav-item">
                 <RouterLink class="nav-link me-2" to="/user">
                     <i class="fa fa-user opacity-6 me-1"></i>
-                    {{ authStore.userData.UserName || oauthStore.userData.UserName }}
+                    {{ authStore.userData.UserName}}
                 </RouterLink>
             </li>
             <li @click="authStore.logout()" class="nav-item">
