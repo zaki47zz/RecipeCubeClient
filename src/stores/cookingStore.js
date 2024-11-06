@@ -135,7 +135,46 @@ export const useCookingStore = defineStore('cookingStore', () => {
             console.error('刷新庫存失敗:', error);
         }
     };
-
+    const updateCookingInventories = (usedIngredients) => {
+        if (!Array.isArray(usedIngredients)) {
+            console.error('usedIngredients 不是一個有效的數組:', usedIngredients);
+            return;
+        }
+    
+        console.log('開始更新 cookingInventories，usedIngredients:', usedIngredients);
+    
+        // 遍歷使用過的食材
+        usedIngredients.forEach((usedIngredient) => {
+            // 在 cookingInventories 中找到對應的食材
+            const inventoryItem = cookingInventories.value.find(
+                (item) => item.ingredientName === usedIngredient.name
+            );
+    
+            // 如果找到了對應的食材，減去用掉的數量
+            if (inventoryItem) {
+                // 確保 quantity 是數字型別
+                inventoryItem.quantity = parseFloat(inventoryItem.quantity);
+    
+                console.log(`正在更新食材: ${inventoryItem.ingredientName}, 原本數量: ${inventoryItem.quantity}, 使用數量: ${usedIngredient.quantity}`);
+                inventoryItem.quantity -= usedIngredient.quantity;
+    
+                // 確保數量不會變成負數
+                if (inventoryItem.quantity < 0) {
+                    inventoryItem.quantity = 0;
+                }
+    
+                console.log(`更新後的數量: ${inventoryItem.quantity}`);
+            } else {
+                console.warn(`找不到對應的食材，ingredientId: ${usedIngredient.ingredientId}`);
+            }
+        });
+    
+        // 更新 LocalStorage 中的 cookingInventories
+        localStorage.setItem('cookingInventories', JSON.stringify(cookingInventories.value));
+        console.log('更新完畢後的 cookingInventories:', cookingInventories.value);
+    };
+    
+    
     ////動態操作結束
 
     return {
@@ -147,5 +186,6 @@ export const useCookingStore = defineStore('cookingStore', () => {
         resetCookingInventories,
         setCookingInventories,
         saveLeftoverInventories,
+        updateCookingInventories,
     };
 });

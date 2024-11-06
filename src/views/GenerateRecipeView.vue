@@ -160,10 +160,6 @@ onMounted(async () => {
     setupIntersectionObserver();
     // 4. 設定列表是否展開
     if (isUsingInventory.value) isListExpanded.value = false;
-
-    setTimeout(() => {
-        console.log('App Scroll Container after mounted:', appScrollContainer.value);
-    }, 1000);
 });
 
 watch(cookingInventories, (newInventories) => {

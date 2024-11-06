@@ -36,14 +36,14 @@ body,
 </style>
 
 <template>
-    <component :is="isMobile ? 'div' : 'PerfectScrollbar'" id="scroll-container" ref="appScrollContainer">
+    <el-scrollbar ref="appScrollContainer" style="height: 100vh">
         <Loader />
         <Navbar />
         <main class="main-content container position-relative">
             <RouterView />
             <Footer></Footer>
         </main>
-    </component>
+    </el-scrollbar>
 </template>
 
 <script setup>
@@ -65,8 +65,7 @@ onMounted(() => {
     provide('appScrollContainer', appScrollContainer);
     router.afterEach(() => {
         if (appScrollContainer.value && !isMobile.value) {
-            const psInstance = appScrollContainer.value.$el;
-            psInstance.scrollTop = 0; // 如果不是手機，重設滾動條到頂部
+            appScrollContainer.value.setScrollTop(0); // 使用 el-scrollbar 的 setScrollTop 方法重設滾動到頂部
         }
     });
 });

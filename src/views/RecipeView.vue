@@ -203,6 +203,36 @@ const editCustomRecipe = (recipeId) => {
     }
 };
 //#endregion 自訂食譜
+
+//刪除功能
+// SweetAlert 提醒刪除自訂食譜
+const alertDeleteCheck = (recipeId) => {
+    Swal.fire({
+        title: '確定刪除此食譜？',
+        text: '此操作將把該食譜刪除',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: '確定刪除',
+        cancelButtonText: '取消',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            deleteRecipe(recipeId);
+        }
+    });
+};
+
+// 刪除食譜（標記為無效）
+const deleteRecipe = async (recipeId) => {
+    try {
+        await recipeStore.deleteRecipe(recipeId, false); // 調用 API 將狀態設為 false
+        Swal.fire('已刪除!', '您的食譜已被刪除。', 'success');
+        await recipeStore.fetchRecipes(); // 刷新食譜列表
+    } catch (error) {
+        Swal.fire('刪除失敗', '無法刪除食譜，請稍後重試。', 'error');
+    }
+};
 </script>
 
 <template>
@@ -302,14 +332,24 @@ const editCustomRecipe = (recipeId) => {
                                     class="card recipe-card shadow-sm rounded-3 d-flex flex-row align-items-center"
                                     @click="recipeStore.selectRecipe(recipe)"
                                 >
+                                    <span class="position-absolute top-0 end-0 z-index-3">
+                                        <button
+                                            v-if="showCustomRecipes"
+                                            class="edit-button btn btn-outline-secondary card-control"
+                                            @click.stop="editCustomRecipe(recipe.recipeId)"
+                                        >
+                                            <i class="fa-solid fa-pencil"></i>
+                                        </button>
+                                        <button
+                                            v-if="showCustomRecipes"
+                                            class="edit-button btn btn-outline-secondary card-control"
+                                            @click.stop="alertDeleteCheck(recipe.recipeId)"
+                                        >
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </span>
                                     <!-- 編輯按鈕 -->
-                                    <button
-                                        v-if="showCustomRecipes"
-                                        class="edit-button position-absolute top-0 end-0 m-2 btn btn-outline-secondary card-control"
-                                        @click.stop="editCustomRecipe(recipe.recipeId)"
-                                    >
-                                        <i class="fa-solid fa-pencil"></i>
-                                    </button>
+
                                     <div class="image-container">
                                         <img
                                             :src="getRecipeImageUrl(recipe.photoName) || 'default_image.jpg'"

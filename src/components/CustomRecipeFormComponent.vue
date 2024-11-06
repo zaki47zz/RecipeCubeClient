@@ -61,7 +61,7 @@ const fetchIngredients = async () => {
         const data = await response.json(); // 只需要調用一次 .json()
         ingredients.value = data;
         groupIngredientsByCategory(data); // 將數據分組
-        console.log('食材data:', data); // 打印出來檢查
+        // console.log('食材data:', data);
         // console.log("分組後的食材:", groupedIngredients.value);  // 檢查分組結果
     } catch (error) {
         console.error('Fetch Fail', error);
@@ -163,6 +163,10 @@ watch(
         }
         // 只有當類別改變時，才清空細部類別
         recipeData.value.detailedCategory = '';
+        // 确保在编辑模式中细部类别也被正确初始化
+        if (isEditMode.value && editingRecipe.value) {
+            recipeData.value.detailedCategory = editingRecipe.value.detailedCategory;
+        }
     }
 );
 

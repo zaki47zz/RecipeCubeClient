@@ -9,7 +9,9 @@
                 <el-descriptions-item label="中/西式">{{ recipe.westEast ? '中式' : '西式' }}</el-descriptions-item>
                 <el-descriptions-item label="類別">{{ recipe.category }}</el-descriptions-item>
                 <el-descriptions-item label="細部類別">{{ recipe.detailedCategory }}</el-descriptions-item>
-                <el-descriptions-item label="權限">{{ recipe.visibility ? '群組' : '私人' }}</el-descriptions-item>
+                <el-descriptions-item label="權限">{{
+                    recipe.visibility === 0 ? '所有人可見' : recipe.visibility === 1 ? '群組可見' : '自己可見'
+                }}</el-descriptions-item>
             </el-descriptions>
 
             <div class="row ingredients-seasoning-section mt-4">
@@ -65,12 +67,13 @@
 </template>
 
 <script setup>
-import { watch, ref, computed } from 'vue';
+import { onMounted, watch, ref, computed } from 'vue';
 import { useRecipeStore } from '@/stores/recipeStore';
 
 const recipeStore = useRecipeStore();
 // 用來控制當前步驟的變數
 let activeStep = ref(1);
+
 // 計算顯示的用戶 ID
 const userIdDisplay = computed(() => {
     return recipeStore.selectedRecipe && recipeStore.selectedRecipe.userId === '0'

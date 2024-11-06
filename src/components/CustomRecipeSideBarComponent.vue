@@ -34,8 +34,10 @@ const subcategoryOptions = computed(() => {
 //清空子類別
 watch(
     () => filters.value.category,
-    () => {
-        filters.value.subcategory = '';
+    (newCategory) => {
+        if (!newCategory) {
+            filters.value.subcategory = '';
+        }
     }
 );
 // 根據搜尋條件和篩選條件過濾食譜
@@ -48,7 +50,13 @@ const filteredRecipes = computed(() => {
         const restrictionMatch = filters.value.restriction === '' || recipe.restriction === filters.value.restriction;
         // 中西式篩選
         const styleMatch = filters.value.style === '' || recipe.westEast === filters.value.style;
-        return searchWordMatch && restrictionMatch && styleMatch;
+        //類別篩選
+        // 主類別篩選
+        const categoryMatch = !filters.value.category || recipe.category === filters.value.category;
+
+        // 細部類別篩選
+        const subcategoryMatch = !filters.value.subcategory || recipe.detailedCategory === filters.value.subcategory;
+        return categoryMatch && subcategoryMatch && searchWordMatch && restrictionMatch && styleMatch;
     });
 });
 const resetActiveStep = ref(false);
@@ -56,8 +64,7 @@ const resetActiveStep = ref(false);
 const scrollContainer = ref(null);
 const onDialogOpened = () => {
     if (scrollContainer.value) {
-        const psInstance = scrollContainer.value.$el; // Get the underlying DOM element of PerfectScrollbar
-        psInstance.scrollTop = 0; // Reset the scroll position to top
+        scrollContainer.value.scrollTop = 0; // 使用原生 scrollTop 重設滾動到頂部
     }
     // console.log("Selected Recipe:", recipeStore.selectedRecipe);
     resetActiveStep.value = true;
@@ -125,15 +132,13 @@ const onDialogOpened = () => {
             class="bg-primary-subtle"
             @opened="onDialogOpened"
         >
-            <PerfectScrollbar ref="scrollContainer" class="custom-scroll-container">
-                <div class="dialog-content">
-                    <RecipeDetailComponent
-                        :recipe="recipeStore.selectedRecipe"
-                        :reset-active-step="resetActiveStep"
-                        v-if="recipeStore.selectedRecipe"
-                    />
-                </div>
-            </PerfectScrollbar>
+            <div ref="scrollContainer" class="dialog-content">
+                <RecipeDetailComponent
+                    :recipe="recipeStore.selectedRecipe"
+                    :reset-active-step="resetActiveStep"
+                    v-if="recipeStore.selectedRecipe"
+                />
+            </div>
             <span slot="footer" class="dialog-footer d-flex justify-content-center mt-3">
                 <el-button @click="recipeStore.closeDialog" type="danger">關閉</el-button>
             </span>
@@ -142,14 +147,10 @@ const onDialogOpened = () => {
 </template>
 
 <style lang="css" scoped>
-.custom-scroll-container {
-    max-height: 300px;
-    overflow: hidden;
-}
-
 .dialog-content {
     max-height: 100%;
     padding-right: 15px;
+
     /* Adjust as needed to avoid content overflow */
 }
 </style>
