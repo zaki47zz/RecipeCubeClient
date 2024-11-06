@@ -202,12 +202,9 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
                         ];
                     }
                 } else {
-                    console.log('庫存管理的烹飪');
-                    // console.log('庫存數據:', inventories.value);
                     // 正常庫存處理方式
                     let inventoryItems = inventories.value
                         .filter((item) => {
-                            console.log('正在檢查庫存項目:', item);
 
                             // 解析 item.expiryDate 並設置時間為 00:00:00
                             const expiryDate = new Date(item.expiryDate);
@@ -220,12 +217,6 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
                             const matchesIngredient = item.ingredientId === ingredient.ingredientId;
                             const matchesUser = item.userId === userId;
                             const notExpired = expiryDate >= currentDate && !isNaN(expiryDate);
-
-                            console.log(`庫存項目: ${item.ingredientName}, 檢查條件: `);
-                            console.log(`符合食材 ID: ${matchesIngredient}`);
-                            console.log(`符合使用者 ID: ${matchesUser}`);
-                            console.log(`過期日期: ${expiryDate}, 當前日期: ${currentDate}`);
-                            console.log(`未過期且日期有效: ${notExpired}`);
 
                             return matchesIngredient && matchesUser && notExpired;
                         })
@@ -272,9 +263,7 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
                             console.log(`已記錄減少的食材: ${inventoryItem.ingredientName}, 數量: ${quantityToDeduct}`);
                         }
                     }
-                    if (requiredQuantity > 0) {
-                        console.log(`食材 ${ingredient.ingredientName} 的庫存不足，仍需 ${requiredQuantity}`);
-                    }
+
                 }
             }
             await fetchInventories();

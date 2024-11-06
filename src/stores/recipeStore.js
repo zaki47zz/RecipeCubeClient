@@ -20,9 +20,12 @@ export const useRecipeStore = defineStore('recipeStore', {
                     throw new Error('Network response was not ok');
                 }
                 const data = await response.json();
-                console.log(data);
-                this.recipes = data;
-                this.totalRecipes = data.length;
+                // console.log(data);
+                // 過濾掉狀態為 false 的食譜
+                const activeRecipes = data.filter(recipe => recipe.status !== false);
+                this.recipes = activeRecipes;
+
+                this.totalRecipes = activeRecipes.length;
             } catch (error) {
                 console.error('There was a problem with the fetch operation:', error);
             }
@@ -99,5 +102,26 @@ export const useRecipeStore = defineStore('recipeStore', {
                 console.error('Error saving recipe:', error);
             }
         },
+        async deleteRecipe (recipeId, status) {
+            try {
+                const BaseURL = import.meta.env.VITE_API_BASEURL;
+
+                const response = await fetch(`${BaseURL}/Recipes/${recipeId}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ status }),
+                });
+    
+                if (!response.ok) {
+                    console.log("刪除食譜失敗")
+                    throw new Error('Failed to update recipe status');
+                }
+            } catch (error) {
+                console.error('Error updating recipe status:', error);
+                throw error;
+            }
+        }
     }
 });
