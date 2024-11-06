@@ -476,10 +476,16 @@ const exportInventories = () => {
     </section>
 
     <section>
-        <el-dialog v-model="isInventoryModalVisible" title="修改庫存內容" width="40%" center class="bg-primary-subtle">
-            <div class="d-flex justify-content-center align-items-center bg-white rounded-4">
+        <el-dialog
+            v-model="isInventoryModalVisible"
+            title="修改庫存內容"
+            width="40%"
+            center
+            class="bg-primary-subtle pb-2"
+        >
+            <div class="d-flex justify-content-center align-items-center bg-white rounded-4" style="height: 410px">
                 <div class="p-3 w-90">
-                    <div class="mb-3">
+                    <div class="my-3">
                         <label for="userId" class="m-0 p-0 fs-6">庫存所有者</label>
                         <input
                             v-model="editInventory.userName"
@@ -524,7 +530,7 @@ const exportInventories = () => {
                             class="form-control w-100 text-center"
                         />
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="visibility" class="m-0 p-0 fs-6">權限</label>
                         <select
                             v-model="editInventory.visibility"
@@ -539,7 +545,7 @@ const exportInventories = () => {
                     </div>
                 </div>
             </div>
-            <span slot="footer" class="dialog-footer d-flex justify-content-center mt-3">
+            <span slot="footer" class="dialog-footer d-flex justify-content-center mt-2">
                 <el-button v-if="editInventory.quantity > 0" type="primary" @click="saveEditedInventory"
                     >儲存</el-button
                 >
@@ -582,26 +588,68 @@ const exportInventories = () => {
         </el-drawer>
     </section>
 
-    <section class="pt-3">
-        <div class="container-fluid">
-            <div class="row justify-content-center">
-                <div class="col-lg-3">
+    <section>
+        <!-- 固定在左側的導航欄 -->
+        <nav class="fixed-left-nav d-none d-lg-block">
+            <div class="nav-container bg-white shadow-lg rounded-end-4 p-2">
+                <div class="d-flex flex-column gap-2">
                     <RouterLink
-                        class="btn text-dark shadow fs-5 w-100"
-                        :class="selectedInventories.length ? 'bg-primary-subtle' : 'bg-secondary disabled-link'"
+                        class="btn text-dark shadow fs-5 mb-0 vertical-btn"
+                        :class="{
+                            'bg-primary-subtle': selectedInventories.length,
+                            'bg-secondary disabled-link': !selectedInventories.length,
+                        }"
                         :to="selectedInventories.length ? { name: 'GenerateRecipe' } : ''"
                         @click="exportInventories"
                     >
-                        產生食譜
+                        <i class="fa-solid fa-wand-magic-sparkles mb-1"></i>
+                        <span class="vertical-text">產生食譜</span>
                     </RouterLink>
-                </div>
-                <div class="col-lg-3">
-                    <button type="button" class="btn blur shadow text-dark fs-5 w-100" @click="isDrawerVisible = true">
-                        查看您選擇的食材
+                    <button
+                        type="button"
+                        class="btn blur shadow text-dark fs-5 mb-0 vertical-btn"
+                        @click="isDrawerVisible = true"
+                    >
+                        <i class="fa-solid fa-list-ul mb-1"></i>
+                        <span class="vertical-text">已選食材</span>
+                        <span class="badge bg-dark rounded-pill mt-2">{{ selectedInventories.length }}</span>
                     </button>
                 </div>
             </div>
-        </div>
+        </nav>
+
+        <!-- 小螢幕上顯示的底部導航欄 -->
+        <nav class="fixed-bottom-nav d-block d-lg-none">
+            <div class="container-fluid pt-2 pb-3 shadow-lg">
+                <div class="row justify-content-center gap-2">
+                    <div class="col-5">
+                        <RouterLink
+                            class="btn text-dark shadow fs-5 mb-0 w-100"
+                            :class="{
+                                'bg-primary-subtle': selectedInventories.length,
+                                'bg-secondary disabled-link': !selectedInventories.length,
+                            }"
+                            :to="selectedInventories.length ? { name: 'GenerateRecipe' } : ''"
+                            @click="exportInventories"
+                        >
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            產生食譜
+                        </RouterLink>
+                    </div>
+                    <div class="col-5">
+                        <button
+                            type="button"
+                            class="btn blur shadow text-dark fs-5 mb-0 w-100"
+                            @click="isDrawerVisible = true"
+                        >
+                            <i class="fa-solid fa-list-ul"></i>
+                            已選食材
+                            <span class="badge bg-dark rounded-pill ms-1">{{ selectedInventories.length }}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
     </section>
 </template>
 
@@ -758,5 +806,64 @@ const exportInventories = () => {
     box-shadow:
         rgba(0, 0, 0, 0.16) 0px 10px 36px 0px,
         rgba(0, 0, 0, 0.06) 0px 0px 0px 1px !important;
+}
+
+/* 左側固定導航欄樣式 */
+.fixed-left-nav {
+    position: fixed;
+    left: 0;
+    top: 70%;
+    transform: translateY(-50%);
+    width: auto;
+}
+
+.nav-container {
+    min-width: 50px;
+    transition: all 0.3s ease;
+}
+
+.vertical-btn {
+    width: 50px;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 5px;
+}
+
+.vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    white-space: nowrap;
+    font-size: 1.125rem;
+    transform: translateX(-10%);
+}
+
+/* 調整主內容區域的左側間距 */
+@media (min-width: 992px) {
+    .container-fluid {
+        padding-left: calc(10px + 1rem) !important;
+    }
+}
+
+/* 按鈕hover效果 */
+.btn:hover:not(.disabled-link) {
+    transform: translateX(5px);
+}
+
+/* 底部導航欄樣式（用於小螢幕） */
+.fixed-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+}
+
+/* 為了確保卡片區域不被導航欄遮擋 */
+.row-cols-1 {
+    margin-bottom: 1rem;
 }
 </style>
