@@ -4,7 +4,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import { PieChart } from 'echarts/charts';
 import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components';
 import VChart, { THEME_KEY } from 'vue-echarts';
-import { ref, provide, onMounted, nextTick, onBeforeUnmount, watch } from 'vue';
+import { ref, provide, onMounted, nextTick, onBeforeUnmount, watch, computed } from 'vue';
 import { ElButton, ElDialog, ElSelect, ElOption, ElSwitch } from 'element-plus';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
@@ -24,6 +24,10 @@ const chartRef = ref(null);
 const products = ref([]);
 const orders = ref([]);
 const selectedView = ref(false); // 切換顯示模式，'product' 或 'category'
+
+const isLogin = computed(() => {
+    return userId && userId;
+});
 
 // 初始化圖表提示
 onMounted(() => {
@@ -251,7 +255,7 @@ const option = ref({
             <i class="fa-solid fa-chart-pie"></i>
         </el-button>
         <el-dialog title="消費統計" v-model="dialogVisible" width="60%" @opened="resizeChart">
-            <div class="animate__animated animate__fadeIn col-12">
+            <div v-if="isLogin" class="animate__animated animate__fadeIn col-12">
                 <span class="col-12 d-flex justify-content-between">
                     <!-- 日期範圍選擇 -->
                     <el-date-picker
@@ -279,6 +283,10 @@ const option = ref({
                 </span>
                 <!-- 顯示圖表 -->
                 <v-chart v-if="dialogVisible" ref="chartRef" class="chart" :option="option"></v-chart>
+            </div>
+            <div v-else class="col-12 d-flex flex-column align-items-center animate__animated animate__bounceIn">
+                <span>請登入後繼續查看消費統計</span>
+                <img src="@/assets/img/ForBackground/logo去背.png" alt="食譜魔方" style="width: 256px; height: auto" />
             </div>
         </el-dialog>
     </div>
