@@ -1,5 +1,4 @@
 <script setup>
-import '@/assets/js/store.js';
 import Swal from 'sweetalert2';
 import { ref, computed, reactive, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';

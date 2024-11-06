@@ -44,7 +44,7 @@ const { getFrequentlyUsedIngredients } = pantryStore;
 
 const customIngredient = ref({
     ingredientId: '',
-    ingredientName: '',
+    ingredientName: '食材名稱',
     category: '',
     synonym: '',
     expireDay: 7,
@@ -324,6 +324,7 @@ const handlePhotoUpload = (event) => {
                         class="form-control"
                         placeholder="例如: 豆腐"
                     />
+                    <span v-if="customIngredient.ingredientName === ''" class="text-danger">名稱欄位不可為空</span>
                 </div>
 
                 <div class="mb-4">
@@ -429,7 +430,13 @@ const handlePhotoUpload = (event) => {
                     </div>
                 </div>
                 <div class="d-flex justify-content-center">
-                    <button class="btn btn-info me-5" @click="postIngredientAlert">加入</button>
+                    <button
+                        v-if="customIngredient.ingredientName !== ''"
+                        class="btn btn-info me-5"
+                        @click="postIngredientAlert"
+                    >
+                        加入
+                    </button>
                     <button class="btn btn-secondary" @click="isModalVisible = false">關閉</button>
                 </div>
             </form>
@@ -449,18 +456,10 @@ const handlePhotoUpload = (event) => {
     padding: 0;
     text-align: center;
     border-radius: 10px;
-    --bs-btn-border-color: transparent;
-    --bs-btn-active-bg: #f8d7da;
-    --bs-btn-active-border-color: transparent;
-    --bs-btn-hover-bg: #f8d7da;
-    --bs-btn-hover-border-color: transparent;
-    --bs-btn-disabled-color: #ccc;
-    --bs-btn-disabled-bg: #eaeaea;
-    --bs-btn-disabled-border-color: #eaeaea;
 }
 .swiper-prev:hover,
 .swiper-next:hover {
-    background: #f8d7da;
+    background: #dff8d7;
 }
 .swal2-container {
     z-index: 99999 !important;
@@ -483,7 +482,9 @@ const handlePhotoUpload = (event) => {
     text-align: center;
     padding: 10px;
     margin: 20px 0;
-    transition: box-shadow 0.3s ease-out, transform 0.3s ease-out;
+    transition:
+        box-shadow 0.3s ease-out,
+        transform 0.3s ease-out;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -514,7 +515,7 @@ const handlePhotoUpload = (event) => {
     color: #ffffff !important;
 }
 .food-badge.control {
-    background-color: #ffdae5 !important;
+    background-color: #daffdb !important;
     color: #555556 !important;
 }
 .synonym-adder:hover,

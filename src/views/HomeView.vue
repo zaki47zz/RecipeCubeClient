@@ -1,19 +1,47 @@
-<script setup lang="ts">
+<script setup>
 import CountUp from 'vue-countup-v3';
 import WOW from 'wow.js';
 import 'wow.js/css/libs/animate.css';
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import PerfectScrollbar from 'perfect-scrollbar';
-import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import { useAuthStore } from '@/stores/auth';
 const authStore = useAuthStore();
+
+const BaseURL = import.meta.env.VITE_API_BASEURL;
+const homeApiURL = `${BaseURL}/home`;
 
 // 用於儲存 perfect-scrollbar 實例和滾動位置
 const scrollPosition = ref(0);
 let ps = null;
 const startCount = ref(false);
 
-onMounted(() => {
+// 響應式物件存資料庫統計數據
+const amounts = ref({
+    recipeAmount: 0,
+    ingredientAmount: 0,
+    groupAmount: 0,
+    userAmount: 0,
+});
+
+// 從食譜資料庫統計隨便抓3個id
+const randomRecipeIds = computed(() => {
+    return Array.from({ length: 3 }, () => Math.floor(Math.random() * amounts.value.recipeAmount));
+});
+
+onMounted(async () => {
+    //fetch資料庫統計數據(不要異步，避免數據不顯示)
+    const response = await fetch(homeApiURL);
+    if (!response.ok) {
+        throw new Error('API有異常');
+    }
+    const data = await response.json();
+    amounts.value = {
+        recipeAmount: data.recipeAmount,
+        ingredientAmount: data.ingredientAmount,
+        groupAmount: data.groupAmount,
+        userAmount: data.userAmount,
+    };
+
     const wow = new WOW({
         boxClass: 'wow',
         animateClass: 'animated',
@@ -64,8 +92,14 @@ const updateScrollPosition = () => {
                                                 試用隨買隨煮
                                             </button></RouterLink
                                         >
-                                        <RouterLink v-if="!authStore.token || !authStore.checkTokenExpiry" :to="{ name: 'signup' }"><button class="btn btn-outline-warning">註冊會員</button></RouterLink>
-                                        <RouterLink v-else to="/store"><button class="btn btn-outline-warning">立即採購食材</button></RouterLink>
+                                        <RouterLink
+                                            v-if="!authStore.token || !authStore.checkTokenExpiry"
+                                            :to="{ name: 'signup' }"
+                                            ><button class="btn btn-outline-warning">註冊會員</button></RouterLink
+                                        >
+                                        <RouterLink v-else to="/store"
+                                            ><button class="btn btn-outline-warning">立即採購食材</button></RouterLink
+                                        >
                                     </div>
                                 </div>
                             </div>
@@ -151,7 +185,7 @@ const updateScrollPosition = () => {
                             <CountUp
                                 v-if="startCount"
                                 class="counter text-dark display-4 mb-0"
-                                :end-val="321"
+                                :end-val="amounts.recipeAmount"
                                 :duration="2.5"
                             />
                         </div>
@@ -163,7 +197,7 @@ const updateScrollPosition = () => {
                             <CountUp
                                 v-if="startCount"
                                 class="counter text-dark display-4 mb-0"
-                                :end-val="233"
+                                :end-val="amounts.ingredientAmount"
                                 :duration="2.5"
                             />
                         </div>
@@ -175,7 +209,7 @@ const updateScrollPosition = () => {
                             <CountUp
                                 v-if="startCount"
                                 class="counter text-dark display-4 mb-0"
-                                :end-val="745"
+                                :end-val="amounts.groupAmount"
                                 :duration="2.5"
                             />
                         </div>
@@ -187,7 +221,7 @@ const updateScrollPosition = () => {
                             <CountUp
                                 v-if="startCount"
                                 class="counter text-dark display-4 mb-0"
-                                :end-val="1546"
+                                :end-val="amounts.userAmount"
                                 :duration="2.5"
                             />
                         </div>

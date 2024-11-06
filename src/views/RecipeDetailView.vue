@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useInventoryStore } from '@/stores/inventoryStore';
 import { useRecipeStore } from '@/stores/recipeStore';
 import { useCookingStore } from '@/stores/cookingStore';
@@ -144,7 +144,10 @@ const startCooking = async () => {
         // 處理減少的食材
         updatedIngredients.forEach((ingredient) => {
             if (!ingredientChanges[ingredient.name]) {
-                ingredientChanges[ingredient.name] = { deleted: false, reducedQuantity: ingredient.quantity };
+                ingredientChanges[ingredient.name] = {
+                    deleted: false,
+                    reducedQuantity: ingredient.quantity,
+                };
             } else {
                 ingredientChanges[ingredient.name].reducedQuantity += ingredient.quantity;
             }
@@ -182,6 +185,8 @@ const startCooking = async () => {
         }).then(() => {
             // 清除標識以避免影響後續的操作
             localStorage.removeItem('source');
+            // 清除選擇的食譜
+            localStorage.removeItem('selectedRecipe');
         });
     } catch (error) {
         console.error('startCooking 發生錯誤:', error);
@@ -193,6 +198,8 @@ const startCooking = async () => {
         }).then(() => {
             // 清除標識以避免影響後續的操作
             localStorage.removeItem('source');
+            // 清除選擇的食譜
+            localStorage.removeItem('selectedRecipe');
         });
     }
 };
@@ -210,6 +217,65 @@ const startCooking = async () => {
             </div>
         </section>
         <!-- 食譜header end -->
+
+        <!-- 裝飾貼紙 -->
+        <section>
+            <img
+                class="sticker"
+                src="@/assets/img/ForBackground/stickers/sticker-1.png"
+                alt=""
+                style="top: 25%; right: 10%"
+            />
+            <img
+                class="sticker"
+                src="@/assets/img/ForBackground/stickers/sticker-2.png"
+                alt=""
+                style="top: 20%; left: 10%"
+            />
+            <img
+                class="sticker"
+                src="@/assets/img/ForBackground/stickers/sticker-3.png"
+                alt=""
+                style="top: 35%; left: 0%"
+            />
+            <img
+                class="sticker"
+                src="@/assets/img/ForBackground/stickers/sticker-4.png"
+                alt=""
+                style="top: 43%; right: 0%"
+            />
+            <img
+                class="sticker"
+                src="@/assets/img/ForBackground/stickers/sticker-5.png"
+                alt=""
+                style="top: 50%; left: 13%"
+            />
+            <img
+                class="sticker"
+                src="@/assets/img/ForBackground/stickers/sticker-6.png"
+                alt=""
+                style="top: 60%; right: 10%"
+            />
+            <img
+                class="sticker"
+                src="@/assets/img/ForBackground/stickers/sticker-7.png"
+                alt=""
+                style="top: 67%; left: -2%"
+            />
+            <img
+                class="sticker"
+                src="@/assets/img/ForBackground/stickers/sticker-8.png"
+                alt=""
+                style="top: 80%; right: 0%"
+            />
+            <img
+                class="sticker"
+                src="@/assets/img/ForBackground/stickers/sticker-9.png"
+                alt=""
+                style="top: 85%; left: 12%"
+            />
+        </section>
+
         <!-- 食譜詳細資訊 start -->
         <section class="recipe-details mt-5 text-center">
             <p class="recipe-title display-4">{{ recipeStore.selectedRecipe.recipeName }}</p>
@@ -238,10 +304,10 @@ const startCooking = async () => {
                             <td>{{ recipeStore.selectedRecipe.detailedCategory }}</td>
                         </tr>
                         <tr>
-                            <th>可見性</th>
+                            <th>權限</th>
                             <td>
                                 <span v-if="recipeStore.selectedRecipe.visibility === 0">公開</span>
-                                <span v-else-if="recipeStore.selectedRecipe.visibility === 1">群組公開</span>
+                                <span v-else-if="recipeStore.selectedRecipe.visibility === 1">群組</span>
                                 <span v-else-if="recipeStore.selectedRecipe.visibility === 2">私人</span>
                                 <span v-else>未知</span>
                                 <!-- 若為意外值，顯示"未知" -->
@@ -257,7 +323,7 @@ const startCooking = async () => {
             <div class="container-fluid">
                 <div class="row g-4 fs-5">
                     <!-- 食材 -->
-                    <div class="col-12 border w-60 mx-auto p-3">
+                    <div class="col-12 w-60 mx-auto p-3">
                         <h3 class="text-black">食材</h3>
                         <div class="row g-4">
                             <ul class="list-unstyled">
@@ -302,7 +368,7 @@ const startCooking = async () => {
                     </div>
 
                     <!-- 調味料 -->
-                    <div class="col-12 border w-60 mx-auto p-3">
+                    <div class="col-12 w-60 mx-auto p-3">
                         <h3 class="text-black">調味料</h3>
                         <div
                             class="seasoning-tags mt-3"
@@ -311,10 +377,10 @@ const startCooking = async () => {
                             <el-tag
                                 v-for="(seasoning, index) in seasoningList"
                                 :key="index"
-                                type="primary"
+                                type="success"
                                 effect="light"
                                 size="large"
-                                class="mb-2 me-3"
+                                class="mb-2 me-3 fs-6"
                             >
                                 {{ seasoning }}
                             </el-tag>
@@ -326,7 +392,7 @@ const startCooking = async () => {
         <!-- 食材列表 end -->
 
         <!-- 步驟 start -->
-        <section class="mt-5 text-center border w-60 mx-auto p-3">
+        <section class="mt-5 text-center w-60 mx-auto p-3">
             <h3 class="text-black">烹飪步驟</h3>
             <div
                 class="recipe-steps my-4 wide-steps-container d-flex justify-content-center"
@@ -346,7 +412,7 @@ const startCooking = async () => {
 
         <!-- 步驟 end -->
         <!-- 開始烹飪按鈕 start -->
-        <div class="container-fluid text-center mt-5">
+        <div class="container-fluid text-center mt-5 mb-3">
             <el-button type="success" size="large" @click="startCooking">烹飪完成</el-button>
         </div>
         <!-- 開始烹飪按鈕 end -->
@@ -373,7 +439,7 @@ const startCooking = async () => {
     top: 0;
     left: 0;
     transform: translateZ(0) scale(1, 1);
-    background: #1b2030 url('src/assets/img/ForBackground/bg-header.jpg') 50% 0 no-repeat;
+    background: #1b2030 url('@/assets/img/ForBackground/bg-header.jpg') 50% 0 no-repeat;
     background-size: cover;
     background-attachment: fixed;
     animation: grow 180s linear 10ms infinite;
@@ -406,6 +472,10 @@ const startCooking = async () => {
     50% {
         transform: scale(1.2) translateY(-250px);
     }
+}
+.sticker {
+    width: 13%;
+    position: absolute;
 }
 .recipe-title {
     font-weight: bold;

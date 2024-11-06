@@ -1,9 +1,7 @@
 <script setup>
-import '@/assets/js/store.js';
 import Swal from 'sweetalert2';
-import { ref, computed, reactive, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { ref, computed, reactive, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
-import CircularJSON from 'circular-json';
 import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引入購物車的 component
 import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import CouponComponent from '@/components/CouponComponent.vue';
@@ -107,7 +105,10 @@ const couponsByUserId = ref([]);
 
 const loadCouponsByUserId = async (userId) => {
     if (coupons.value && coupons.value.length > 0) {
-        couponsByUserId.value = coupons.value.filter((coupon) => coupon.userId === userId);
+        if (coupons.value)
+            couponsByUserId.value = coupons.value.filter(
+                (coupon) => coupon.userId === userId && coupon.couponStatus === 1 && coupon.usedStatus === 1
+            );
         console.log('該使用者的優惠券', couponsByUserId.value);
     } else {
         couponsByUserId.value = [];

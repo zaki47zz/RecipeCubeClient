@@ -28,6 +28,7 @@ import oAuthFirstSignIn from '@/views/oAuthFirstSignInView.vue';
 
 import { createRouter, createWebHistory } from 'vue-router';
 
+
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
@@ -51,7 +52,7 @@ const router = createRouter({
             component: BuyandCookView,
         },
         {
-            path: '/customrecipe',
+            path: '/customrecipe/:id?',
             name: 'CustomRecipe',
             component: CustomRecipeView,
         },

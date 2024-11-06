@@ -1,5 +1,4 @@
 <script setup>
-import '@/assets/js/store.js';
 import Swal from 'sweetalert2';
 import { useRouter } from 'vue-router';
 import { computed, ref, watch, onMounted, nextTick } from 'vue';
@@ -7,6 +6,10 @@ import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引
 import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import CouponComponent from '@/components/CouponComponent.vue';
 import StoreChatComponent from '@/components/StoreChatComponent.vue';
+import StoreChartComponent from '@/components/StoreChartComponent.vue';
+import { Vue3Lottie } from 'vue3-lottie';
+import addToCartJson from '@/assets/lottie/cart.json';
+
 // swiper
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { EffectCoverflow, Pagination, Autoplay, Navigation } from 'swiper/modules';
@@ -18,6 +21,7 @@ import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 const swiperInstance = ref(null);
 const isDataLoaded = ref(false);
+const lottieRef = ref(null);
 
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
@@ -79,10 +83,6 @@ const loadCategories = async () => {
     categories.value = datas;
     console.log(BaseUrlWithoutApi);
 };
-
-// 呼叫方法
-loadProducts();
-loadCategories();
 
 // 跳轉至商品明細頁面
 const router = useRouter();
@@ -181,7 +181,8 @@ watch(totalPages, (newTotalPages) => {
 
 // 篩選功能
 
-const clickCategory = (category) => {
+const clickCategory = (category, event) => {
+    event.preventDefault(); // 阻止預設滾動行為
     currentPage.value = 1; // 篩選後重設頁碼為第一頁
     loadFilteredProducts(category);
 };
@@ -285,7 +286,7 @@ const shouldRenderSwiper = computed(() => {
 });
 
 onMounted(async () => {
-    await loadProducts(); // 等待數據加載完成
+    await Promise.all([loadProducts(), loadCategories()]);
 });
 
 const swiperProducts = computed(() => {
@@ -314,7 +315,8 @@ const swiperProducts = computed(() => {
     <CouponComponent />
     <!-- 引入聊天機器人 -->
     <StoreChatComponent />
-
+    <!-- 引入消費統計圖表 -->
+    <StoreChartComponent />
     <div class="p-0 m-0">
         <!-- Single Page Header start -->
         <section>
@@ -428,7 +430,7 @@ const swiperProducts = computed(() => {
                                                         class="d-flex justify-content-between fruite-name"
                                                         v-for="category in categories"
                                                         :key="category.category"
-                                                        @click="clickCategory(category.category)"
+                                                        @click="(event) => clickCategory(category.category, event)"
                                                     >
                                                         <a href="#"
                                                             ><i class="fas fa-apple-alt me-2"></i
@@ -441,8 +443,7 @@ const swiperProducts = computed(() => {
                                                             <button
                                                                 v-if="selectedCategory === category.category"
                                                                 @click.stop="clearCategory"
-                                                                class="btn btn-sm ms-2 animate__animated animate__bounceIn"
-                                                                style="color: #9bc8fb; background-color: #fbeae3"
+                                                                class="cancel-button animate__animated animate__bounceIn"
                                                             >
                                                                 <i class="fa-solid fa-x"></i>
                                                             </button>
@@ -468,6 +469,13 @@ const swiperProducts = computed(() => {
                                         </div>
                                     </div>
                                     <!-- 價格區間 End -->
+                                    <div>
+                                        <a
+                                            href="https://www.cathaybk.com.tw/cathaybk/personal/product/credit-card/cards/"
+                                            target="_blank"
+                                            ><img src="@/assets/img/Store/廣告01.png" alt="" class="col-lg-12"
+                                        /></a>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-lg-10">
@@ -515,12 +523,29 @@ const swiperProducts = computed(() => {
                                                         $ {{ product.price }} 元
                                                     </p>
                                                 </div>
+                                                <!-- 加入購物車按鈕 -->
                                                 <div class="d-flex justify-content-center">
                                                     <div
                                                         @click="addToCart(product)"
-                                                        class="btn border border-secondary rounded-pill px-3 m-2 text-primary"
+                                                        class="btn border border-secondary rounded-pill d-flex align-items-center px-3 m-2 text-primary"
                                                     >
-                                                        <i class="fa fa-shopping-bag me-2 text-primary"></i> 加入購物車
+                                                        <div class="lottie-container">
+                                                            <Vue3Lottie
+                                                                ref="lottieRef"
+                                                                :animationData="addToCartJson"
+                                                                :height="120"
+                                                                :width="120"
+                                                                :loop="true"
+                                                                :auto-play="true"
+                                                                :no-margin="true"
+                                                            />
+                                                        </div>
+                                                        <span
+                                                            class="d-flex align-items-center"
+                                                            style="display: inline-block; white-space: nowrap"
+                                                        >
+                                                            加入購物車
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -676,6 +701,26 @@ const swiperProducts = computed(() => {
     border-radius: 10px;
 }
 
+.cancel-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 1.25rem;
+    width: 1.25rem;
+    font-size: smaller;
+    border-radius: 50%;
+    border: 1.5px solid red;
+    color: red;
+    margin-left: 0.5rem;
+    background-color: transparent;
+}
+
+.cancel-button:hover {
+    background-color: red;
+    border: none;
+    color: white;
+}
+
 .product-info {
     position: absolute;
     bottom: 10px;
@@ -702,5 +747,14 @@ const swiperProducts = computed(() => {
 
 :deep(.el-pagination.is-background .el-pager li.is-active) {
     background-color: #41b883 !important;
+}
+
+.lottie-container {
+    width: 50px; /* 設定你想要的寬度 */
+    height: 11px; /* 設定你想要的高度 */
+    display: flex; /*使容器使用 flexbox */
+    align-items: center;
+    transform: translate(-12%, -80%);
+    justify-content: center; /* 水平居中動畫 */
 }
 </style>

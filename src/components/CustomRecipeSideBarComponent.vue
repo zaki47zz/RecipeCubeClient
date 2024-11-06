@@ -19,10 +19,10 @@ const filters = ref({
 });
 
 const categoryOptions = {
-    "主餐": ["麵食", "飯食", "粥", "排餐", "鹹派", "火鍋", "焗烤"],
-    "副餐": ["肉類料理", "青菜料理", "海鮮料理"],
-    "湯品": ["無"],
-    "甜點": ["甜", "鹹"]
+    主餐: ['麵食', '飯食', '粥', '排餐', '鹹派', '火鍋', '焗烤'],
+    副餐: ['肉類料理', '青菜料理', '海鮮料理'],
+    湯品: ['無'],
+    甜點: ['甜', '鹹'],
 };
 const subcategoryOptions = computed(() => {
     // console.log(filters.value)
@@ -32,16 +32,20 @@ const subcategoryOptions = computed(() => {
     return [];
 });
 //清空子類別
-watch(() => filters.value.category, () => {
-    filters.value.subcategory = '';
-});
+watch(
+    () => filters.value.category,
+    () => {
+        filters.value.subcategory = '';
+    }
+);
 // 根據搜尋條件和篩選條件過濾食譜
 const filteredRecipes = computed(() => {
-    return recipeStore.recipes.filter(recipe => {
-        const searchWordMatch = !filters.value.searchWord || recipe.recipeName.toLowerCase().includes(filters.value.searchWord.toLowerCase());
+    return recipeStore.recipes.filter((recipe) => {
+        const searchWordMatch =
+            !filters.value.searchWord ||
+            recipe.recipeName.toLowerCase().includes(filters.value.searchWord.toLowerCase());
         // 葷素篩選
-        const restrictionMatch =
-            filters.value.restriction === '' || recipe.restriction === filters.value.restriction;
+        const restrictionMatch = filters.value.restriction === '' || recipe.restriction === filters.value.restriction;
         // 中西式篩選
         const styleMatch = filters.value.style === '' || recipe.westEast === filters.value.style;
         return searchWordMatch && restrictionMatch && styleMatch;
@@ -84,8 +88,8 @@ const onDialogOpened = () => {
             </select>
             <select class="form-select w-100 mb-2" v-model="filters.style">
                 <option value="">選擇中西式</option>
-                <option :value="false">中式</option>
-                <option :value="true">西式</option>
+                <option :value="true">中式</option>
+                <option :value="false">西式</option>
             </select>
             <select class="form-select w-100 mb-2" v-model="filters.category">
                 <option value="">選擇主類別</option>
@@ -103,20 +107,34 @@ const onDialogOpened = () => {
         <hr />
         <!-- 食譜列表 -->
         <ul class="list-group list-group-flush">
-            <li v-for="recipe in filteredRecipes.slice(0, 20)" :key="recipe.recipeName"
-                class="list-group-item list-group-item-action" @click="recipeStore.selectRecipe(recipe)">
+            <li
+                v-for="recipe in filteredRecipes.slice(0, 20)"
+                :key="recipe.recipeName"
+                class="list-group-item list-group-item-action"
+                @click="recipeStore.selectRecipe(recipe)"
+            >
                 {{ recipe.recipeName }}
             </li>
         </ul>
         <!-- 食譜詳細資訊對話框 -->
-        <el-dialog v-model="recipeStore.dialogVisible" title="食譜詳細資訊" width="75%" center @opened="onDialogOpened">
+        <el-dialog
+            v-model="recipeStore.dialogVisible"
+            title="食譜詳細資訊"
+            width="75%"
+            center
+            class="bg-primary-subtle"
+            @opened="onDialogOpened"
+        >
             <PerfectScrollbar ref="scrollContainer" class="custom-scroll-container">
                 <div class="dialog-content">
-                    <RecipeDetailComponent :recipe="recipeStore.selectedRecipe" :reset-active-step="resetActiveStep"
-                        v-if="recipeStore.selectedRecipe" />
+                    <RecipeDetailComponent
+                        :recipe="recipeStore.selectedRecipe"
+                        :reset-active-step="resetActiveStep"
+                        v-if="recipeStore.selectedRecipe"
+                    />
                 </div>
             </PerfectScrollbar>
-            <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
+            <span slot="footer" class="dialog-footer d-flex justify-content-center mt-3">
                 <el-button @click="recipeStore.closeDialog" type="danger">關閉</el-button>
             </span>
         </el-dialog>

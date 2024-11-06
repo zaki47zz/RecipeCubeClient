@@ -5,7 +5,7 @@ import tippy from 'tippy.js';
 import CategorySwiperComponent from '@/components/CategorySwiperComponent.vue';
 import UnitConversionComponent from '@/components/UnitConversionComponent.vue';
 import 'tippy.js/dist/tippy.css';
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { ElCheckbox } from 'element-plus';
 
 const cookingStore = useCookingStore();
@@ -14,6 +14,15 @@ const { resetCookingInventories } = cookingStore;
 const selectedIngredients = ref([]);
 const set = ref(false);
 const useInventory = ref(false);
+
+const isValidated = computed(() => {
+    // 驗證條件:
+    // 1. 必須有選擇食材 (selectedIngredients.length > 0)
+    // 2. 所有食材的數量都必須大於0
+    return (
+        selectedIngredients.value.length > 0 && !cookingInventories.value.some((inventory) => inventory.quantity <= 0)
+    );
+});
 
 onMounted(() => {
     initTippy();
@@ -32,7 +41,7 @@ watch(
         cookingInventories.value = newIngredients.map((ingredient) => {
             return {
                 ...ingredient,
-                quantity: 0, //初始數量
+                quantity: 1, //初始數量
                 expiryDate: expiryDate, //到期日期
                 visibility: false, //預設 visibility
             };
@@ -164,7 +173,8 @@ const exportInventories = () => {
                                     <input
                                         v-model="inventory.quantity"
                                         type="text"
-                                        class="form-control inline-control w-30"
+                                        class="form-control inline-control text-center w-30"
+                                        placeholder="數量必須大於0"
                                     />
                                     {{ inventory.unit }}
                                 </td>
@@ -201,18 +211,6 @@ const exportInventories = () => {
         <div class="container-fluid">
             <div class="row justify-content-center">
                 <div class="col-lg-3">
-                    <ElCheckbox v-model="set" name="set" id="set" class="switch-set">
-                        <span class="fs-6">
-                            套餐
-                            <span id="tooltip-wrapper-set">
-                                <i class="fa-solid fa-circle-question"></i>
-                            </span>
-                        </span>
-                    </ElCheckbox>
-                </div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-lg-3">
                     <ElCheckbox v-model="useInventory" name="inventory" id="inventory" class="switch-inventory">
                         <span class="fs-6">
                             使用庫存食材
@@ -227,8 +225,8 @@ const exportInventories = () => {
                 <div class="col-lg-3">
                     <RouterLink
                         class="btn text-dark shadow fs-5 w-100"
-                        :class="selectedIngredients.length ? 'bg-primary-subtle' : 'bg-secondary disabled-link'"
-                        :to="selectedIngredients.length ? { name: 'GenerateRecipe' } : ''"
+                        :class="isValidated ? 'bg-primary-subtle' : 'bg-secondary disabled-link'"
+                        :to="isValidated ? { name: 'GenerateRecipe' } : ''"
                         @click="exportInventories"
                     >
                         產生食譜

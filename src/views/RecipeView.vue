@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch, nextTick } from 'vue';
+import { ref, onMounted, computed, watch, nextTick, watchEffect } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRecipeStore } from '@/stores/recipeStore';
 import { useIngredientStore } from '@/stores/ingredientStore';
@@ -10,7 +10,8 @@ import RecipeFilterComponent from '@/components/RecipeFilterComponent.vue';
 import RecipeDetailComponent from '@/components/RecipeDetailComponent.vue';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.min.css';
-
+import { useRouter } from 'vue-router';
+const router = useRouter();
 // 使用 Pinia 的 recipeStore
 const recipeStore = useRecipeStore();
 const ingredientStore = useIngredientStore();
@@ -23,7 +24,10 @@ const currentPage = ref(1);
 const pageSize = ref(8);
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
-
+// 需要推薦的食譜數據
+const recommendedRecipe = ref(null);
+const isRandomRecommend = ref(false); // 控制是否顯示重新推薦按鈕
+const UserId = localStorage.getItem('UserId'); // 從 localStorage 中取得 userId
 // 使用fetch獲取數據 (這段寫在recipeStore了)
 
 // 在組件加載後獲取數據
@@ -35,6 +39,40 @@ onMounted(async () => {
 const getRecipeImageUrl = (fileName) => {
     return `${BaseUrlWithoutApi}/images/recipe/${fileName}`;
 };
+
+// 當用戶點擊“推薦我食譜！”按鈕時，調用 API
+const recommendRecipe = async () => {
+    try {
+        const response = await fetch(`${BaseURL}/RecommendRecipe/RandomRecommend`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('無法獲取推薦食譜');
+        }
+
+        recommendedRecipe.value = await response.json();
+        recipeStore.selectRecipe(recommendedRecipe.value); // 使用 Pinia 的 store 設定選中的食譜
+        isRandomRecommend.value = true; // 顯示重新推薦按鈕
+        recipeStore.dialogVisible = true; // 打開對話框以顯示推薦食譜
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: '推薦失敗',
+            text: '無法獲取推薦食譜，請稍後重試',
+        });
+    }
+};
+
+// 當用戶點擊 "重新隨機推薦" 時
+const reRecommendRecipe = async () => {
+    await recommendRecipe(); // 調用推薦函數重新獲取推薦食譜
+    onDialogOpened();
+};
+
 const resetActiveStep = ref(false);
 // Create a ref for the scrollable container
 const scrollContainer = ref(null);
@@ -114,19 +152,33 @@ watch(
 
 //#endregion 搜尋功能end
 
+//#region 自訂食譜
+const showCustomRecipes = ref(false);
+const toggleRecipesView = () => {
+    showCustomRecipes.value = !showCustomRecipes.value;
+};
+// 自訂食譜的篩選邏輯
+const customRecipes = computed(() => {
+    if (!recipeStore.recipes) {
+        return [];
+    }
+    return recipeStore.recipes.filter((recipe) => recipe.isCustom && recipe.userId === UserId);
+});
+
+const filteredRecipesList = computed(() => {
+    return showCustomRecipes.value ? customRecipes.value : filteredRecipes.value;
+});
 //#region 分頁功能 start
 
 // all-data
-const totalRecipes = computed(() => filteredRecipes.value.length);
+const totalRecipes = computed(() => filteredRecipesList.value.length);
 const totalPages = computed(() => Math.ceil(totalRecipes.value / pageSize.value));
 
-//該分頁所顯示的data
 const paginatedRecipes = computed(() => {
     const start = (currentPage.value - 1) * pageSize.value;
     const end = start + pageSize.value;
-    return filteredRecipes.value.slice(start, end);
+    return filteredRecipesList.value.slice(start, end);
 });
-
 const handlePageSizeChange = (newSize) => {
     pageSize.value = newSize;
     currentPage.value = 1; // 當每頁顯示的數量改變時，重置到第一頁
@@ -142,6 +194,15 @@ watch(totalPages, (newTotalPages) => {
     }
 });
 //#endregion 分頁功能 end
+const editCustomRecipe = (recipeId) => {
+    const selectedRecipe = recipeStore.recipes.find((recipe) => recipe.recipeId === recipeId);
+    if (selectedRecipe) {
+        recipeStore.setEditingRecipe(selectedRecipe); // 設置選中的食譜到 editingRecipe
+        recipeStore.setEditMode(true); // 設置編輯模式
+        router.push({ path: `/customrecipe/${recipeId}` });
+    }
+};
+//#endregion 自訂食譜
 </script>
 
 <template>
@@ -172,7 +233,9 @@ watch(totalPages, (newTotalPages) => {
                     <div class="d-flex flex-column align-items-center">
                         <h2 class="mt-3 text-dark text-gradient">左思右想還是不知道煮什麼嗎?</h2>
                         <div class="d-flex gap-2 flex-wrap mb-5">
-                            <button class="btn btn-lg bg-gradient-success text-white fs-6">推薦我食譜!</button>
+                            <button class="btn btn-lg bg-gradient-success text-white fs-6" @click="recommendRecipe">
+                                推薦我食譜!
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -205,8 +268,14 @@ watch(totalPages, (newTotalPages) => {
             <div class="row">
                 <div class="col-md-12">
                     <div class="bootstrap-tabs product-tabs p-3">
-                        <div class="tabs-header d-flex justify-content-between">
-                            <h3>食譜列表</h3>
+                        <div class="tabs-header d-flex justify-content-between align-items-center">
+                            <h3>{{ showCustomRecipes ? '自訂食譜列表' : '食譜列表' }}</h3>
+                            <el-switch
+                                v-model="showCustomRecipes"
+                                style="--el-switch-on-color: #41b883"
+                                active-text="查看自訂食譜"
+                                inactive-text="查看所有食譜"
+                            />
                         </div>
                         <div>
                             <!-- 分頁導航 -->
@@ -233,6 +302,14 @@ watch(totalPages, (newTotalPages) => {
                                     class="card recipe-card shadow-sm rounded-3 d-flex flex-row align-items-center"
                                     @click="recipeStore.selectRecipe(recipe)"
                                 >
+                                    <!-- 編輯按鈕 -->
+                                    <button
+                                        v-if="showCustomRecipes"
+                                        class="edit-button position-absolute top-0 end-0 m-2 btn btn-outline-secondary card-control"
+                                        @click.stop="editCustomRecipe(recipe.recipeId)"
+                                    >
+                                        <i class="fa-solid fa-pencil"></i>
+                                    </button>
                                     <div class="image-container">
                                         <img
                                             :src="getRecipeImageUrl(recipe.photoName) || 'default_image.jpg'"
@@ -247,8 +324,8 @@ watch(totalPages, (newTotalPages) => {
                                         <div class="d-flex gap-2">
                                             <span class="badge bg-secondary" v-if="recipe.restriction">素食</span>
                                             <span class="badge bg-secondary" v-else>葷食</span>
-                                            <span class="badge bg-secondary" v-if="recipe.westEast">西式</span>
-                                            <span class="badge bg-secondary" v-else>中式</span>
+                                            <span class="badge bg-secondary" v-if="recipe.westEast">中式</span>
+                                            <span class="badge bg-secondary" v-else>西式</span>
                                             <span class="badge bg-secondary">{{ recipe.category }}</span>
                                         </div>
                                     </div>
@@ -283,6 +360,7 @@ watch(totalPages, (newTotalPages) => {
             </div>
         </PerfectScrollbar>
         <span slot="footer" class="dialog-footer d-flex justify-content-center mt-3">
+            <el-button v-if="isRandomRecommend" @click="reRecommendRecipe" type="primary">重新推薦</el-button>
             <el-button @click="recipeStore.closeDialog" type="danger">關閉</el-button>
         </span>
     </el-dialog>
@@ -380,5 +458,26 @@ watch(totalPages, (newTotalPages) => {
 
 :deep(.el-pagination.is-background .el-pager li.is-active) {
     background-color: #41b883 !important;
+}
+
+/* 修改開啟狀態的標籤顏色 */
+:deep(.el-switch__label--left.is-active) {
+    color: #41b883 !important;
+}
+
+/* 修改開啟狀態的標籤顏色 */
+:deep(.el-switch__label--right.is-active) {
+    color: #41b883 !important;
+}
+.card-control {
+    color: red;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 10px 20px 10px 20px;
+}
+
+.card-control:hover {
+    transform: scale(1.1);
 }
 </style>

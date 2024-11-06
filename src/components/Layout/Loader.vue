@@ -43,7 +43,7 @@ onMounted(() => {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgb(233, 248, 255);
+    background-color: rgb(234, 255, 241);
     display: -webkit-box;
     display: flex;
     -webkit-box-align: center;

@@ -100,10 +100,7 @@ const filters = ref({
 //利用computed的監測特性來實時更改篩選庫存
 const filteredInventories = computed(() => {
     return inventories.value.filter((inventory) => {
-        //利用filter逐項遍歷每個inventory項目作篩選，利用5個Boolean來決定項目要不要顯示
-        //個人項目篩選(只能看到屬於自己或群組公開的食材)
-        const userMatch =
-            inventory.userId === currentUserId || (!inventory.visibility && inventory.userId != currentUserId);
+        //利用filter逐項遍歷每個inventory項目作篩選，利用4個Boolean來決定項目要不要顯示
         //分類篩選(用戶沒篩選或篩選符合會回傳true)
         const categoryMatch = !filters.value.category || inventory.category === filters.value.category;
         //權限篩選
@@ -127,7 +124,7 @@ const filteredInventories = computed(() => {
             );
 
         //因為filter只會傳回結果是true的項目回陣列，所以可以這樣回傳Boolean來控制
-        return userMatch && categoryMatch && visibilityMatch && expiryMatch && searchMatch;
+        return categoryMatch && visibilityMatch && expiryMatch && searchMatch;
     });
 });
 ////篩選功能結束
@@ -306,15 +303,13 @@ const exportInventories = () => {
         <div class="container-fluid">
             <div class="row justify-content-center">
                 <div class="text-center">
-                    <h4>
-                        在下方食材列表，您可以看到您所屬群組的庫存食材，您可以進行兩種操作(這裡之後用driver.js做導覽)
-                    </h4>
+                    <h4>在下方食材列表，您可以看到您所屬群組的庫存食材，您可以進行兩種操作</h4>
                 </div>
             </div>
             <div class="row justify-content-center my-5">
                 <div class="col-lg-3">
                     <div class="d-flex gap-4 justify-content-center align-items-center">
-                        <div class="driver text-center px-3 m-1 rounded-3">
+                        <div class="driver text-center px-3 m-1 rounded-3" @click="startEditTutorial">
                             <h5><i class="fa-solid fa-box-open mt-3"></i> 管理食材</h5>
                             <p>對個別食材進行數量的修改或刪除</p>
                         </div>
@@ -322,7 +317,7 @@ const exportInventories = () => {
                 </div>
                 <div class="col-lg-3">
                     <div class="d-flex gap-4 justify-content-center align-items-center">
-                        <div class="driver text-center px-3 m-1 rounded-3">
+                        <div class="driver text-center px-3 m-1 rounded-3" @click="startCookTutorial">
                             <h5><i class="fa-solid fa-utensils mt-3"></i> 產生食譜</h5>
                             <p>選取食材讓我們為您自動生成食譜</p>
                         </div>
@@ -383,7 +378,7 @@ const exportInventories = () => {
                         <div class="tabs-header d-flex justify-content-between">
                             <h3>食材列表</h3>
                             <div>
-                                <button class="btn blur shadow fs-6 me-1" @click="showPantryDialog">
+                                <button class="btn blur shadow fs-6 me-1" id="historyButton" @click="showPantryDialog">
                                     歷史編輯紀錄
                                 </button>
                                 <button v-if="allSelect" class="btn blur shadow fs-6 me-1" @click="deselectAllCard">
@@ -517,6 +512,7 @@ const exportInventories = () => {
                             />
                             <span>{{ editInventory.unit }}</span>
                         </div>
+                        <span v-if="editInventory.quantity <= 0" class="m-0 p-0 text-danger">數量不可小於或等於0</span>
                     </div>
                     <div class="mb-3">
                         <label for="expiryDate" class="m-0 p-0 fs-6">到期日</label>
@@ -544,7 +540,9 @@ const exportInventories = () => {
                 </div>
             </div>
             <span slot="footer" class="dialog-footer d-flex justify-content-center mt-3">
-                <el-button type="info" @click="saveEditedInventory">儲存</el-button>
+                <el-button v-if="editInventory.quantity > 0" type="primary" @click="saveEditedInventory"
+                    >儲存</el-button
+                >
                 <el-button type="danger" @click="isInventoryModalVisible = false">關閉</el-button>
             </span>
         </el-dialog>
@@ -666,7 +664,9 @@ const exportInventories = () => {
     height: 100%;
     display: flex;
     flex-direction: column;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
 }
 
 .card.active {
@@ -755,11 +755,8 @@ const exportInventories = () => {
 }
 
 .driver {
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px !important;
-    cursor: pointer;
-}
-
-.driver:hover {
-    transform: scale(1.05);
+    box-shadow:
+        rgba(0, 0, 0, 0.16) 0px 10px 36px 0px,
+        rgba(0, 0, 0, 0.06) 0px 0px 0px 1px !important;
 }
 </style>

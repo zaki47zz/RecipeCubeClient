@@ -1,7 +1,14 @@
 <script setup>
-import { ref, computed, watchEffect, onMounted } from 'vue';
+import { useRecipeStore } from '@/stores/recipeStore';
+import { storeToRefs } from 'pinia';
+import { ref, computed, watchEffect, onMounted, watch } from 'vue';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.min.css';
+
+const recipeStore = useRecipeStore();
+const { clearEditingRecipe } = recipeStore;
+const { editingRecipe, isEditMode } = storeToRefs(recipeStore);
+
 const recipeData = ref({
     photo: '',
     recipeName: '',
@@ -21,10 +28,9 @@ const recipeData = ref({
     previewUrl: '',
     time: '',
     description: '',
+    recipeId: 0,
 });
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
-const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
-const POSTAPI = `${BaseURL}/Recipes`;
 const getIngredientsApi = `${BaseURL}/Ingredients`;
 const ingredients = ref([]);
 const selectedIngredients = ref([]);
@@ -61,15 +67,40 @@ const fetchIngredients = async () => {
         console.error('Fetch Fail', error);
     }
 };
-onMounted(() => {
+onMounted(async () => {
     const storedUserId = localStorage.getItem('UserId');
     if (storedUserId) {
         recipeData.value.userId = storedUserId;
-        // console.log("userId", recipeData.value.userId)
     }
-    // console.log("store:", storedUserId)
-    // fetchRecipes();
-    fetchIngredients();
+    // 先獲取食材
+    await fetchIngredients();
+
+    // 如果是編輯模式，初始化表單資料
+    if (isEditMode.value && editingRecipe.value) {
+        Object.assign(recipeData.value, editingRecipe.value);
+        // 初始化選擇的食材
+        selectedIngredients.value = editingRecipe.value.selectedIngredients
+            .map((id) => ingredients.value.find((ingredient) => ingredient.ingredientId === id))
+            .filter(Boolean); // 過濾掉為 null 或 undefined 的值
+
+        recipeData.value.recipeId = editingRecipe.value.recipeId;
+        recipeData.value.detailedCategory = editingRecipe.value.detailedCategory;
+        // 初始化步驟和調味料
+        if (editingRecipe.value.steps) {
+            stepsList.value = editingRecipe.value.steps.split('。').map((step) => ({ description: step }));
+        }
+        if (editingRecipe.value.seasoning) {
+            seasoningsList.value = editingRecipe.value.seasoning.split(', ').map((item) => ({ description: item }));
+        }
+
+        // 將 time 的 "30m" 轉換為數字 30
+        if (editingRecipe.value.time) {
+            recipeData.value.time = parseInt(editingRecipe.value.time.replace('m', ''));
+        }
+
+        // 初始化 ingredientQuantities
+        ingredientQuantities.value = { ...editingRecipe.value.ingredientQuantities };
+    }
 });
 function customLabel(option) {
     // 合併名稱和同義字來讓它們參與過濾
@@ -97,9 +128,9 @@ watchEffect(() => {
             ingredientQuantities.value[ingredient.ingredientId] = '';
         }
     });
-    console.log(ingredientQuantities.value);
+    // console.log(ingredientQuantities.value);
 });
-const fileName = ref('');
+
 // 處理圖片上傳
 const handlePhotoUpload = (event) => {
     const file = event.target.files[0];
@@ -122,17 +153,18 @@ const categoryOptions = {
 };
 const subcategoryOptions = ref([]);
 
-// 使用 watchEffect 來自動更新子類別選項
-watchEffect(() => {
-    console.log(recipeData.value.category);
-    if (recipeData.value.category) {
-        subcategoryOptions.value = categoryOptions[recipeData.value.category] || [];
-    } else {
-        subcategoryOptions.value = [];
+watch(
+    () => recipeData.value.category,
+    (newCategory) => {
+        if (newCategory) {
+            subcategoryOptions.value = categoryOptions[newCategory] || [];
+        } else {
+            subcategoryOptions.value = [];
+        }
+        // 只有當類別改變時，才清空細部類別
+        recipeData.value.detailedCategory = '';
     }
-    // 清空選擇的細部類別
-    recipeData.value.detailedCategory = '';
-});
+);
 
 const stepsList = ref([{ description: '' }]);
 const seasoningsList = ref([{ description: '' }]);
@@ -201,13 +233,18 @@ const saveRecipe = async () => {
     formData.append('time', timestring);
 
     formData.append('description', recipeData.value.description);
+    if (isEditMode.value) {
+        formData.append('recipeId', recipeData.value.recipeId);
+    }
     // 在這裡可以調用 API 來提交食譜資料4
     for (let pair of formData.entries()) {
         console.log(pair[0] + ': ' + pair[1]);
     }
     try {
-        const response = await fetch(POSTAPI, {
-            method: 'POST',
+        const method = isEditMode.value ? 'PUT' : 'POST';
+        const ApiURL = `${BaseURL}/Recipes${isEditMode.value ? `/${editingRecipe.value.recipeId}` : ''}`;
+        const response = await fetch(ApiURL, {
+            method: method,
             body: formData,
         });
         if (!response.ok) {
@@ -218,6 +255,7 @@ const saveRecipe = async () => {
         }
         const data = await response.json();
         console.log('Recipe saved successfully:', data);
+        clearEditingRecipe();
     } catch (error) {
         console.error('error saving recipe:', error);
     }
@@ -316,8 +354,8 @@ const saveRecipe = async () => {
                         <div class="col-6">
                             <select class="form-select fs-6 text-center" v-model="recipeData.westEast">
                                 <option :value="null">中式/西式</option>
-                                <option :value="true">西式</option>
-                                <option :value="false">中式</option>
+                                <option :value="false">西式</option>
+                                <option :value="true">中式</option>
                             </select>
                         </div>
                         <div class="col-6">

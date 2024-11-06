@@ -15,8 +15,8 @@
             <div class="col-md-2 mt-2">
                 <select class="form-select" v-model="filters.style">
                     <option value="">選擇中西式</option>
-                    <option :value="false">中式</option>
-                    <option :value="true">西式</option>
+                    <option :value="true">中式</option>
+                    <option :value="false">西式</option>
                 </select>
             </div>
             <div class="col-md-3 mt-2">

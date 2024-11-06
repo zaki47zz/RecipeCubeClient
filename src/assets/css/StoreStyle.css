@@ -18,7 +18,7 @@
     font-size: 25px; /* 控制圖標的大小 */
 }
 .floating-icon:hover {
-    background-color: #ec8404; /* 懸停時變色 */
+    background-color: #b2d1d3; /* 懸停時變色 */
 }
 
 .floating-icon-cart {
@@ -40,7 +40,7 @@
 }
 
 .floating-icon-cart:hover {
-    background-color: #ec8404; /* 懸停時變色 */
+    background-color: #b2d1d3; /* 懸停時變色 */
 }
 
 .floating-icon-side-cart {
@@ -63,7 +63,7 @@
 }
 
 .floating-icon-side-cart:hover {
-    background-color: #ec8404; /* 懸停時變色 */
+    background-color: #b2d1d3; /* 懸停時變色 */
 }
 
 .floating-icon-order {
@@ -86,7 +86,7 @@
 }
 
 .floating-icon-order:hover {
-    background-color: #ec8404; /* 懸停時變色 */
+    background-color: #b2d1d3; /* 懸停時變色 */
 }
 
 .floating-icon-shoppingList {
@@ -109,7 +109,7 @@
 }
 
 .floating-icon-shoppingList:hover {
-    background-color: #ec8404; /* 懸停時變色 */
+    background-color: #b2d1d3; /* 懸停時變色 */
 }
 
 .floating-icon-myCoupon {
@@ -132,7 +132,7 @@
 }
 
 .floating-icon-myCoupon:hover {
-    background-color: #ec8404; /* 懸停時變色 */
+    background-color: #b2d1d3; /* 懸停時變色 */
 }
 
 .floating-icon-bot {
@@ -155,7 +155,30 @@
 }
 
 .floating-icon-bot:hover {
-    background-color: #ec8404; /* 懸停時變色 */
+    background-color: #b2d1d3; /* 懸停時變色 */
+}
+
+.floating-icon-chart {
+    position: fixed;
+    bottom: 470px;
+    right: 30px;
+    background-color: #f4b0a5; /* 背景顏色 */
+    border-radius: 15px; /* 圓角 */
+    width: 45px; /* 控制圖標的寬度 */
+    height: 45px; /* 控制圖標的高度 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加陰影效果 */
+    cursor: pointer;
+    z-index: 900; /* 保證圖標在最上層 */
+    color: white !important; /* 圖標顏色 */
+    font-size: 25px; /* 控制圖標的大小 */
+    border: none;
+}
+
+.floating-icon-chart:hover {
+    background-color: #b2d1d3; /* 懸停時變色 */
 }
 
 /* 右側懸浮storeIcon products End */

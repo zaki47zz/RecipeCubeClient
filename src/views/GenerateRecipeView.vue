@@ -6,7 +6,7 @@ import { useInventoryStore } from '@/stores/inventoryStore';
 import { useRecipeFilterStore } from '@/stores/recipeFilterStore';
 import { useRecipeStore } from '@/stores/recipeStore';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, watch, nextTick, computed } from 'vue';
+import { onMounted, ref, watch, nextTick, computed, inject } from 'vue';
 import { useRouter } from 'vue-router';
 
 // 設定列表是否展開
@@ -27,7 +27,9 @@ const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
 const apiUrl = `${BaseURL}/RecommendRecipe/Recommend`;
 const scrollContainer = ref(null);
+const appScrollContainer = inject('appScrollContainer');
 const router = useRouter();
+const userId = ref('');
 // 當打開對話框時，重置子組件中的 activeStep
 const onDialogOpened = () => {
     if (scrollContainer.value) {
@@ -82,13 +84,62 @@ const fetchRecipes = async () => {
 
         // 解析返回的結果
         const data = await response.json();
-        recipes.value = data; // 將返回的食譜儲存在 `recipes` 中
+        // 更新食譜，添加偏好和禁忌的標記
+        recipes.value = data.map((recipe) => {
+            // 判斷該食譜是否包含偏好食材
+            const hasPreferred = recipe.ingredientIds.some((id) => preferredIngredients.value.includes(id));
+            // 判斷該食譜是否包含禁忌食材
+            const hasExclusive = recipe.ingredientIds.some((id) => exclusiveIngredients.value.includes(id));
+
+            // 返回一個包含新屬性的食譜物件
+            return {
+                ...recipe,
+                hasPreferred,
+                hasExclusive,
+            };
+        });
         // console.log('推薦食譜:', recipes.value);
     } catch (error) {
         console.error('錯誤:', error);
     }
 };
+const preferredIngredients = ref([]);
+const exclusiveIngredients = ref([]);
 
+const fetchUserPreferences = async () => {
+    try {
+        // 從 localStorage 中獲取偏好食材
+        const preferredIngredientsString = localStorage.getItem('PreferIngredients');
+        if (preferredIngredientsString) {
+            const preferredIngredientsArray = preferredIngredientsString.split('\n');
+            const preferredIngredientIds = preferredIngredientsArray.map((item) => parseInt(item.split(',')[0]));
+            preferredIngredients.value = preferredIngredientIds;
+            console.log('偏好食材 ID 列表:', preferredIngredientIds);
+        } else {
+            console.warn('偏好食材沒有儲存在 localStorage 中');
+        }
+
+        // 從 localStorage 獲取 ExclusiveIngredients 資料
+        const exclusiveIngredientsString = localStorage.getItem('ExclusiveIngredients');
+        if (exclusiveIngredientsString) {
+            // 將資料拆分為陣列，以換行符作為分隔符
+            const exclusiveIngredientsArray = exclusiveIngredientsString.split('\n');
+
+            // 使用 map() 來提取所有的 id (每行的第一個值)
+            const exclusiveIngredientIds = exclusiveIngredientsArray.map((item) => {
+                // 以逗號分隔，取出第一部分（即 id 值），並轉換為數字
+                return parseInt(item.split(',')[0]);
+            });
+            exclusiveIngredients.value = exclusiveIngredientIds;
+
+            console.log('禁忌食材 ID 列表:', exclusiveIngredientIds);
+        } else {
+            console.log('未找到 ExclusiveIngredients 資料於 localStorage 中');
+        }
+    } catch (error) {
+        console.error('錯誤:', error);
+    }
+};
 // 在DOM載入後抓食材
 onMounted(async () => {
     console.log('Store values:', {
@@ -102,10 +153,17 @@ onMounted(async () => {
     // 2. 從 localStorage 中取出保存的食材 ID
     setCookingInventories();
     // 3. fetch推薦食譜 API
+    await fetchUserPreferences();
     await fetchRecipes();
+    // console.log('偏好食材:', preferredIngredients.value);
+    console.log('不可食材:', exclusiveIngredients.value);
     setupIntersectionObserver();
     // 4. 設定列表是否展開
     if (isUsingInventory.value) isListExpanded.value = false;
+
+    setTimeout(() => {
+        console.log('App Scroll Container after mounted:', appScrollContainer.value);
+    }, 1000);
 });
 
 watch(cookingInventories, (newInventories) => {
@@ -248,11 +306,29 @@ function useSelectedRecipe() {
     }
     // 這裡寫你需要執行的邏輯
     console.log('使用選定的食譜', recipeId);
+    // 在使用食譜時，關閉 el-dialog
+    recipeStore.dialogVisible = false;
     // 比如導航到新的頁面或者呼叫 API
     // 使用 Vue Router 導航到新的頁面
     localStorage.setItem('isFromGenerateRecipe', 'true');
     router.push(`/generaterecipe/recipeDetail/${recipeStore.selectedRecipe.recipeId}`);
 }
+
+//收起列表的時候把滾動軸條回頂端
+const ListClose = async () => {
+    console.log('listclose');
+    isListExpanded.value = false;
+    await nextTick(); // 確保在 DOM 更新後操作滾動
+    console.log(appScrollContainer.value);
+
+    const container = appScrollContainer?.value?.$el || appScrollContainer?.value;
+    if (container && container.scrollTop !== undefined) {
+        container.scrollTop = 10;
+        console.log('滾動到頂端成功');
+    } else {
+        console.error('無法找到滾動容器');
+    }
+};
 </script>
 
 <template>
@@ -321,13 +397,17 @@ function useSelectedRecipe() {
                         <tfoot>
                             <tr>
                                 <td colspan="4" class="text-dark">
-                                    <h6 v-if="!isListExpanded" class="collapse-button" @click="isListExpanded = true">
+                                    <h6
+                                        v-if="!isListExpanded && cookingInventories.length > 10"
+                                        class="collapse-button"
+                                        @click="isListExpanded = true"
+                                    >
                                         與其他 {{ cookingInventories.length - 10 }} 個食材...
                                     </h6>
                                     <h6
                                         v-if="isListExpanded && isUsingInventory"
                                         class="collapse-button"
-                                        @click="isListExpanded = false"
+                                        @click="ListClose"
                                     >
                                         收起列表
                                     </h6>
@@ -375,7 +455,25 @@ function useSelectedRecipe() {
                             />
                         </div>
                         <div class="p-3 w-100 d-flex flex-column justify-content-start align-items-center">
-                            <h5 class="mt-3 text-center">{{ recipe.recipeName }}</h5>
+                            <h5 class="mt-3 text-center">
+                                {{ recipe.recipeName }}
+                                <el-tag
+                                    v-if="recipe.hasExclusive"
+                                    size="large"
+                                    type="danger"
+                                    class="position-absolute top-3 end-1"
+                                >
+                                    包含禁忌食材
+                                </el-tag>
+                                <el-tag
+                                    v-else-if="recipe.hasPreferred"
+                                    type="success"
+                                    size="large"
+                                    class="position-absolute top-3 end-1"
+                                >
+                                    包含偏好食材
+                                </el-tag>
+                            </h5>
                             <div class="d-flex flex-wrap gap-2 mb-1 mx-auto">
                                 <div class="d-flex gap-2">
                                     <span class="text-secondary">#{{ recipe.restriction ? '素' : '葷' }}</span>
@@ -407,11 +505,30 @@ function useSelectedRecipe() {
                             />
                         </div>
                         <div class="p-3 w-100 d-flex flex-column justify-content-start align-items-center">
-                            <h5 class="mt-3 text-center">{{ recipe.recipeName }}</h5>
+                            <h5 class="mt-3 text-center">
+                                {{ recipe.recipeName }}
+                                <el-tag
+                                    v-if="recipe.hasExclusive"
+                                    type="danger"
+                                    size="large"
+                                    class="position-absolute top-3 end-1"
+                                >
+                                    包含禁忌食材
+                                </el-tag>
+                                <el-tag
+                                    v-else-if="recipe.hasPreferred"
+                                    type="success"
+                                    size="large"
+                                    class="position-absolute top-3 end-1"
+                                >
+                                    包含偏好食材
+                                </el-tag>
+                            </h5>
+
                             <div class="d-flex flex-wrap gap-2 mb-1 mx-auto">
                                 <div class="d-flex gap-2">
                                     <span class="text-secondary">#{{ recipe.restriction ? '素' : '葷' }}</span>
-                                    <span class="text-secondary">#{{ recipe.westEast ? '西式' : '中式' }}</span>
+                                    <span class="text-secondary">#{{ recipe.westEast ? '中式' : '西式' }}</span>
                                 </div>
                                 <div class="d-flex gap-2">
                                     <span class="text-secondary">#{{ recipe.category }}</span>
@@ -439,6 +556,7 @@ function useSelectedRecipe() {
         width="75%"
         @close="recipeStore.closeDialog"
         center
+        class="bg-primary-subtle"
         destroy-on-close
         @opended="onDialogOpened"
     >
@@ -447,7 +565,7 @@ function useSelectedRecipe() {
                 <RecipeDetailComponent :recipe="recipeStore.selectedRecipe" v-if="recipeStore.selectedRecipe" />
             </div>
         </PerfectScrollbar>
-        <span slot="footer" class="dialog-footer d-flex justify-content-center m-3">
+        <span slot="footer" class="dialog-footer d-flex justify-content-center mt-3">
             <el-button @click="useSelectedRecipe" type="primary">使用該食譜</el-button>
             <el-button @click="recipeStore.closeDialog" type="danger">關閉</el-button>
         </span>
@@ -567,5 +685,19 @@ function useSelectedRecipe() {
     max-height: 100%;
     padding-right: 15px;
     /* Adjust as needed to avoid content overflow */
+}
+
+.recipe-tag {
+    font-size: 0.8rem; /* 調整標籤的字體大小 */
+    line-height: 1.2; /* 控制標籤的行高，減少標籤占用的垂直空間 */
+    padding: 2px 6px; /* 調整標籤內部的間距 */
+}
+
+:deep(.card .el-tag) {
+    font-size: 0.8rem;
+    line-height: 1.2;
+    padding: 2px 6px;
+    border: none;
+    background-color: transparent;
 }
 </style>
