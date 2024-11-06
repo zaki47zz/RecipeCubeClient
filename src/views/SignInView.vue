@@ -2,9 +2,11 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { useOAuthStore } from '@/stores/oauth';
 
-const authStore = useAuthStore();
 const router = useRouter();
+const authStore = useAuthStore();
+const oauthStore = useOAuthStore();
 
 const user = ref({
     // 後續記得帳號功能，可以在按下記住密碼button後，將帳號密碼寫入localStorage，登入時讀取localStorage帳密，在tokin到期時一起清除
@@ -15,19 +17,20 @@ const user = ref({
 const handleLoginClick = async () => {
     const loginSuccess = await authStore.login(user.value.email, user.value.password); // 先發送請求
     if (loginSuccess) {
-        authStore.userData.UserName
-        authStore.userData.UserName
-        console.log(authStore.checkTokenExpiry);
+        // console.log(authStore.checkTokenExpiry);
         router.push('/'); // 使用 router 進行導航，不需要刷新頁面
     }
+};
+
+const handleGoogleLogin = async (response) => {
+    oauthStore.callback(response);
 };
 </script>
 
 <template>
     <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
         <div class="card card-plain mt-8">
-            <button>Google</button>
-            
+            <GoogleLogin :callback="handleGoogleLogin" />
             <div class="card-header pb-0 text-left bg-transparent">
                 <h3 class="font-weight-bolder text-info text-gradient">歡迎回來</h3>
                 <p class="mb-0">輸入Email與密碼登入</p>

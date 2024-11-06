@@ -22,6 +22,7 @@ import OrderView from '@/views/OrderView.vue';
 import HomeView from '@/views/HomeView.vue';
 import RecipeDetailView from '@/views/RecipeDetailView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
+import oAuthFirstSignIn from '@/views/oAuthFirstSignInView.vue';
 
 import { createRouter, createWebHistory } from 'vue-router';
 
@@ -68,6 +69,12 @@ const router = createRouter({
             path: '/signin',
             name: 'signin',
             component: SignIn,
+        },
+        {
+            // 第一次第三方登入跳轉填寫必填資訊
+            path: '/oAuthFirstSignIn',
+            name: 'oAuthFirstSignIn',
+            component: oAuthFirstSignIn,
         },
         {
             // 註冊
