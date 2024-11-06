@@ -55,6 +55,7 @@ const check = (text, buttonText, func, secondTitle) => {
         text: text,
         icon: 'warning',
         showCancelButton: true,
+        heightAuto: false,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
         confirmButtonText: buttonText,
@@ -63,6 +64,7 @@ const check = (text, buttonText, func, secondTitle) => {
         if (result.isConfirmed) {
             func();
             Swal.fire({
+                heightAuto: false,
                 title: secondTitle,
                 icon: 'success',
             });
@@ -241,6 +243,7 @@ const deleteCards = () => {
     for (let inventory of selectedInventories.value) {
         deleteCard(inventory);
     }
+    selectedInventories.value = [];
 };
 ////刪除功能結束
 

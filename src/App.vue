@@ -18,12 +18,8 @@ body,
     /* 避免顯示原生滾動條 */
 }
 
-#scroll-container {
+.scroll-container {
     height: 100vh;
-    /* 確保 PerfectScrollbar 覆蓋整個視窗 */
-    display: flex;
-    flex-direction: column;
-    width: 100vw;
     margin-left: calc(50% - 50vw);
     background: url('@/assets/img/ForBackground/ad-bg-pattern.png') no-repeat center / cover;
 }
@@ -36,7 +32,7 @@ body,
 </style>
 
 <template>
-    <el-scrollbar ref="appScrollContainer" style="height: 100vh">
+    <el-scrollbar ref="appScrollContainer" class="scroll-container" @scroll="handleScroll">
         <Loader />
         <Navbar />
         <main class="main-content container position-relative">
@@ -51,10 +47,16 @@ import Navbar from './components/Layout/Navbar.vue';
 import Footer from './components/Layout/Footer.vue';
 import Loader from './components/Layout/Loader.vue';
 
+import { storeToRefs } from 'pinia';
+import { useScrollStore } from './stores/scrollStore';
 import { onMounted, ref, provide } from 'vue';
 import { useRouter } from 'vue-router';
+
+const scrollStore = useScrollStore();
+const { appScrollContainer } = storeToRefs(scrollStore);
+const { handleScroll } = scrollStore;
+
 const isMobile = ref(false); // 用來判斷是否為手機裝置
-const appScrollContainer = ref(null); // Ref to access PerfectScrollbar instance
 const router = useRouter(); // Access Vue Router instance
 const checkIfMobile = () => {
     isMobile.value = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);

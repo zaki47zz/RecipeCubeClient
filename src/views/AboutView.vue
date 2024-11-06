@@ -3,16 +3,25 @@ import wasteFood from '@/assets/img/ForBackground/wasteFood.jpg';
 import WOW from 'wow.js';
 import 'wow.js/css/libs/animate.css';
 import { onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useScrollStore } from '@/stores/scrollStore';
+const scrollStore = useScrollStore();
+const { appScrollContainer } = storeToRefs(scrollStore);
 
 onMounted(() => {
-    const wow = new WOW({
-        boxClass: 'wow',
-        animateClass: 'animated',
-        mobile: true,
-        live: true,
-        scrollContainer: '#scroll-container',
-    });
-    wow.init();
+    if (appScrollContainer.value?.wrapRef) {
+        //為滾動容器添加一個ID
+        appScrollContainer.value.wrapRef.id = 'wow-scroll-container';
+
+        const wow = new WOW({
+            boxClass: 'wow',
+            animateClass: 'animated',
+            mobile: true,
+            live: true,
+            scrollContainer: '#wow-scroll-container', //使用ID選擇器
+        });
+        wow.init();
+    }
 });
 </script>
 
