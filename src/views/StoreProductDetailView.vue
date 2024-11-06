@@ -6,6 +6,7 @@ import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引
 import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import CouponComponent from '@/components/CouponComponent.vue';
 import StoreChatComponent from '@/components/StoreChatComponent.vue';
+import StoreChartComponent from '@/components/StoreChartComponent.vue';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 const BaseURL = import.meta.env.VITE_API_BASEURL;
@@ -239,6 +240,8 @@ loadEvaluates(productId);
     <CouponComponent />
     <!-- 引入聊天機器人 -->
     <StoreChatComponent />
+    <!-- 引入消費統計圖表 -->
+    <StoreChartComponent />
 
     <!-- Single Product Start -->
     <div class="container-fluid py-1 mt-5 d-flex justify-content-center">

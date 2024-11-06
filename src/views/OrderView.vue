@@ -3,6 +3,7 @@ import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引
 import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import CouponComponent from '@/components/CouponComponent.vue';
 import StoreChatComponent from '@/components/StoreChatComponent.vue';
+import StoreChartComponent from '@/components/StoreChartComponent.vue';
 import Swal from 'sweetalert2';
 import { ref, onMounted } from 'vue';
 import 'vue3-easy-data-table/dist/style.css';
@@ -444,6 +445,8 @@ const submitReview = async (item) => {
             <CouponComponent />
             <!-- 引入聊天機器人  -->
             <StoreChatComponent />
+            <!-- 引入消費統計圖表 -->
+            <StoreChartComponent />
         </div>
         <div>
             <!-- EasyDataTable Start -->

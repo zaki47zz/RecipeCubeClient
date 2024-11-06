@@ -6,6 +6,7 @@ import SideBarCartComponent from '@/components/SideBarCartComponent.vue'; // 引
 import ShoppingListComponent from '@/components/ShoppingListComponent.vue';
 import CouponComponent from '@/components/CouponComponent.vue';
 import StoreChatComponent from '@/components/StoreChatComponent.vue';
+import StoreChartComponent from '@/components/StoreChartComponent.vue';
 const BaseURL = import.meta.env.VITE_API_BASEURL;
 const BaseUrlWithoutApi = BaseURL.replace('/api', ''); // 去掉 "/api" 得到基本的 URL;
 
@@ -379,6 +380,8 @@ const ToOrders = () => {
     <CouponComponent />
     <!-- 引入聊天機器人 -->
     <StoreChatComponent />
+    <!-- 引入消費統計圖表 -->
+    <StoreChartComponent />
     <!-- Checkout Page Start -->
     <div class="container-fluid py-2">
         <div class="container py-2">
