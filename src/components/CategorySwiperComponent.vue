@@ -314,132 +314,134 @@ const handlePhotoUpload = (event) => {
             :z-index="1000"
             class="el-dialog bg-primary-subtle"
         >
-            <form class="bg-white rounded-4 p-3" @submit.prevent>
-                <div class="mb-4">
-                    <label for="ingredientName" class="form-label fs-6">食材名稱</label>
-                    <input
-                        v-model="customIngredient.ingredientName"
-                        type="text"
-                        id="ingredientName"
-                        class="form-control"
-                        placeholder="例如: 豆腐"
-                    />
-                    <span v-if="customIngredient.ingredientName === ''" class="text-danger">名稱欄位不可為空</span>
-                </div>
-
-                <div class="mb-4">
-                    <label for="category" class="form-label fs-6">類別</label>
-                    <select v-model="customIngredient.category" id="category" class="form-control">
-                        <option value="">請選擇類別</option>
-                        <option v-for="category in ingredientCategory" :key="category" :value="category">
-                            {{ category }}
-                        </option>
-                    </select>
-                </div>
-
-                <div class="mb-4">
-                    <label for="synonym" class="form-label fs-6">別名</label>
-                    <div class="d-flex justify-content-between align-items-center">
+            <PerfectScrollbar ref="scrollContainer" class="custom-scroll-container">
+                <form class="bg-white rounded-4 p-3" @submit.prevent>
+                    <div class="mb-4">
+                        <label for="ingredientName" class="form-label fs-6">食材名稱</label>
                         <input
-                            v-model="customIngredient.synonym"
+                            v-model="customIngredient.ingredientName"
                             type="text"
-                            id="synonym"
+                            id="ingredientName"
                             class="form-control"
-                            placeholder="(選填) 例如: Tofu"
+                            placeholder="例如: 豆腐"
                         />
-                        <span class="synonym-adder mx-2 fs-2" @click="addSynonym">+</span>
+                        <span v-if="customIngredient.ingredientName === ''" class="text-danger">名稱欄位不可為空</span>
                     </div>
 
-                    <!-- 動態生成的別名欄位 -->
-                    <div
-                        v-for="(synonym, index) in synonyms"
-                        :key="index"
-                        class="d-flex justify-content-between align-items-center mt-2"
-                    >
-                        <input v-model="synonyms[index]" type="text" class="form-control" />
-                        <span class="synonym-remover mx-2 fs-3" @click="removeSynonym(index)">×</span>
+                    <div class="mb-4">
+                        <label for="category" class="form-label fs-6">類別</label>
+                        <select v-model="customIngredient.category" id="category" class="form-control">
+                            <option value="">請選擇類別</option>
+                            <option v-for="category in ingredientCategory" :key="category" :value="category">
+                                {{ category }}
+                            </option>
+                        </select>
                     </div>
-                </div>
 
-                <div class="mb-4">
-                    <label for="expireDay" class="form-label fs-6">保鮮期 (天)</label>
-                    <input
-                        v-model="customIngredient.expireDay"
-                        type="number"
-                        id="expireDay"
-                        class="form-control"
-                        placeholder="(選填，預設7天) 例如: 7"
-                    />
-                </div>
-
-                <div class="mb-4">
-                    <label for="unit" class="form-label fs-6">常用單位</label>
-                    <input
-                        v-model="customIngredient.unit"
-                        type="text"
-                        id="unit"
-                        class="form-control"
-                        placeholder="(選填，預設'克') 例如: 盒"
-                    />
-                </div>
-
-                <div class="mb-4">
-                    <label for="gram" class="form-label fs-6">每單位重量 (克)</label>
-                    <input
-                        v-model="customIngredient.gram"
-                        type="number"
-                        id="gram"
-                        class="form-control"
-                        value=""
-                        placeholder="(選填，常用單位非'克'時建議填寫) 例如: 200"
-                    />
-                </div>
-
-                <label for="photo" class="form-label fs-6">食材圖片</label>
-                <div class="mb-4 d-flex justify-content-center">
-                    <div
-                        class="position-relative"
-                        style="
-                            width: 50%;
-                            height: 300px;
-                            background-color: #f8f9fa;
-                            border: 2px dashed #ced4da;
-                            border-radius: 8px;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            cursor: pointer;
-                        "
-                    >
-                        <div v-if="!customIngredient.previewUrl" class="text-center">
-                            <i class="fas fa-cloud-upload-alt mb-2" style="font-size: 48px; color: #6c757d"></i>
-                            <p class="mb-0 fs-6" style="color: #6c757d">點擊或拖曳上傳食材照片</p>
+                    <div class="mb-4">
+                        <label for="synonym" class="form-label fs-6">別名</label>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <input
+                                v-model="customIngredient.synonym"
+                                type="text"
+                                id="synonym"
+                                class="form-control"
+                                placeholder="(選填) 例如: Tofu"
+                            />
+                            <span class="synonym-adder mx-2 fs-2" @click="addSynonym">+</span>
                         </div>
-                        <img
-                            v-else
-                            :src="customIngredient.previewUrl"
-                            alt="食材預覽"
-                            style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px"
-                        />
+
+                        <!-- 動態生成的別名欄位 -->
+                        <div
+                            v-for="(synonym, index) in synonyms"
+                            :key="index"
+                            class="d-flex justify-content-between align-items-center mt-2"
+                        >
+                            <input v-model="synonyms[index]" type="text" class="form-control" />
+                            <span class="synonym-remover mx-2 fs-3" @click="removeSynonym(index)">×</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="expireDay" class="form-label fs-6">保鮮期 (天)</label>
                         <input
-                            type="file"
-                            class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
-                            accept="image/*"
-                            @change="handlePhotoUpload"
+                            v-model="customIngredient.expireDay"
+                            type="number"
+                            id="expireDay"
+                            class="form-control"
+                            placeholder="(選填，預設7天) 例如: 7"
                         />
                     </div>
-                </div>
-                <div class="d-flex justify-content-center">
-                    <button
-                        v-if="customIngredient.ingredientName !== ''"
-                        class="btn btn-info me-5"
-                        @click="postIngredientAlert"
-                    >
-                        加入
-                    </button>
-                    <button class="btn btn-secondary" @click="isModalVisible = false">關閉</button>
-                </div>
-            </form>
+
+                    <div class="mb-4">
+                        <label for="unit" class="form-label fs-6">常用單位</label>
+                        <input
+                            v-model="customIngredient.unit"
+                            type="text"
+                            id="unit"
+                            class="form-control"
+                            placeholder="(選填，預設'克') 例如: 盒"
+                        />
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="gram" class="form-label fs-6">每單位重量 (克)</label>
+                        <input
+                            v-model="customIngredient.gram"
+                            type="number"
+                            id="gram"
+                            class="form-control"
+                            value=""
+                            placeholder="(選填，常用單位非'克'時建議填寫) 例如: 200"
+                        />
+                    </div>
+
+                    <label for="photo" class="form-label fs-6">食材圖片</label>
+                    <div class="mb-4 d-flex justify-content-center">
+                        <div
+                            class="position-relative"
+                            style="
+                                width: 50%;
+                                height: 300px;
+                                background-color: #f8f9fa;
+                                border: 2px dashed #ced4da;
+                                border-radius: 8px;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                cursor: pointer;
+                            "
+                        >
+                            <div v-if="!customIngredient.previewUrl" class="text-center">
+                                <i class="fas fa-cloud-upload-alt mb-2" style="font-size: 48px; color: #6c757d"></i>
+                                <p class="mb-0 fs-6" style="color: #6c757d">點擊或拖曳上傳食材照片</p>
+                            </div>
+                            <img
+                                v-else
+                                :src="customIngredient.previewUrl"
+                                alt="食材預覽"
+                                style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px"
+                            />
+                            <input
+                                type="file"
+                                class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
+                                accept="image/*"
+                                @change="handlePhotoUpload"
+                            />
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <button
+                            v-if="customIngredient.ingredientName !== ''"
+                            class="btn btn-info me-5"
+                            @click="postIngredientAlert"
+                        >
+                            加入
+                        </button>
+                        <button class="btn btn-secondary" @click="isModalVisible = false">關閉</button>
+                    </div>
+                </form>
+            </PerfectScrollbar>
         </el-dialog>
     </section>
 </template>
@@ -526,5 +528,10 @@ const handlePhotoUpload = (event) => {
     transform: scale(1.1);
     /* 懸停時放大效果 */
     transition: transform 0.2s;
+}
+
+.custom-scroll-container {
+    max-height: 420px;
+    overflow: hidden;
 }
 </style>

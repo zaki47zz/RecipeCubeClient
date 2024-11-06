@@ -1,19 +1,71 @@
 <script setup>
 import CountUp from 'vue-countup-v3';
 import WOW from 'wow.js';
+// swiper
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import { EffectCreative, Pagination, Autoplay, Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/effect-creative';
 import 'wow.js/css/libs/animate.css';
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, onBeforeMount, watch, computed } from 'vue';
 import PerfectScrollbar from 'perfect-scrollbar';
 import { useAuthStore } from '@/stores/auth';
 const authStore = useAuthStore();
 
 const BaseURL = import.meta.env.VITE_API_BASEURL;
+const BaseUrlWithoutApi = BaseURL.replace('/api', '');
 const homeApiURL = `${BaseURL}/home`;
 
 // 用於儲存 perfect-scrollbar 實例和滾動位置
 const scrollPosition = ref(0);
 let ps = null;
 const startCount = ref(false);
+
+// swiper
+// 設定
+const isDataLoaded = ref(false);
+
+const swiperOptions = {
+    spaceBetween: 80,
+    initialSlide: 5,
+    effect: 'coverflow',
+    grabCursor: true,
+    centeredSlides: true,
+    slidesPerView: 'auto',
+    coverflowEffect: {
+        rotate: 50,
+        stretch: 0,
+        depth: 100,
+        modifier: 1,
+        slideShadows: true,
+    },
+    navigation: true,
+    pagination: {
+        clickable: true,
+    },
+    autoplay: {
+        delay: 2000,
+        disableOnInteraction: false,
+        pauseOnMouseEnter: true,
+    },
+    modules: [EffectCreative, Pagination, Autoplay, Navigation],
+    loop: true,
+};
+
+// Swiper 初始化完成的處理函數
+const onSwiperInit = (swiper) => {
+    if (swiper && randomRecipes.value.length > 0) {
+        swiper.update();
+        swiper.autoplay.start();
+    }
+};
+
+// 確保在數據加載完成後再渲染 Swiper
+const shouldRenderSwiper = computed(() => {
+    return isDataLoaded.value && randomRecipes.value.length > 0;
+});
 
 // 響應式物件存資料庫統計數據
 const amounts = ref({
@@ -23,18 +75,17 @@ const amounts = ref({
     userAmount: 0,
 });
 
-// 從食譜資料庫統計隨便抓3個id
-const randomRecipeIds = computed(() => {
-    return Array.from({ length: 3 }, () => Math.floor(Math.random() * amounts.value.recipeAmount));
-});
+// 響應式物件存隨機3食譜
+const randomRecipes = ref([]);
 
-onMounted(async () => {
-    //fetch資料庫統計數據(不要異步，避免數據不顯示)
-    const response = await fetch(homeApiURL);
-    if (!response.ok) {
+// mount前先抓好資料
+onBeforeMount(async () => {
+    //fetch資料庫統計數據
+    const AmountResponse = await fetch(homeApiURL);
+    if (!AmountResponse.ok) {
         throw new Error('API有異常');
     }
-    const data = await response.json();
+    const data = await AmountResponse.json();
     amounts.value = {
         recipeAmount: data.recipeAmount,
         ingredientAmount: data.ingredientAmount,
@@ -42,6 +93,16 @@ onMounted(async () => {
         userAmount: data.userAmount,
     };
 
+    //fetch抓隨機三個內建食譜
+    const randomRecipeResponse = await fetch(`${homeApiURL}/Recommend`);
+    if (!randomRecipeResponse.ok) {
+        throw new Error('API有異常');
+    }
+    randomRecipes.value = await randomRecipeResponse.json();
+    isDataLoaded.value = true;
+});
+
+onMounted(() => {
     const wow = new WOW({
         boxClass: 'wow',
         animateClass: 'animated',
@@ -108,6 +169,14 @@ const updateScrollPosition = () => {
                 </div>
             </div>
         </div>
+    </section>
+
+    <section>
+        <swiper v-if="shouldRenderSwiper" v-bind="swiperOptions" @swiper="onSwiperInit">
+            <swiper-slide v-for="(recipe, index) in randomRecipes" :key="recipe.recipeId" class="swiper-slide">
+                <img :src="`${BaseUrlWithoutApi}/images/recipe/${recipe.photo}`" class="swiper-img" />
+            </swiper-slide>
+        </swiper>
     </section>
 
     <section class="service-section banner-wrapper">
@@ -439,5 +508,31 @@ const updateScrollPosition = () => {
 
 .floating-buttons .button:hover {
     background-color: #f39c12;
+}
+
+.swiper {
+    width: 100%;
+    padding-top: 30px;
+    padding-bottom: 50px;
+}
+
+.swiper-slide {
+    background-position: center;
+    background-size: cover;
+    width: 300px;
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.swiper-img {
+    display: block;
+    width: 300px;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 10px;
 }
 </style>

@@ -15,7 +15,6 @@ import 'swiper/css/pagination';
 import 'swiper/css/effect-coverflow';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
-const swiperInstance = ref(null);
 const isDataLoaded = ref(false);
 
 const BaseURL = import.meta.env.VITE_API_BASEURL; // https://localhost:7188/api
@@ -271,7 +270,6 @@ const swiperOptions = {
 // Swiper 初始化完成的處理函數
 const onSwiperInit = (swiper) => {
     if (swiper && products.value.length > 0) {
-        swiperInstance.value = swiper;
         swiper.update();
         swiper.autoplay.start();
         console.log('Swiper initialized successfully');
@@ -664,8 +662,8 @@ const swiperProducts = computed(() => {
 .swiper-slide {
     background-position: center;
     background-size: cover;
-    width: 300px;
-    height: 250px;
+    width: 400px;
+    height: 300px;
     display: flex;
     align-items: center;
     justify-content: center;
