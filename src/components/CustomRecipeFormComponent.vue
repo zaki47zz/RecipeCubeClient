@@ -261,7 +261,7 @@ const saveRecipe = async () => {
         }
         const data = await response.json();
         console.log('Recipe saved successfully:', data);
-        clearEditingRecipe();
+
         // 使用 Swal 彈出成功提示框
         Swal.fire({
             title: isEditMode.value ? '修改成功!' : '新增成功!',
@@ -272,6 +272,7 @@ const saveRecipe = async () => {
             // 在彈出框關閉後的操作
             // 可以在這裡執行跳轉頁面或其他操作
         });
+        clearEditingRecipe();
     } catch (error) {
         console.error('error saving recipe:', error);
         Swal.fire({
