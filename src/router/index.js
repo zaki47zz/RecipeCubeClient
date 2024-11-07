@@ -24,8 +24,9 @@ import RecipeDetailView from '@/views/RecipeDetailView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import oAuthFirstSignIn from '@/views/oAuthFirstSignInView.vue';
 
-import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
+import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -174,6 +175,29 @@ const router = createRouter({
     scrollBehavior(to, from, savedPosition) {
         return { top: 0 };
     },
+});
+
+router.beforeEach((to, from, next) => {
+    //登入的頁面陣列
+    const requiresAuth = ['Inventory', 'AddIngredient', 'CustomRecipe', 'GenerateRecipe', 'signin'];
+
+    //檢查使用者要去的頁面是否需要登入
+    if (requiresAuth.includes(to.name)) {
+        //檢查使用者是否已登入
+        const authStore = useAuthStore();
+        const isLoggedIn = authStore.token && authStore.checkTokenExpiry;
+
+        if (!isLoggedIn) {
+            //若沒登入，重導到首頁
+            next('/');
+        } else {
+            //已登入則允許
+            next();
+        }
+    } else {
+        // 不需要登入的頁面直接放行
+        next();
+    }
 });
 
 export default router;
