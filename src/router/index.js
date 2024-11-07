@@ -179,7 +179,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     //登入的頁面陣列
-    const requiresAuth = ['Inventory', 'AddIngredient', 'CustomRecipe', 'GenerateRecipe', 'signin'];
+    const requiresAuth = ['Inventory', 'AddIngredient', 'CustomRecipe', 'GenerateRecipe'];
 
     //檢查使用者要去的頁面是否需要登入
     if (requiresAuth.includes(to.name)) {

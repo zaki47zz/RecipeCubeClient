@@ -2,14 +2,20 @@
 import { storeToRefs } from 'pinia';
 import { useIngredientStore } from '@/stores/ingredientStore';
 import { usePantryStore } from '@/stores/pantryStore';
+import { useAuthStore } from '@/stores/auth';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import Swal from 'sweetalert2';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
-import { onMounted, ref, watchEffect, computed } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.min.css';
+
+const authStore = useAuthStore();
+const isLoggedIn = computed(() => {
+    authStore.token && authStore.checkTokenExpiry;
+});
 
 //定義 props，接收父組件的 v-model 值
 //modelValue 是 v-model 在 Vue 3 中的默認 prop 名稱
@@ -63,8 +69,10 @@ const isIngredientExpanded = ref([]);
 
 onMounted(async () => {
     await fetchIngredients();
-    frequentlyUsedIngredients.value = await getFrequentlyUsedIngredients(0.05);
-    //因為裡面是Promise物件要用async/await自動解構(相當於.then(result=>變數=result))
+    if (isLoggedIn) {
+        //因為裡面是Promise物件要用async/await自動解構(相當於.then(result=>變數=result))
+        frequentlyUsedIngredients.value = await getFrequentlyUsedIngredients(0.05);
+    }
     isIngredientExpanded.value = [...ingredientCategory.value].map((c) => false);
 });
 
@@ -229,7 +237,7 @@ const handlePhotoUpload = (event) => {
         <div class="col-md-12">
             <!-- 使用 Swiper 和 SwiperSlide 組件 -->
             <Swiper v-bind="swiperOptions" class="category-carousel">
-                <SwiperSlide class="nav-link category-item">
+                <SwiperSlide v-if="isLoggedIn" class="nav-link category-item">
                     <h6 class="text-center">您的常用食材</h6>
                     <div class="d-flex flex-wrap justify-content-center gap-2">
                         <span
@@ -293,7 +301,7 @@ const handlePhotoUpload = (event) => {
                     </div>
                 </SwiperSlide>
 
-                <SwiperSlide class="nav-link category-item">
+                <SwiperSlide v-if="isLoggedIn" class="nav-link category-item">
                     <h6 class="text-dark">沒有想要的食材?</h6>
                     <button class="btn blur rounded-3 shadow text-center" @click="isModalVisible = true">
                         加入自定義食材
