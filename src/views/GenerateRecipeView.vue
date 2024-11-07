@@ -58,8 +58,15 @@ const fetchRecipes = async () => {
             //如果沒有userId就給他0，這是內建食譜的預設Id
             userId = 0;
         }
-        const ingredientIds = cookingInventories.value.map((inventory) => inventory.ingredientId);
-
+        // const ingredientIds = cookingInventories.value.map((inventory) => inventory.ingredientId);
+        // 確保庫存和加入的食材都包含在 ingredientIds 中
+        const ingredientIds = [
+            ...new Set([
+                ...cookingInventories.value.map((inventory) => inventory.ingredientId),
+                ...(isUsingInventory.value ? inventories.value.map((inv) => inv.ingredientId) : []),
+            ]),
+        ];
+        // console.log('Ingredient IDs for API:', ingredientIds);
         // 構造請求 body
         const requestBody = {
             UserId: userId,
@@ -160,11 +167,14 @@ onMounted(async () => {
     }
     // 2. 從 localStorage 中取出保存的食材 ID
     setCookingInventories();
+
+    // 3. 合併庫存食材到選擇的食材
+
     // 3. fetch推薦食譜 API
     await fetchUserPreferences();
     await fetchRecipes();
     // console.log('偏好食材:', preferredIngredients.value);
-    console.log('不可食材:', exclusiveIngredients.value);
+    // console.log('不可食材:', exclusiveIngredients.value);
     setupIntersectionObserver();
     // 4. 設定列表是否展開
     if (isUsingInventory.value) isListExpanded.value = false;
