@@ -206,13 +206,13 @@ const handleCompleteOrder = async (item) => {
     }
 
     const { value: visibility } = await Swal.fire({
-        title: '選擇可見性',
-        text: '請選擇該訂單商品的可見性',
+        title: '選擇權限',
+        text: '請選擇該訂單商品的權限',
         icon: 'question',
         input: 'radio',
         inputOptions: {
-            true: '可見',
-            false: '不可見',
+            true: '私人',
+            false: '群組',
         },
         inputValidator: (value) => {
             if (!value) return '請選擇一個選項！';
