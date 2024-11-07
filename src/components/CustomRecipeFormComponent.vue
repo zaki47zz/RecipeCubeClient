@@ -2,6 +2,8 @@
 import { useRecipeStore } from '@/stores/recipeStore';
 import { storeToRefs } from 'pinia';
 import { ref, computed, watchEffect, onMounted, watch } from 'vue';
+import Swal from 'sweetalert2';
+import { useRouter } from 'vue-router';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.min.css';
 
@@ -260,8 +262,24 @@ const saveRecipe = async () => {
         const data = await response.json();
         console.log('Recipe saved successfully:', data);
         clearEditingRecipe();
+        // 使用 Swal 彈出成功提示框
+        Swal.fire({
+            title: isEditMode.value ? '修改成功!' : '新增成功!',
+            text: isEditMode.value ? '您的食譜已成功修改。' : '您的食譜已成功新增！',
+            icon: 'success',
+            confirmButtonText: '了解',
+        }).then(() => {
+            // 在彈出框關閉後的操作
+            // 可以在這裡執行跳轉頁面或其他操作
+        });
     } catch (error) {
         console.error('error saving recipe:', error);
+        Swal.fire({
+            title: '儲存失敗!',
+            text: '儲存食譜時發生錯誤，請稍後再試。',
+            icon: 'error',
+            confirmButtonText: '了解',
+        });
     }
 };
 </script>
