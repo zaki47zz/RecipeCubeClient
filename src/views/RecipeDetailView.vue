@@ -85,10 +85,10 @@ const recipeIngredients = computed(() => {
 
 //#region 顯示食譜資訊
 // 計算顯示的用戶 ID
-const userIdDisplay = computed(() => {
+const userDisplayName = computed(() => {
     return recipeStore.selectedRecipe && recipeStore.selectedRecipe.userId === '0'
         ? '系統預設'
-        : recipeStore.selectedRecipe?.userId;
+        : recipeStore.selectedRecipe?.userName || '未知用戶';
 });
 
 // 用來控制當前步驟的變數
@@ -302,7 +302,7 @@ const startCooking = async () => {
                         </tr>
                         <tr>
                             <th>用戶名稱</th>
-                            <td>{{ userIdDisplay }}</td>
+                            <td>{{ userDisplayName }}</td>
                         </tr>
                         <tr>
                             <th>葷素限制</th>

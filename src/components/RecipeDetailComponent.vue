@@ -4,7 +4,7 @@
 
         <div class="recipe-info">
             <el-descriptions title="" :column="2" border>
-                <el-descriptions-item label="用戶名稱">{{ userIdDisplay }}</el-descriptions-item>
+                <el-descriptions-item label="用戶名稱">{{ userDisplayName }}</el-descriptions-item>
                 <el-descriptions-item label="葷素限制">{{ recipe.restriction ? '素' : '葷' }}</el-descriptions-item>
                 <el-descriptions-item label="中/西式">{{ recipe.westEast ? '中式' : '西式' }}</el-descriptions-item>
                 <el-descriptions-item label="類別">{{ recipe.category }}</el-descriptions-item>
@@ -75,10 +75,10 @@ const recipeStore = useRecipeStore();
 let activeStep = ref(1);
 
 // 計算顯示的用戶 ID
-const userIdDisplay = computed(() => {
+const userDisplayName = computed(() => {
     return recipeStore.selectedRecipe && recipeStore.selectedRecipe.userId === '0'
         ? '系統預設'
-        : recipeStore.selectedRecipe?.userId;
+        : recipeStore.selectedRecipe?.userName || '未知用戶';
 });
 const props = defineProps({
     recipe: {
