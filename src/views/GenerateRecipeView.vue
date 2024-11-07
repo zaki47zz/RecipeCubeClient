@@ -495,7 +495,7 @@ const ListClose = async () => {
                             <div class="d-flex flex-wrap gap-2 mb-1 mx-auto">
                                 <div class="d-flex gap-2">
                                     <span class="text-secondary">#{{ recipe.restriction ? '素' : '葷' }}</span>
-                                    <span class="text-secondary">#{{ recipe.westEast ? '西式' : '中式' }}</span>
+                                    <span class="text-secondary">#{{ recipe.westEast ? '中式' : '西式' }}</span>
                                 </div>
                                 <div class="d-flex gap-2">
                                     <span class="text-secondary">#{{ recipe.category }}</span>

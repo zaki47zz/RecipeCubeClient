@@ -16,7 +16,12 @@
 
             <div class="row ingredients-seasoning-section mt-4">
                 <div class="col-md-6 ingredients-section">
-                    <h5>食材列表</h5>
+                    <div class="d-flex justify-content-between">
+                        <h5>食材列表</h5>
+                        <UnitConversionComponent
+                            :addingInventoriesList="selectedIngredientId"
+                        ></UnitConversionComponent>
+                    </div>
                     <ul class="ingredients-list">
                         <li
                             v-for="(ingredientId, index) in recipeStore.selectedRecipe.selectedIngredients"
@@ -67,10 +72,19 @@
 </template>
 
 <script setup>
-import { onMounted, watch, ref, computed } from 'vue';
+import UnitConversionComponent from './UnitConversionComponent.vue';
+import { watch, ref, computed } from 'vue';
 import { useRecipeStore } from '@/stores/recipeStore';
 
 const recipeStore = useRecipeStore();
+
+//新增一個陣列來存只有ingredientId的物件，因為單位轉換表需要
+const selectedIngredientId = computed(() => {
+    return recipeStore.selectedRecipe.selectedIngredients.map((IngredientId) => {
+        return { ingredientId: IngredientId };
+    });
+});
+
 // 用來控制當前步驟的變數
 let activeStep = ref(1);
 

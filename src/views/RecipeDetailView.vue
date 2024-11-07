@@ -1,4 +1,5 @@
 <script setup>
+import UnitConversionComponent from '@/components/UnitConversionComponent.vue';
 import { ref, computed, onMounted } from 'vue';
 import { useInventoryStore } from '@/stores/inventoryStore';
 import { useRecipeStore } from '@/stores/recipeStore';
@@ -338,6 +339,7 @@ const startCooking = async () => {
                     <!-- 食材 -->
                     <div class="col-12 w-60 mx-auto p-3">
                         <h3 class="text-black">食材</h3>
+                        <UnitConversionComponent :addingInventoriesList="recipeIngredients"></UnitConversionComponent>
                         <div class="row g-4">
                             <ul class="list-unstyled">
                                 <li
