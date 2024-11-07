@@ -13,8 +13,9 @@ import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.min.css';
 
 const authStore = useAuthStore();
+const { token } = storeToRefs(authStore);
 const isLoggedIn = computed(() => {
-    authStore.token && authStore.checkTokenExpiry;
+    return token && authStore.checkTokenExpiry;
 });
 
 //定義 props，接收父組件的 v-model 值
@@ -69,7 +70,7 @@ const isIngredientExpanded = ref([]);
 
 onMounted(async () => {
     await fetchIngredients();
-    if (isLoggedIn) {
+    if (isLoggedIn.value) {
         //因為裡面是Promise物件要用async/await自動解構(相當於.then(result=>變數=result))
         frequentlyUsedIngredients.value = await getFrequentlyUsedIngredients(0.05);
     }

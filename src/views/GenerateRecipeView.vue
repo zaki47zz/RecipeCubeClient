@@ -1,6 +1,8 @@
 <script setup>
+import Swal from 'sweetalert2';
 import RecipeFilterComponent from '@/components/RecipeFilterComponent.vue';
 import RecipeDetailComponent from '@/components/RecipeDetailComponent.vue';
+import { useAuthStore } from '@/stores/auth';
 import { useCookingStore } from '@/stores/cookingStore';
 import { useInventoryStore } from '@/stores/inventoryStore';
 import { useRecipeFilterStore } from '@/stores/recipeFilterStore';
@@ -12,10 +14,18 @@ import { useRouter } from 'vue-router';
 // 設定列表是否展開
 const isListExpanded = ref(true);
 
+const authStore = useAuthStore();
+const { token } = storeToRefs(authStore);
 const cookingStore = useCookingStore();
 const inventoryStore = useInventoryStore();
 const recipeFilterStore = useRecipeFilterStore();
 const recipeStore = useRecipeStore();
+
+//檢查登入與否
+const isLoggedIn = computed(() => {
+    return token && authStore.checkTokenExpiry;
+});
+
 // 使用 filterStore 的篩選條件
 const { filters, selectedIngredients } = storeToRefs(recipeFilterStore);
 const { inventories } = storeToRefs(inventoryStore); // 使用庫存資料並引入 fetch 方法
@@ -43,16 +53,13 @@ const getRecipeImageUrl = (fileName) => {
 // 呼叫推薦食譜API
 const fetchRecipes = async () => {
     try {
-        // console.log('Fetching recipes with filters:', filters.value);
-        const userId = localStorage.getItem('UserId');
-        // console.log(userId);
+        let userId = localStorage.getItem('UserId');
         if (!userId) {
-            console.error('無法獲取用戶 ID');
-            return;
+            //如果沒有userId就給他0，這是內建食譜的預設Id
+            userId = 0;
         }
         const ingredientIds = cookingInventories.value.map((inventory) => inventory.ingredientId);
 
-        // console.log('Ingredient IDs for API:', ingredientIds);
         // 構造請求 body
         const requestBody = {
             UserId: userId,
@@ -72,7 +79,6 @@ const fetchRecipes = async () => {
         if (!response.ok) {
             const errorData = await response.json();
             console.error('API 回應錯誤:', errorData);
-            // 顯示錯誤訊息給用戶（可以使用 Swal 或其他通知工具）
             Swal.fire({
                 title: '錯誤',
                 text: errorData.message || '發生未知錯誤',
@@ -148,8 +154,10 @@ onMounted(async () => {
         isUsingInventory: isUsingInventory.value,
     });
     console.log('食材:', { cookingInventories: cookingInventories.value });
-    // 1. 先加載庫存
-    await inventoryStore.fetchInventories();
+    // 1. 先加載庫存(已登入才會加載)
+    if (isLoggedIn.value) {
+        await inventoryStore.fetchInventories();
+    }
     // 2. 從 localStorage 中取出保存的食材 ID
     setCookingInventories();
     // 3. fetch推薦食譜 API
@@ -259,8 +267,12 @@ const partialMatchRecipes = computed(() => {
                     let missingQuantity = missingIngredientDetail?.missingQuantity;
                     let ingredientUnit = missingIngredientDetail?.unit;
 
-                    // 如果找不到缺少的食材，且該食材在庫存中但未被選擇
-                    if (missingQuantity === undefined && inventories.value.some((inv) => inv.ingredientId === id)) {
+                    // 如果找不到缺少的食材，且該食材在庫存中但未被選擇(已登入才會加入庫存篩選機制)
+                    if (
+                        isLoggedIn &&
+                        missingQuantity === undefined &&
+                        inventories.value.some((inv) => inv.ingredientId === id)
+                    ) {
                         missingQuantity = '未選擇食材';
                         ingredientUnit = '';
                     } else {
@@ -344,7 +356,7 @@ const ListClose = async () => {
                     <h4>
                         您輸入了
                         <span class="text-info text-gradient">{{ cookingInventories.length }}</span>
-                        樣食材<span v-if="isShowingString"
+                        樣食材<span v-if="isShowingString && isLoggedIn"
                             >，並決定
                             <span v-if="isUsingInventory" class="text-info text-gradient">納入</span>
                             <span v-else class="text-info text-gradient">不納入</span>

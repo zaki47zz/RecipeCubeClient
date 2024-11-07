@@ -1,7 +1,8 @@
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { defineStore, storeToRefs } from 'pinia';
 import { useInventoryStore } from '@/stores/inventoryStore';
 import { usePantryStore } from '@/stores/pantryStore';
+import { useAuthStore } from '@/stores/auth';
 
 export const useCookingStore = defineStore('cookingStore', () => {
     //儲存產生食譜用的食材們
@@ -16,9 +17,6 @@ export const useCookingStore = defineStore('cookingStore', () => {
     //決定顯示"納入/不納入"字串的Flag(在隨買隨煮設定)
     const isUsingInventory = ref(false);
 
-    //決定是否要產生套餐的Flag(在隨買隨煮設定)
-    const isSet = ref(false);
-
     //判斷是不是已經加入過庫存食材了
     const hasAddedInventories = ref(false);
     // 判斷是否來自隨買隨煮
@@ -30,13 +28,11 @@ export const useCookingStore = defineStore('cookingStore', () => {
         isShowingString.value = true;
         isUsingInventory.value = false;
         hasAddedInventories.value = false;
-        isSet.value = false;
         source.value = '';
         const keysToRemove = [
             'cookingInventories',
             'isShowingString',
             'isUsingInventory',
-            'isSet',
             'hasAddedInventories',
             'source',
         ];
@@ -47,10 +43,17 @@ export const useCookingStore = defineStore('cookingStore', () => {
     //建構store們
     const inventoryStore = useInventoryStore();
     const pantryStore = usePantryStore();
+    const authStore = useAuthStore();
+    const { token } = storeToRefs(authStore);
 
     //監控isUsingInventory的值，如果設定為true就抓庫存進來
     const { inventories } = storeToRefs(inventoryStore);
     const { fetchInventories } = inventoryStore;
+
+    //檢查登入與否
+    const isLoggedIn = computed(() => {
+        return token && authStore.checkTokenExpiry;
+    });
 
     watch(isUsingInventory, async (newValue) => {
         if (newValue === true && !hasAddedInventories.value) {
@@ -77,13 +80,11 @@ export const useCookingStore = defineStore('cookingStore', () => {
                 cookingInventories: JSON.parse(localStorage.getItem('cookingInventories')),
                 isShowingString: JSON.parse(localStorage.getItem('isShowingString')),
                 isUsingInventory: JSON.parse(localStorage.getItem('isUsingInventory')),
-                isSet: JSON.parse(localStorage.getItem('isSet')),
                 hasAddedInventories: JSON.parse(localStorage.getItem('hasAddedInventories')),
                 source: localStorage.getItem('source'),
             };
             if (storedData.cookingInventories) cookingInventories.value = storedData.cookingInventories;
             if (storedData.isShowingString !== null) isShowingString.value = storedData.isShowingString;
-            if (storedData.isSet !== null) isSet.value = storedData.isSet;
             if (storedData.hasAddedInventories !== null) hasAddedInventories.value = storedData.hasAddedInventories;
             if (storedData.isUsingInventory !== null) isUsingInventory.value = storedData.isUsingInventory;
             if (storedData.source) source.value = storedData.source;
@@ -98,8 +99,8 @@ export const useCookingStore = defineStore('cookingStore', () => {
     const { postPantry } = pantryStore;
     const saveLeftoverInventories = async () => {
         // 如果來源不是隨買隨煮，則不需要將剩餘食材加入庫存
-        if (source.value !== 'buyAndCook') {
-            console.log('來源不是隨買隨煮，跳過保存剩餘食材的步驟');
+        if (!isLoggedIn.value || source.value !== 'buyAndCook') {
+            console.log('未登入或來源不是隨買隨煮，跳過保存剩餘食材的步驟');
             return;
         }
 
@@ -140,41 +141,40 @@ export const useCookingStore = defineStore('cookingStore', () => {
             console.error('usedIngredients 不是一個有效的數組:', usedIngredients);
             return;
         }
-    
+
         console.log('開始更新 cookingInventories，usedIngredients:', usedIngredients);
-    
+
         // 遍歷使用過的食材
         usedIngredients.forEach((usedIngredient) => {
             // 在 cookingInventories 中找到對應的食材
-            const inventoryItem = cookingInventories.value.find(
-                (item) => item.ingredientName === usedIngredient.name
-            );
-    
+            const inventoryItem = cookingInventories.value.find((item) => item.ingredientName === usedIngredient.name);
+
             // 如果找到了對應的食材，減去用掉的數量
             if (inventoryItem) {
                 // 確保 quantity 是數字型別
                 inventoryItem.quantity = parseFloat(inventoryItem.quantity);
-    
-                console.log(`正在更新食材: ${inventoryItem.ingredientName}, 原本數量: ${inventoryItem.quantity}, 使用數量: ${usedIngredient.quantity}`);
+
+                console.log(
+                    `正在更新食材: ${inventoryItem.ingredientName}, 原本數量: ${inventoryItem.quantity}, 使用數量: ${usedIngredient.quantity}`
+                );
                 inventoryItem.quantity -= usedIngredient.quantity;
-    
+
                 // 確保數量不會變成負數
                 if (inventoryItem.quantity < 0) {
                     inventoryItem.quantity = 0;
                 }
-    
+
                 console.log(`更新後的數量: ${inventoryItem.quantity}`);
             } else {
                 console.warn(`找不到對應的食材，ingredientId: ${usedIngredient.ingredientId}`);
             }
         });
-    
+
         // 更新 LocalStorage 中的 cookingInventories
         localStorage.setItem('cookingInventories', JSON.stringify(cookingInventories.value));
         console.log('更新完畢後的 cookingInventories:', cookingInventories.value);
     };
-    
-    
+
     ////動態操作結束
 
     return {
@@ -182,7 +182,6 @@ export const useCookingStore = defineStore('cookingStore', () => {
         leftInventories,
         isShowingString,
         isUsingInventory,
-        isSet,
         resetCookingInventories,
         setCookingInventories,
         saveLeftoverInventories,

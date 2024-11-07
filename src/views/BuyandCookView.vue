@@ -1,5 +1,6 @@
 <script setup>
 import { useCookingStore } from '@/stores/cookingStore';
+import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
 import tippy from 'tippy.js';
 import CategorySwiperComponent from '@/components/CategorySwiperComponent.vue';
@@ -9,11 +10,17 @@ import { ref, onMounted, watch, computed } from 'vue';
 import { ElCheckbox } from 'element-plus';
 
 const cookingStore = useCookingStore();
+const authStore = useAuthStore();
+const { token } = storeToRefs(authStore);
 const { cookingInventories } = storeToRefs(cookingStore);
 const { resetCookingInventories } = cookingStore;
 const selectedIngredients = ref([]);
-const set = ref(false);
 const useInventory = ref(false);
+
+//檢查登入與否
+const isLoggedIn = computed(() => {
+    return token && authStore.checkTokenExpiry;
+});
 
 const isValidated = computed(() => {
     // 驗證條件:
@@ -81,7 +88,6 @@ const exportInventories = () => {
     }
     localStorage.setItem('cookingInventories', JSON.stringify(cookingInventories.value));
     localStorage.setItem('isUsingInventory', useInventory.value);
-    localStorage.setItem('isSet', set.value);
     localStorage.setItem('source', 'buyAndCook'); // 標識來源為隨買隨煮
 };
 </script>
@@ -160,8 +166,8 @@ const exportInventories = () => {
                                 <th scope="col" class="text-dark">編號</th>
                                 <th scope="col" class="text-dark">食材</th>
                                 <th scope="col" class="text-dark">數量</th>
-                                <th scope="col" class="text-dark">權限</th>
-                                <th scope="col" class="text-dark">期限</th>
+                                <th v-if="isLoggedIn" scope="col" class="text-dark">權限</th>
+                                <th v-if="isLoggedIn" scope="col" class="text-dark">期限</th>
                                 <th scope="col"></th>
                             </tr>
                         </thead>
@@ -178,7 +184,7 @@ const exportInventories = () => {
                                     />
                                     {{ inventory.unit }}
                                 </td>
-                                <td class="text-dark">
+                                <td v-if="isLoggedIn" class="text-dark">
                                     <select
                                         v-model="inventory.visibility"
                                         class="form-control inline-control text-center"
@@ -187,7 +193,7 @@ const exportInventories = () => {
                                         <option :value="true">私人</option>
                                     </select>
                                 </td>
-                                <td class="text-dark">
+                                <td v-if="isLoggedIn" class="text-dark">
                                     <input
                                         v-model="inventory.expiryDate"
                                         type="date"
@@ -209,7 +215,7 @@ const exportInventories = () => {
 
     <section class="pt-5">
         <div class="container-fluid">
-            <div class="row justify-content-center">
+            <div v-if="isLoggedIn" class="row justify-content-center">
                 <div class="col-lg-3">
                     <ElCheckbox v-model="useInventory" name="inventory" id="inventory" class="switch-inventory">
                         <span class="fs-6">
@@ -233,7 +239,7 @@ const exportInventories = () => {
                     </RouterLink>
                 </div>
             </div>
-            <div class="row justify-content-center">
+            <div v-if="isLoggedIn" class="row justify-content-center">
                 <div class="col-lg-3">
                     <p class="text-center">(別擔心，剩餘食材將被加入庫存)</p>
                 </div>
