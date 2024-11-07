@@ -63,7 +63,7 @@ const isIngredientExpanded = ref([]);
 
 onMounted(async () => {
     await fetchIngredients();
-    frequentlyUsedIngredients.value = await getFrequentlyUsedIngredients(0.1);
+    frequentlyUsedIngredients.value = await getFrequentlyUsedIngredients(0.05);
     //因為裡面是Promise物件要用async/await自動解構(相當於.then(result=>變數=result))
     isIngredientExpanded.value = [...ingredientCategory.value].map((c) => false);
 });

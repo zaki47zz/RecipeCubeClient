@@ -122,22 +122,21 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
 
     const getRunningOutIngredients = async () => {
         if (!inventories.value.length) await fetchInventories();
+        const frequentlyUsedIngredients = (await getFrequentlyUsedIngredients(0.05)).map((ingredient) => {
+            const quantity =
+                inventories.value
+                    .filter((inventory) => inventory.ingredientId === ingredient.ingredientId)
+                    .map((inventory) => inventory.quantity)[0] || 0;
 
-        const frequentlyUsedIngredientIds = (await getFrequentlyUsedIngredients(0.1)).map(
-            (ingredient) => ingredient.ingredientId
-        );
-        const frequentlyUsedIngredients = inventories.value
-            .filter(
-                (ingredient) =>
-                    frequentlyUsedIngredientIds.includes(ingredient.ingredientId) && ingredient.isExpired === false
-            )
-            .map((ingredient) => ({
+            return {
                 ingredientId: ingredient.ingredientId,
                 ingredientName: ingredient.ingredientName,
-                quantity: ingredient.quantity,
+                quantity: quantity,
                 unit: ingredient.unit,
                 source: '常用食材',
-            }));
+            };
+        });
+
         const isExpiredIngredients = inventories.value
             .filter((inventory) => inventory.isExpired === true)
             .map((inventory) => ({ ...inventory, source: '已經過期' }));
@@ -205,7 +204,6 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
                     // 正常庫存處理方式
                     let inventoryItems = inventories.value
                         .filter((item) => {
-
                             // 解析 item.expiryDate 並設置時間為 00:00:00
                             const expiryDate = new Date(item.expiryDate);
                             expiryDate.setHours(0, 0, 0, 0);
@@ -263,7 +261,6 @@ export const useInventoryStore = defineStore('inventoryStore', () => {
                             console.log(`已記錄減少的食材: ${inventoryItem.ingredientName}, 數量: ${quantityToDeduct}`);
                         }
                     }
-
                 }
             }
             await fetchInventories();
