@@ -32,7 +32,7 @@ watchEffect(async () => {
 
 <template>
     <p class="conversion-button badge bg-secondary" @click="isModalVisible = true">
-        <i class="fa-solid fa-repeat"></i> 數量換算表
+        <i class="fa-solid fa-repeat"></i> 單位克數換算表
     </p>
 
     <el-dialog v-model="isModalVisible" title="單位與克數換算表" width="30%" center class="bg-primary-subtle">
