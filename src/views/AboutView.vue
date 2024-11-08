@@ -34,8 +34,19 @@ onMounted(() => {
             </div>
         </div>
     </section>
+
+    <!-- 聲明 -->
+    <section class="mt-3">
+        <div class="d-flex justify-content-center">
+            <div class="text-center">
+                <p class="fs-4">此網頁為僅供學習用途</p>
+                <p class="fs-4">This website is for educational purposes only.</p>
+            </div>
+        </div>
+    </section>
+
     <!-- 簡介理念 -->
-    <section class="mt-6">
+    <section class="mt-5">
         <div class="brief-section container-fluid">
             <div class="row g-5 align-items-center">
                 <div class="col-md-6">
@@ -168,7 +179,7 @@ onMounted(() => {
     top: 0;
     left: 0;
     transform: translateZ(0) scale(1, 1);
-    background: #1b2030 url('src/assets/img/ForBackground/bg-header.jpg') 50% 0 no-repeat;
+    background: #1b2030 url('@/assets/img/ForBackground/bg-header.jpg') 50% 0 no-repeat;
     background-size: cover;
     background-attachment: fixed;
     animation: grow 180s linear 10ms infinite;

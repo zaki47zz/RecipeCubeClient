@@ -362,7 +362,7 @@ watch(scrollPosition, (newPosition) => {
 }
 
 .service-section {
-    background-image: url('src/assets/img/ForBackground/inventory1.jpg'); /* Replace with your image path */
+    background-image: url('@/assets/img/ForBackground/inventory1.jpg'); /* Replace with your image path */
     background-size: cover;
     background-position: center;
 }
@@ -405,7 +405,7 @@ watch(scrollPosition, (newPosition) => {
     justify-content: center;
     position: relative;
     padding: 2rem;
-    background-image: url('src/assets/img/ForBackground/inventory.jpg');
+    background-image: url('@/assets/img/ForBackground/inventory.jpg');
     background-size: cover;
     background-position: center;
     height: 100vh;

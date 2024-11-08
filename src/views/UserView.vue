@@ -8,7 +8,6 @@ const filteredIngredients = ref([]); // 選取分類後過濾的食材
 const selectedIngredientId = ref(null); // 儲存選擇的食材 ID
 const foodtype = ref('');
 
-
 // 定義一個響應式變數 username，儲存使用者名稱
 const username = ref('');
 
@@ -63,9 +62,9 @@ const loadPreferIngredients = () => {
     const preferIngredientsString = localStorage.getItem('PreferIngredients');
     preferIngredientsArray.value = preferIngredientsString
         ? preferIngredientsString.split('\n').map((item) => {
-            const parts = item.split(',');
-            return { id: parts[0], name: parts[1].replace(/"/g, '') };
-        })
+              const parts = item.split(',');
+              return { id: parts[0], name: parts[1].replace(/"/g, '') };
+          })
         : [];
 };
 loadPreferIngredients();
@@ -74,9 +73,9 @@ const loadExclusiveIngredients = () => {
     const exclusiveIngredientsString = localStorage.getItem('ExclusiveIngredients');
     exclusiveIngredientsArray.value = exclusiveIngredientsString
         ? exclusiveIngredientsString.split('\n').map((item) => {
-            const parts = item.split(',');
-            return { id: parts[0], name: parts[1].replace(/"/g, '') };
-        })
+              const parts = item.split(',');
+              return { id: parts[0], name: parts[1].replace(/"/g, '') };
+          })
         : [];
 };
 loadExclusiveIngredients();
@@ -86,10 +85,12 @@ const handleButtonClick = (id) => {
     console.log(`按鈕 ID: ${id} 被點擊`); // 你可以在這裡添加更多處理邏輯
 };
 
-const API_URL_ExclusiveIngredientsDelete = `${import.meta.env.VITE_API_BASEURL
-    }/UserIngredients/ExclusiveIngredientsDelete`;
-const API_URL_PreferedIngredientsDelete = `${import.meta.env.VITE_API_BASEURL
-    }/UserIngredients/PreferedIngrediensDelete`;
+const API_URL_ExclusiveIngredientsDelete = `${
+    import.meta.env.VITE_API_BASEURL
+}/UserIngredients/ExclusiveIngredientsDelete`;
+const API_URL_PreferedIngredientsDelete = `${
+    import.meta.env.VITE_API_BASEURL
+}/UserIngredients/PreferedIngrediensDelete`;
 
 // 刪除 API 呼叫
 const sendDelPreFood = async (ingredientId) => {
@@ -151,8 +152,7 @@ const handleEXDelete = (ingredientId) => {
 const handlePreDelete = (ingredientId) => {
     sendDelPreFood(ingredientId);
 };
-const API_URL_Ingredients = `${import.meta.env.VITE_API_BASEURL
-    }/Ingredients`;
+const API_URL_Ingredients = `${import.meta.env.VITE_API_BASEURL}/Ingredients`;
 
 // 在組件載入時執行 API 呼叫取出食材名稱
 onMounted(async () => {
@@ -160,7 +160,7 @@ onMounted(async () => {
         const response = await fetch(API_URL_Ingredients);
         if (response.ok) {
             const data = await response.json();
-            ingredients.value = data.map(item => ({
+            ingredients.value = data.map((item) => ({
                 ingredientId: item.ingredientId,
                 ingredientName: item.ingredientName,
                 category: item.category,
@@ -176,9 +176,7 @@ onMounted(async () => {
 // 取出食材名稱
 const filterIngredientsByCategory = () => {
     if (selectedCategory.value) {
-        filteredIngredients.value = ingredients.value.filter(
-            item => item.category === selectedCategory.value
-        );
+        filteredIngredients.value = ingredients.value.filter((item) => item.category === selectedCategory.value);
     } else {
         filteredIngredients.value = [];
     }
@@ -186,25 +184,25 @@ const filterIngredientsByCategory = () => {
 
 // 取值 (增加群組)
 const addFoot = ref({
-    "user_Id": "",
-    "ingredient_Id": 0
-})
+    user_Id: '',
+    ingredient_Id: 0,
+});
 // 溝通API (增加食材)
 const API_URL_IngredientsAdd = ref('');
 const preferIngredientModal = (prefer) => {
     foodtype.value = '偏好食材';
     API_URL_IngredientsAdd.value = `${import.meta.env.VITE_API_BASEURL}/UserIngredients/PreferedIngredientsAdd`;
-    selectedCategory.value = ""; // 使用者選擇的分類
-    filteredIngredients.value = ""; // 選取分類後過濾的食材
-    selectedIngredientId.value = ""; // 儲存選擇的食材 ID
-}
+    selectedCategory.value = ''; // 使用者選擇的分類
+    filteredIngredients.value = ''; // 選取分類後過濾的食材
+    selectedIngredientId.value = ''; // 儲存選擇的食材 ID
+};
 const exclusiveIngredientModal = (exclusive) => {
     foodtype.value = '不可食用食材';
     API_URL_IngredientsAdd.value = `${import.meta.env.VITE_API_BASEURL}/UserIngredients/ExclusiveIngredientsAdd`;
-    selectedCategory.value = ""; // 使用者選擇的分類
-    filteredIngredients.value = ""; // 選取分類後過濾的食材
-    selectedIngredientId.value = ""; // 儲存選擇的食材 ID
-}
+    selectedCategory.value = ''; // 使用者選擇的分類
+    filteredIngredients.value = ''; // 選取分類後過濾的食材
+    selectedIngredientId.value = ''; // 儲存選擇的食材 ID
+};
 const sendAddIngredientModal = async () => {
     try {
         addFoot.value.user_Id = storedUserData?.UserId;
@@ -212,29 +210,35 @@ const sendAddIngredientModal = async () => {
         const response = await fetch(API_URL_IngredientsAdd.value, {
             method: 'POST',
             body: JSON.stringify(addFoot.value),
-            headers: { 'Content-Type': 'application/json' }
-        })
+            headers: { 'Content-Type': 'application/json' },
+        });
 
         if (response.ok) {
             alert('新增成功！');
             if (foodtype.value === '偏好食材') {
-                const preferredIngredientsResponse = await fetch(`${import.meta.env.VITE_API_BASEURL}/UserIngredients/PreferedIngredientsName?User_Id=${storedUserData?.UserId}`);
+                const preferredIngredientsResponse = await fetch(
+                    `${import.meta.env.VITE_API_BASEURL}/UserIngredients/PreferedIngredientsName?User_Id=${storedUserData?.UserId}`
+                );
                 const preferredIngredientsGet = await preferredIngredientsResponse.json();
 
                 if (preferredIngredientsResponse.ok && preferredIngredientsGet.preferredIngredients.length > 0) {
                     const preferIngredientsFormatted = preferredIngredientsGet.preferredIngredients
-                        .map(ingredient => `${ingredient.preferIngredientId},"${ingredient.preferIngredientName}"`)
+                        .map((ingredient) => `${ingredient.preferIngredientId},"${ingredient.preferIngredientName}"`)
                         .join('\n');
                     localStorage.setItem('PreferIngredients', preferIngredientsFormatted);
                 }
-            }
-            else if (foodtype.value === '不可食用食材') {
-                const exclusiveIngredientsResponse = await fetch(`${import.meta.env.VITE_API_BASEURL}/UserIngredients/ExclusiveIngredientsName?User_Id=${storedUserData?.UserId}`);
+            } else if (foodtype.value === '不可食用食材') {
+                const exclusiveIngredientsResponse = await fetch(
+                    `${import.meta.env.VITE_API_BASEURL}/UserIngredients/ExclusiveIngredientsName?User_Id=${storedUserData?.UserId}`
+                );
                 const exclusiveIngredientsGet = await exclusiveIngredientsResponse.json();
 
                 if (exclusiveIngredientsResponse.ok && exclusiveIngredientsGet.exclusiveIngredients.length > 0) {
                     const exclusiveIngredientsFormatted = exclusiveIngredientsGet.exclusiveIngredients
-                        .map(ingredient => `${ingredient.exclusiveIngredientId},"${ingredient.exclusiveIngredientName}"`)
+                        .map(
+                            (ingredient) =>
+                                `${ingredient.exclusiveIngredientId},"${ingredient.exclusiveIngredientName}"`
+                        )
                         .join('\n');
                     localStorage.setItem('ExclusiveIngredients', exclusiveIngredientsFormatted);
                 }
@@ -248,28 +252,26 @@ const sendAddIngredientModal = async () => {
     }
 };
 
-
 // 取值 (建立群組)
-const groupName = ref(storedUserData?.UserName + "的群組");
+const groupName = ref(storedUserData?.UserName + '的群組');
 const CreateGroup = ref({
-    "group_name": groupName.value,
-    "group_Admin_Id": storedUserData?.UserId
-})
+    group_name: groupName.value,
+    group_Admin_Id: storedUserData?.UserId,
+});
 // 溝通API (建立群組)
-const API_URL_CreateGroup = `${import.meta.env.VITE_API_BASEURL
-    }/UserGroups/CreateGroup`;
+const API_URL_CreateGroup = `${import.meta.env.VITE_API_BASEURL}/UserGroups/CreateGroup`;
 const sendCreateGroup = async () => {
     try {
         const response = await fetch(API_URL_CreateGroup, {
             method: 'POST',
             body: JSON.stringify(CreateGroup.value),
-            headers: { 'Content-Type': 'application/json' }
-        })
+            headers: { 'Content-Type': 'application/json' },
+        });
         if (response.ok) {
             alert('新增成功！');
         } else {
             const data = await response.json();
-            alert('新增失敗：' + "已有群組");
+            alert('新增失敗：' + '已有群組');
         }
     } catch (error) {
         alert('新增請求失敗：' + error.message);
@@ -278,24 +280,22 @@ const sendCreateGroup = async () => {
 
 // 取值 (更換群組)
 const changeGroup = ref({
-    "change_user_Id": storedUserData?.UserId,
-    "change_Group_Id": storedUserData?.GroupId,
-})
+    change_user_Id: storedUserData?.UserId,
+    change_Group_Id: storedUserData?.GroupId,
+});
 // 溝通API (更換群組)
-const API_URL_ChangeGroup = `${import.meta.env.VITE_API_BASEURL
-    }/Users/changeGroup`;
+const API_URL_ChangeGroup = `${import.meta.env.VITE_API_BASEURL}/Users/changeGroup`;
 const sendchangeGroup = async () => {
     try {
         const response = await fetch(API_URL_ChangeGroup, {
             method: 'PUT',
             body: JSON.stringify(changeGroup.value),
-            headers: { 'Content-Type': 'application/json' }
-        })
+            headers: { 'Content-Type': 'application/json' },
+        });
         if (response.ok) {
             const updatedUserData = {
                 ...storedUserData, // 保留其他資料
-                GroupId
-                    : changeGroup.value.change_Group_Id, // 更新群組id
+                GroupId: changeGroup.value.change_Group_Id, // 更新群組id
             };
             // 更新 localStorage
             localStorage.setItem('UserData', JSON.stringify(updatedUserData));
@@ -328,9 +328,15 @@ const sendchangeGroup = async () => {
                 <!-- 使用 v-for 迴圈渲染選單項目 -->
                 <!-- 根據activeIndex 動態設定選單項目樣式 -->
                 <!-- ARIA 屬性幫助無障礙性 -->
-                <a v-for="(item, index) in menuItems" :key="index" href="#"
-                    class="list-group-item list-group-item-action" :class="{ active: activeIndex === index }"
-                    :aria-current="activeIndex === index ? 'true' : null" @click="setActive(index)">
+                <a
+                    v-for="(item, index) in menuItems"
+                    :key="index"
+                    href="#"
+                    class="list-group-item list-group-item-action"
+                    :class="{ active: activeIndex === index }"
+                    :aria-current="activeIndex === index ? 'true' : null"
+                    @click="setActive(index)"
+                >
                     <!-- 點擊事件，調用 setActive 函式 -->
                     {{ item }}
                 </a>
@@ -362,38 +368,70 @@ const sendchangeGroup = async () => {
             <div v-else-if="activeIndex === 1">
                 <p><strong>偏好食材:</strong></p>
                 <div>
-                    <button v-for="(item, index) in preferIngredientsArray" :key="index" :id="item.id"
-                        class="btn btn-info m-1" @click="handleButtonClick(item.id)">
+                    <button
+                        v-for="(item, index) in preferIngredientsArray"
+                        :key="index"
+                        :id="item.id"
+                        class="btn btn-info m-1"
+                        @click="handleButtonClick(item.id)"
+                    >
                         {{ item.name }}
                         <!-- X 按鈕 -->
-                        <button type="button" class="btn-close ms-2" aria-label="Close"
-                            @click="handlePreDelete(item.id)"></button>
+                        <button
+                            type="button"
+                            class="btn-close ms-2"
+                            aria-label="Close"
+                            @click="handlePreDelete(item.id)"
+                        ></button>
                     </button>
-                    <button class="btn btn-outline-primary m-1" data-bs-toggle="modal" data-bs-target="#exampleModal"
-                        @click="preferIngredientModal('prefer')">+</button>
+                    <button
+                        class="btn btn-outline-primary m-1"
+                        data-bs-toggle="modal"
+                        data-bs-target="#exampleModal"
+                        @click="preferIngredientModal('prefer')"
+                    >
+                        +
+                    </button>
                 </div>
 
                 <p><strong>不可食用食材:</strong></p>
                 <div>
-                    <button v-for="(item, index) in exclusiveIngredientsArray" :key="index" :id="item.id"
-                        class="btn btn-danger m-1" @click="handleButtonClick(item.id)">
+                    <button
+                        v-for="(item, index) in exclusiveIngredientsArray"
+                        :key="index"
+                        :id="item.id"
+                        class="btn btn-danger m-1"
+                        @click="handleButtonClick(item.id)"
+                    >
                         {{ item.name }}
                         <!-- X 按鈕 -->
-                        <button type="button" class="btn-close ms-2" aria-label="Close"
-                            @click="handleEXDelete(item.id)"></button>
+                        <button
+                            type="button"
+                            class="btn-close ms-2"
+                            aria-label="Close"
+                            @click="handleEXDelete(item.id)"
+                        ></button>
                     </button>
-                    <button class="btn btn-outline-primary m-1" data-bs-toggle="modal" data-bs-target="#exampleModal"
-                        @click="exclusiveIngredientModal('exclusive')">+</button>
+                    <button
+                        class="btn btn-outline-primary m-1"
+                        data-bs-toggle="modal"
+                        data-bs-target="#exampleModal"
+                        @click="exclusiveIngredientModal('exclusive')"
+                    >
+                        +
+                    </button>
                 </div>
             </div>
             <!-- 群組區塊內容 -->
             <div v-else-if="activeIndex === 2">
                 <p><strong>群組:</strong> {{ storedUserData?.GroupId }}</p>
-                <button class="btn btn-outline-primary m-1" data-bs-toggle="modal"
-                    data-bs-target="#CreateGroupModal">新增群組</button>
+                <button class="btn btn-outline-primary m-1" data-bs-toggle="modal" data-bs-target="#CreateGroupModal">
+                    新增群組
+                </button>
 
-                <button class="btn btn-outline-primary m-1" data-bs-toggle="modal"
-                    data-bs-target="#changeGroupModal">更換群組</button>
+                <button class="btn btn-outline-primary m-1" data-bs-toggle="modal" data-bs-target="#changeGroupModal">
+                    更換群組
+                </button>
             </div>
             <div v-else-if="activeIndex === 3">
                 <p>自訂食譜</p>
@@ -414,8 +452,11 @@ const sendchangeGroup = async () => {
                         <label for="categorySelect">選擇類別</label>
                         <select id="categorySelect" v-model="selectedCategory" @change="filterIngredientsByCategory">
                             <option value="">選擇類別</option>
-                            <option v-for="category in [...new Set(ingredients.map(i => i.category))]" :key="category"
-                                :value="category">
+                            <option
+                                v-for="category in [...new Set(ingredients.map((i) => i.category))]"
+                                :key="category"
+                                :value="category"
+                            >
                                 {{ category }}
                             </option>
                         </select>
@@ -424,8 +465,11 @@ const sendchangeGroup = async () => {
                         <label for="ingredientSelect">選擇食材</label>
                         <select id="ingredientSelect" v-model="selectedIngredientId">
                             <option value="">選擇食材</option>
-                            <option v-for="ingredient in filteredIngredients" :key="ingredient.ingredientId"
-                                :value="ingredient.ingredientId">
+                            <option
+                                v-for="ingredient in filteredIngredients"
+                                :key="ingredient.ingredientId"
+                                :value="ingredient.ingredientId"
+                            >
                                 {{ ingredient.ingredientName }}
                             </option>
                         </select>
@@ -436,16 +480,21 @@ const sendchangeGroup = async () => {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-                    <button type="submit" class="btn btn-primary" @click="sendAddIngredientModal">加入{{
-                        foodtype
-                    }}食材</button>
+                    <button type="submit" class="btn btn-primary" @click="sendAddIngredientModal">
+                        加入{{ foodtype }}食材
+                    </button>
                 </div>
             </div>
         </div>
     </div>
     <!-- 創建群組 Modal -->
-    <div class="modal fade" id="CreateGroupModal" tabindex="-1" aria-labelledby="CreateGroupModalLabel"
-        aria-hidden="true">
+    <div
+        class="modal fade"
+        id="CreateGroupModal"
+        tabindex="-1"
+        aria-labelledby="CreateGroupModalLabel"
+        aria-hidden="true"
+    >
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -465,8 +514,13 @@ const sendchangeGroup = async () => {
     </div>
 
     <!-- 更換群組 Modal -->
-    <div class="modal fade" id="changeGroupModal" tabindex="-1" aria-labelledby="changeGroupModalLabel"
-        aria-hidden="true">
+    <div
+        class="modal fade"
+        id="changeGroupModal"
+        tabindex="-1"
+        aria-labelledby="changeGroupModalLabel"
+        aria-hidden="true"
+    >
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -507,7 +561,7 @@ const sendchangeGroup = async () => {
     top: 0;
     left: 0;
     transform: translateZ(0) scale(1, 1);
-    background: #1b2030 url('src/assets/img/ForBackground/bg-header.jpg') 50% 0 no-repeat;
+    background: #1b2030 url('@/assets/img/ForBackground/bg-header.jpg') 50% 0 no-repeat;
     background-size: cover;
     background-attachment: fixed;
     animation: grow 180s linear 10ms infinite;

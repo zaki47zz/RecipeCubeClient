@@ -21,9 +21,9 @@ const send = async () => {
         訊息: ${contactMessage.value.message}
     `;
     const emailSend = ref({
-        toName: "系統",
+        toName: '系統',
         toEmail: authStore.Contact,
-        title: "聯絡我們",
+        title: '聯絡我們',
         body: formattedMessage.trim(),
     });
     const response = await fetch(API_URL, {
@@ -31,18 +31,17 @@ const send = async () => {
         body: JSON.stringify(emailSend.value), // 將 AccountSettings 轉為 JSON 格式
         headers: { 'Content-Type': 'application/json' },
     });
-    console.log("傳送內容",emailSend.value);
+    console.log('傳送內容', emailSend.value);
     if (response.ok) {
         alert('傳送成功！'); // 顯示成功訊息
     } else {
         alert('傳送失敗'); // 顯示錯誤訊息
     }
 };
-
 </script>
 
 <template>
-        <section>
+    <section>
         <div class="container-fluid py-0">
             <div class="contact-section rounded-3">
                 <div class="contact-box">
@@ -155,7 +154,7 @@ const send = async () => {
     justify-content: center;
     position: relative;
     padding: 2rem;
-    background-image: url('src/assets/img/ForBackground/contact-bg.jpg');
+    background-image: url('@/assets/img/ForBackground/contact-bg.jpg');
     background-size: cover;
     background-position: center;
     height: 100vh;
