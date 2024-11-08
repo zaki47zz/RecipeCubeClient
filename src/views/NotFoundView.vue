@@ -120,7 +120,6 @@
     width: 90vw;
     transform: translate(-50%, -50%);
     font-weight: bold;
-    color: #fff;
     text-align: center;
 }
 .message button {

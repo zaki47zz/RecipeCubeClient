@@ -39,7 +39,7 @@ onMounted(() => {
     <section class="mt-3">
         <div class="d-flex justify-content-center">
             <div class="text-center">
-                <p class="fs-4">此網頁為僅供學習用途</p>
+                <p class="fs-4">此網頁僅供學習用途</p>
                 <p class="fs-4">This website is for educational purposes only.</p>
             </div>
         </div>
