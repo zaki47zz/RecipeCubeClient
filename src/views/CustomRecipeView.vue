@@ -71,7 +71,7 @@ watchEffect(() => {
     top: 0;
     left: 0;
     transform: translateZ(0) scale(1, 1);
-    background: #1b2030 url('src/assets/img/ForBackground/bg-header.jpg') 50% 0 no-repeat;
+    background: #1b2030 url('@/assets/img/ForBackground/bg-header.jpg') 50% 0 no-repeat;
     background-size: cover;
     background-attachment: fixed;
     animation: grow 180s linear 10ms infinite;
@@ -134,7 +134,9 @@ watchEffect(() => {
     cursor: pointer;
     transform: scale(1.1);
     /* 懸停時放大效果 */
-    transition: transform 0.2s, background-color 0.2s;
+    transition:
+        transform 0.2s,
+        background-color 0.2s;
     /* 添加平滑動畫 */
 }
 </style>
