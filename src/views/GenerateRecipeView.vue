@@ -264,7 +264,13 @@ const partialMatchRecipes = computed(() => {
                 .map((id) => {
                     // 獲取食材名稱
                     const ingredientName = recipe.ingredientNames[recipe.ingredientIds.indexOf(id)];
-
+                    // 如果是訪客，只顯示食材名稱
+                    if (!isLoggedIn) {
+                        return {
+                            ingredientId: id,
+                            ingredientName,
+                        };
+                    }
                     // 解構 missingIngredients
                     const missingIngredientsList = JSON.parse(JSON.stringify(recipe.missingIngredients));
 
@@ -556,8 +562,10 @@ const ListClose = async () => {
                             <p class="text-danger mt-2">
                                 缺少的食材:
                                 <span v-for="(ingredient, index) in recipe.missingIngredients" :key="index">
-                                    {{ ingredient.ingredientName }} ({{ ingredient.missingQuantity }}
-                                    {{ ingredient.unit }})
+                                    {{ ingredient.ingredientName }}
+                                    <span v-if="isLoggedIn && ingredient.missingQuantity !== undefined">
+                                        ({{ ingredient.missingQuantity }} {{ ingredient.unit }})
+                                    </span>
                                     <span v-if="index < recipe.missingIngredients.length - 1">, </span>
                                 </span>
                             </p>
