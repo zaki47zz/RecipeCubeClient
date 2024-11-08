@@ -1,11 +1,9 @@
 <script setup>
-import { ref } from 'vue'
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useOAuthStore } from '@/stores/oauth';
 const oauthStore = useOAuthStore();
 const dietaryRestrictions = ref(false);
-
-
 
 const handleLoginClick = async () => {
     const loginSuccess = await oauthStore.oAuthFirstSignIn(dietaryRestrictions.value); // 先發送請求
@@ -24,12 +22,24 @@ const handleLoginClick = async () => {
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-3">
                             <!-- 第一個 Radio Button: 素食 -->
-                            <input type="radio" class="form-check-input me-2 custom-radio" name="dietaryPreference"
-                                v-model="dietaryRestrictions" id="nonVegetarian" :value="true" />
+                            <input
+                                type="radio"
+                                class="form-check-input me-2 custom-radio"
+                                name="dietaryPreference"
+                                v-model="dietaryRestrictions"
+                                id="nonVegetarian"
+                                :value="true"
+                            />
                             <label for="nonVegetarian" class="form-check-label me-4">素食</label>
                             <!-- 第二個 Radio Button: 葷食 -->
-                            <input type="radio" class="form-check-input me-2 custom-radio" name="dietaryPreference"
-                                v-model="dietaryRestrictions" id="vegetarian" :value="false" />
+                            <input
+                                type="radio"
+                                class="form-check-input me-2 custom-radio"
+                                name="dietaryPreference"
+                                v-model="dietaryRestrictions"
+                                id="vegetarian"
+                                :value="false"
+                            />
                             <label for="vegetarian" class="form-check-label">葷食</label>
                             <!-- 顯示錯誤訊息 -->
                             <span class="text-danger ms-3">{{ dietaryMessage }}</span>
