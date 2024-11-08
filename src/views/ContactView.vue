@@ -63,7 +63,7 @@ const send = async () => {
                                 </div>
                                 <div class="contact-card-info mx-auto">
                                     <p class="p-0 m-0 fw-bold fs-6">email</p>
-                                    <p class="p-0 m-0">XXX@gmail.com</p>
+                                    <p class="p-0 m-0">recipecube@gmail.com</p>
                                 </div>
                             </div>
                             <div class="contact-card d-flex justify-content-start align-items-center">
