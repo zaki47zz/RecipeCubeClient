@@ -79,7 +79,7 @@ const send = async () => {
                             type="password"
                             class="form-control"
                             name="password"
-                            v-model.trim="pwd1"
+                            v-model.trim="pwd2"
                             id="password"
                             value=""
                             placeholder="確認密碼"

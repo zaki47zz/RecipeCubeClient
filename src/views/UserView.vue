@@ -1,6 +1,6 @@
 <script setup>
 // 引入 ref API，用來管理響應式狀態
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 
 const ingredients = ref([]); // 存儲所有食材資料
 const selectedCategory = ref(''); // 使用者選擇的分類
@@ -22,7 +22,6 @@ const activeIndex = ref(-1);
 // setActive 函式用於設定目前選中的選單項目
 const setActive = (index) => {
     activeIndex.value = index; // 更新 activeIndex，根據點擊的項目
-    section.value = menuItems.value[activeIndex.value]; // 根據 index 動態更新橫幅標題
 };
 
 const AccountSettings = ref({
@@ -171,6 +170,7 @@ onMounted(async () => {
     } catch (error) {
         console.error('API 請求錯誤:', error);
     }
+    activeIndex.value = 0;
 });
 
 // 取出食材名稱
@@ -193,14 +193,14 @@ const preferIngredientModal = (prefer) => {
     foodtype.value = '偏好食材';
     API_URL_IngredientsAdd.value = `${import.meta.env.VITE_API_BASEURL}/UserIngredients/PreferedIngredientsAdd`;
     selectedCategory.value = ''; // 使用者選擇的分類
-    filteredIngredients.value = ''; // 選取分類後過濾的食材
+    filteredIngredients.value = []; // 選取分類後過濾的食材
     selectedIngredientId.value = ''; // 儲存選擇的食材 ID
 };
 const exclusiveIngredientModal = (exclusive) => {
     foodtype.value = '不可食用食材';
     API_URL_IngredientsAdd.value = `${import.meta.env.VITE_API_BASEURL}/UserIngredients/ExclusiveIngredientsAdd`;
     selectedCategory.value = ''; // 使用者選擇的分類
-    filteredIngredients.value = ''; // 選取分類後過濾的食材
+    filteredIngredients.value = []; // 選取分類後過濾的食材
     selectedIngredientId.value = ''; // 儲存選擇的食材 ID
 };
 const sendAddIngredientModal = async () => {
@@ -323,7 +323,7 @@ const sendchangeGroup = async () => {
 
     <div class="row">
         <!-- 左側選單 -->
-        <div class="col-12 col-md-3 p-5">
+        <div class="col-12 col-md-3 p-5 mt-5">
             <div class="list-group">
                 <!-- 使用 v-for 迴圈渲染選單項目 -->
                 <!-- 根據activeIndex 動態設定選單項目樣式 -->
@@ -344,31 +344,57 @@ const sendchangeGroup = async () => {
         </div>
 
         <!-- 右側內容區域 -->
-        <div class="col-12 col-md-9 p-5">
+        <div class="col-12 col-md-9 d-flex flex-column mx-auto">
             <!-- 根據 activeIndex 動態顯示對應的內容 -->
             <div v-if="activeIndex === 0">
+                <h4 class="mt-5 text-center">您的基本資料</h4>
                 <form @submit.prevent="sendBasic">
-                    <!-- 使用 @submit.prevent 阻止表單的默認提交行為 -->
-                    <p>
-                        <strong>姓名:</strong>
-                        <input type="text" v-model="AccountSettings.userName" placeholder="請輸入姓名" required />
-                    </p>
-                    <p>
-                        <strong>Email:</strong> {{ storedUserData?.Email }}
-                        <!-- Email 不可修改 -->
-                    </p>
-                    <p>
-                        <strong>電話:</strong>
-                        <input type="text" v-model="AccountSettings.phone" placeholder="請輸入電話" required />
-                    </p>
-                    <button class="btn bg-gradient-info w-50 mt-4 mb-0" type="submit">確認修改</button>
+                    <div class="mt-3 w-60 mx-auto">
+                        <label for="name" class="fs-6">姓名</label>
+                        <input
+                            type="text"
+                            class="form-control text-center"
+                            name="name"
+                            v-model="AccountSettings.userName"
+                            id="name"
+                            placeholder="姓名"
+                            required
+                        />
+                        <label class="fs-6 mt-3">Email</label>
+                        <p class="form-control text-center">
+                            {{ storedUserData?.Email }}
+                        </p>
+                        <label for="phone" class="fs-6">電話</label>
+                        <input
+                            type="text"
+                            class="form-control text-center"
+                            name="phone"
+                            v-model="AccountSettings.phone"
+                            id="phone"
+                            placeholder="電話"
+                            required
+                        />
+                        <div class="text-center">
+                            <button type="submit" class="btn bg-gradient-success w-100 mt-5 mb-4 fs-6">確認修改</button>
+                        </div>
+                    </div>
                 </form>
             </div>
             <!-- 飲食偏好區塊內容 -->
             <div v-else-if="activeIndex === 1">
-                <p><strong>偏好食材:</strong></p>
-                <div>
-                    <button
+                <h4 class="mt-5 text-center">您的飲食偏好</h4>
+                <div class="mt-3 w-60 mx-auto">
+                    <h5>
+                        偏好食材<button
+                            class="add-button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#exampleModal"
+                            @click="preferIngredientModal('prefer')"
+                        >
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </h5>
+                    <span
                         v-for="(item, index) in preferIngredientsArray"
                         :key="index"
                         :id="item.id"
@@ -383,20 +409,19 @@ const sendchangeGroup = async () => {
                             aria-label="Close"
                             @click="handlePreDelete(item.id)"
                         ></button>
-                    </button>
-                    <button
-                        class="btn btn-outline-primary m-1"
-                        data-bs-toggle="modal"
-                        data-bs-target="#exampleModal"
-                        @click="preferIngredientModal('prefer')"
-                    >
-                        +
-                    </button>
-                </div>
-
-                <p><strong>不可食用食材:</strong></p>
-                <div>
-                    <button
+                    </span>
+                    <span v-if="!preferIngredientsArray.length">目前無偏好食材</span>
+                    <h5 class="mt-5">
+                        不可食用食材<button
+                            class="add-button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#exampleModal"
+                            @click="exclusiveIngredientModal('exclusive')"
+                        >
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </h5>
+                    <span
                         v-for="(item, index) in exclusiveIngredientsArray"
                         :key="index"
                         :id="item.id"
@@ -411,33 +436,43 @@ const sendchangeGroup = async () => {
                             aria-label="Close"
                             @click="handleEXDelete(item.id)"
                         ></button>
-                    </button>
-                    <button
-                        class="btn btn-outline-primary m-1"
-                        data-bs-toggle="modal"
-                        data-bs-target="#exampleModal"
-                        @click="exclusiveIngredientModal('exclusive')"
-                    >
-                        +
-                    </button>
+                    </span>
+                    <span v-if="!exclusiveIngredientsArray.length">目前無偏好食材</span>
                 </div>
             </div>
             <!-- 群組區塊內容 -->
             <div v-else-if="activeIndex === 2">
-                <p><strong>群組:</strong> {{ storedUserData?.GroupId }}</p>
-                <button class="btn btn-outline-primary m-1" data-bs-toggle="modal" data-bs-target="#CreateGroupModal">
-                    新增群組
-                </button>
-
-                <button class="btn btn-outline-primary m-1" data-bs-toggle="modal" data-bs-target="#changeGroupModal">
-                    更換群組
-                </button>
+                <h4 class="mt-5 text-center">您的群組</h4>
+                <div class="mt-3 w-60 mx-auto">
+                    <p class="group-text text-center">{{ storedUserData?.GroupId }}</p>
+                    <p class="text-black text-center fs-6">是您目前的群組編號</p>
+                    <div class="d-flex justify-content-center">
+                        <button
+                            class="btn bg-gradient-success m-1 fs-6"
+                            data-bs-toggle="modal"
+                            data-bs-target="#CreateGroupModal"
+                        >
+                            新增群組
+                        </button>
+                        <button
+                            class="btn bg-gradient-success m-1 fs-6"
+                            data-bs-toggle="modal"
+                            data-bs-target="#changeGroupModal"
+                        >
+                            更換群組
+                        </button>
+                    </div>
+                </div>
             </div>
             <div v-else-if="activeIndex === 3">
-                <p>自訂食譜</p>
+                <h4 class="mt-5 text-center">您的自訂食譜</h4>
+                <div class="mt-3 w-60 mx-auto">
+                    <p>自訂食譜</p>
+                </div>
             </div>
         </div>
     </div>
+
     <!-- 食材選擇 -->
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -598,5 +633,29 @@ const sendchangeGroup = async () => {
     50% {
         transform: scale(1.2) translateY(-250px);
     }
+}
+
+.add-button {
+    border: none;
+    background-color: transparent;
+    color: rgb(48, 48, 48);
+    font-weight: 600;
+    font-size: 1.5 rem;
+}
+.add-button:hover {
+    color: #595959;
+    /* 懸停時變色 */
+    cursor: pointer;
+    transform: scale(1.1);
+    /* 懸停時放大效果 */
+    transition:
+        transform 0.2s,
+        background-color 0.2s;
+    /* 添加平滑動畫 */
+}
+.group-text {
+    color: #595959;
+    font-weight: 600;
+    font-size: 5rem;
 }
 </style>
