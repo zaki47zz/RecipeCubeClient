@@ -1,17 +1,30 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useOAuthStore } from '@/stores/oauth';
+import { useOAuthLineStore } from '@/stores/oauthLine';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const oauthStore = useOAuthStore();
+const oauthLineStore = useOAuthLineStore();
 
 const user = ref({
     // 後續記得帳號功能，可以在按下記住密碼button後，將帳號密碼寫入localStorage，登入時讀取localStorage帳密，在tokin到期時一起清除
     email: 'user18@example.com',
     password: 'Password123!',
+});
+
+
+// 處理 LINE 登入
+const handleLineLogin = () => {
+    oauthLineStore.handleLineLogin();
+};
+
+// 組件加載時初始化 LINE SDK
+onMounted(() => {
+    oauthLineStore.initializeLineSDK();
 });
 
 const handleLoginClick = async () => {
@@ -30,9 +43,11 @@ const handleGoogleLogin = async (response) => {
 <template>
     <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
         <div class="card card-plain mt-8">
-            <GoogleLogin :callback="handleGoogleLogin" />
             <div class="card-header pb-0 text-left bg-transparent">
                 <h3 class="font-weight-bolder text-info text-gradient">歡迎回來</h3>
+                <GoogleLogin class="w-100 mb-3 mb-0" :callback="handleGoogleLogin" />
+                <button class="linebutton w-100 mb-3 mb-0" @click="handleLineLogin">使用 LINE 登入</button>
+                <p>token： {{ oauthLineStore.lineToken }}</p> <!-- 顯示取得的 LINE ID Token -->
                 <p class="mb-0">輸入Email與密碼登入</p>
             </div>
             <div class="card-body">
@@ -81,4 +96,17 @@ const handleGoogleLogin = async (response) => {
     </div>
 </template>
 
-<style lang="css" scoped></style>
+<style lang="css" scoped>
+.linebutton {
+    padding: 10px 20px;
+    background-color: #00c300;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.linebutton:hover {
+    background-color: #009900;
+}
+</style>
