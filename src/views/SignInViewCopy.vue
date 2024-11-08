@@ -9,7 +9,7 @@ const authStore = useAuthStore();
 const oauthStore = useOAuthStore();
 
 const user = ref({
-    // 後續記得帳號功能，可以在按下記住密碼button後，將帳號密碼寫入localStorage，登入時讀取localStorage帳密，在tokin到期時一起清除
+    // 後續記得帳號功能，可以在按下記住密碼button後，將帳號密碼寫入localStorage，登入時讀取localStorage帳密，在token到期時一起清除
     email: 'user18@example.com',
     password: 'Password123!',
 });
@@ -40,13 +40,28 @@ const handleGoogleLogin = async (response) => {
                     <!-- 修改事件綁定為 handleLoginClick -->
                     <div class="text-danger" role="alert"></div>
                     <div class="form-floating mb-3">
-                        <input type="email" class="form-control" name="email" v-model.trim="user.email" id="email"
-                            placeholder="Email" required />
+                        <input
+                            type="email"
+                            class="form-control"
+                            name="email"
+                            v-model.trim="user.email"
+                            id="email"
+                            placeholder="Email"
+                            required
+                        />
                         <label for="email" class="form-label">Email</label>
                     </div>
                     <div class="form-floating mb-3">
-                        <input type="password" class="form-control" name="password" v-model.trim="user.password"
-                            id="password" value="" placeholder="密碼" required />
+                        <input
+                            type="password"
+                            class="form-control"
+                            name="password"
+                            v-model.trim="user.password"
+                            id="password"
+                            value=""
+                            placeholder="密碼"
+                            required
+                        />
                         <label for="password" class="form-label">密碼</label>
                     </div>
                     <span class="text-danger text-center">{{ authStore.loginMessage }}</span>
@@ -64,11 +79,13 @@ const handleGoogleLogin = async (response) => {
             <div class="card-footer text-center pt-0 px-lg-2 px-1">
                 <p class="mb-4 text-sm mx-auto">
                     不記得密碼嗎?
-                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'resetpassword' }">忘記密碼
+                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'resetpassword' }"
+                        >忘記密碼
                     </RouterLink>
                     <br />
                     還沒有註冊過會員嗎?
-                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'signup' }">註冊
+                    <RouterLink class="text-info text-gradient font-weight-bold" :to="{ name: 'signup' }"
+                        >註冊
                     </RouterLink>
                     <br />
                     沒有收到驗證電子郵件嗎?
