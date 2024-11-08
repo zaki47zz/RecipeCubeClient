@@ -15,7 +15,7 @@ import 'vue-multiselect/dist/vue-multiselect.min.css';
 const authStore = useAuthStore();
 const { token } = storeToRefs(authStore);
 const isLoggedIn = computed(() => {
-    return token && authStore.checkTokenExpiry;
+    return token.value && authStore.checkTokenExpiry;
 });
 
 //定義 props，接收父組件的 v-model 值

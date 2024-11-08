@@ -19,7 +19,7 @@ const useInventory = ref(false);
 
 //檢查登入與否
 const isLoggedIn = computed(() => {
-    return token && authStore.checkTokenExpiry;
+    return token.value && authStore.checkTokenExpiry;
 });
 
 const isValidated = computed(() => {

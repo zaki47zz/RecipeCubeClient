@@ -23,7 +23,7 @@ const recipeStore = useRecipeStore();
 
 //檢查登入與否
 const isLoggedIn = computed(() => {
-    return token && authStore.checkTokenExpiry;
+    return token.value && authStore.checkTokenExpiry;
 });
 
 // 使用 filterStore 的篩選條件
@@ -56,7 +56,7 @@ const fetchRecipes = async () => {
         let userId = localStorage.getItem('UserId');
         if (!userId) {
             //如果沒有userId就給他0，這是內建食譜的預設Id
-            userId = 0;
+            userId = '0';
         }
         // const ingredientIds = cookingInventories.value.map((inventory) => inventory.ingredientId);
         // 確保庫存和加入的食材都包含在 ingredientIds 中
